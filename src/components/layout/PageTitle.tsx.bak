@@ -1,0 +1,639 @@
+'use client'; // Required for useContext
+
+import { useState, useEffect, useMemo } from "react"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
+import { ChevronsUpDown, Check, User, Users, Landmark, Move } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { Account } from "@/lib/mock-data";
+import { usePageHeaderContext } from '@/contexts/PageHeaderContext'; // Import the context hook
+import { cn } from "@/lib/utils"; // Import cn for conditional classes
+import React from 'react'; // Ensure React is imported for Fragment
+import { Inter } from "next/font/google";
+const inter = Inter({ subsets: ["latin"] });
+
+
+export interface PageTitleProps {
+  title: string
+  clientId?: string
+  clientName?: string
+  clientAccounts?: Account[]
+  accountId?: string
+}
+
+export function PageTitle({
+  title,
+  clientId,
+  clientName,
+  clientAccounts = [],
+  accountId,
+}: PageTitleProps) {
+  const { isSticky } = usePageHeaderContext(); // Consume the context
+  const pathname = usePathname()
+  const router = useRouter()
+
+  // --- Start: Code Dropdown Logic (Moved back/re-added) ---
+  const repCodes = ["CA10", "CA12", "NY22", "TX30"];
+  const officeCodes = ["LA10", "SF01", "CHI33"];
+  // State for both dropdown types
+  const [selectedCodes, setSelectedCodes] = useState<string[]>([...repCodes, ...officeCodes]);
+  const [tempSelectedCodes, setTempSelectedCodes] = useState<string[]>(selectedCodes);
+  const [isCodeDropdownOpen, setIsCodeDropdownOpen] = useState(false);
+  
+  // Effect to sync temp codes when code dropdown opens
+  useEffect(() => {
+    if (isCodeDropdownOpen) {
+      setTempSelectedCodes(selectedCodes);
+    }
+  }, [isCodeDropdownOpen, selectedCodes]);
+
+  const handleTempSelectCode = (code: string, checked: boolean | 'indeterminate') => {
+    setTempSelectedCodes(prev => 
+      checked ? [...prev, code] : prev.filter(c => c !== code)
+    );
+  };
+
+  const applyCodeChanges = () => {
+    setSelectedCodes(tempSelectedCodes);
+    setIsCodeDropdownOpen(false);
+    // Potentially trigger data refetch/update based on selected codes here
+  };
+
+  const cancelCodeChanges = () => {
+    // No need to reset tempSelectedCodes here if useEffect handles it on open
+    setIsCodeDropdownOpen(false);
+  };
+
+  const displaySelectedCodes = () => { // Optional: Can display selected codes in trigger? Maybe not needed if title is just "Reports"
+    if (selectedCodes.length === 0) return " + Add Codes";
+    if (selectedCodes.length <= 2) return selectedCodes.join(", ");
+    return `${selectedCodes.slice(0, 2).join(", ")} +${selectedCodes.length - 2}`;
+  };
+  // --- End: Code Dropdown Logic ---
+
+  // Wrap simulated structure in useMemo to stabilize its reference
+  const simulatedStructure = useMemo(() => [
+    {
+      id: 'individual-jim',
+      type: 'individual',
+      name: "Jim Robinson",
+      accountIds: ["1PB10002", "1PB10004"], // Jim's 401k, Jim's general investment
+      icon: User
+    },
+    {
+      id: 'hh-jim-alexa',
+      type: 'household',
+      name: "Jim and Alexa Robinson household",
+      members: "Jim Robinson, Alexa Robinson",
+      accountIds: ["1PB10001", "1PB10003", "1PB10001-kids"],
+      icon: Users
+    },
+    {
+      id: 'hh-charlie-alexa',
+      type: 'household',
+      name: "Charlie and Alexa Robinson household",
+      members: "Jim Robinson, Alexa Robinson, James Robinson",
+      accountIds: ["1PB10001", "1PB10008"],
+      icon: Users
+    },
+  ], []); // Empty dependency array means it's created once
+
+  const handleSelect = (selectedId: string) => {
+    if (!clientId) return;
+    if (selectedId === 'client-home') {
+      router.push(`/clients/${clientId}`);
+    } else {
+      router.push(`/account/${selectedId}`);
+    }
+  };
+
+  const showDropdown = !!clientId && !!clientName && clientAccounts.length > 0;
+  const currentSelection = accountId ? accountId : (clientId ? 'client-home' : undefined);
+
+  // Define the structure for dropdown groups
+  type DropdownGroup = {
+    label: string;
+    labelIcon?: React.ElementType;
+    items: { id: string; name: string; }[];
+  };
+
+  // Group accounts for the dropdown (using simulation)
+  const dropdownGroups = useMemo(() => {
+    if (!showDropdown) return [];
+
+    const groups: DropdownGroup[] = [
+      // Client Overview Group (Always first)
+      {
+        label: 'Client',
+        // labelIcon: User, // Maybe no icon for the very first section label
+        items: [
+          { id: 'client-home', name: `${clientName} (Overview)` }
+        ]
+      }
+    ];
+
+    // Add groups based on simulated structure
+    simulatedStructure.forEach(simGroup => {
+      // Find accounts from the actual prop that match the simulated IDs
+      const groupAccounts = clientAccounts.filter(acc => simGroup.accountIds.includes(acc.id));
+      
+      if (groupAccounts.length > 0) {
+        groups.push({
+          label: simGroup.name,
+          labelIcon: simGroup.icon,
+          items: groupAccounts.map(acc => ({ id: acc.id, name: acc.name }))
+        });
+      }
+    });
+
+    // Optional: Add accounts from props not covered by simulation?
+    // const accountsInSimulatedGroups = new Set(simulatedStructure.flatMap(g => g.accountIds));
+    // const otherAccounts = clientAccounts.filter(acc => !accountsInSimulatedGroups.has(acc.id));
+    // if (otherAccounts.length > 0) { ... add "Other Accounts" group ... }
+
+    return groups;
+  }, [showDropdown, clientName, clientAccounts, simulatedStructure]); // Now simulatedStructure is stable
+
+  // Determine which dropdown (if any) to show
+  const showAccountDropdown = showDropdown && currentSelection;
+  const showCodeDropdown = pathname.startsWith('/reports');
+
+  // --- Start: JSX Rendering Logic --- 
+  return (
+    <div className={cn("flex w-full items-center justify-between", inter.className)}>
+      <div className="flex items-center gap-x-4">
+        {showCodeDropdown ? (
+          <DropdownMenu open={isCodeDropdownOpen} onOpenChange={setIsCodeDropdownOpen}>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center justify-between items-start w-full cursor-pointer group hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md py-2 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-0">
+                <div className="flex items-start gap-x-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className={cn(
+                      "font-medium",
+                      isSticky ? "text-sm" : "text-sm"
+                    )}>
+                      Rep/Office Codes
+                    </span>
+                    <span className={cn(
+                      "inline-block rounded px-2 py-0.5 transition-all duration-200 ease-in-out mt-1",
+                      isSticky ? "text-xs" : "text-xs",
+                      selectedCodes.length > 0
+                        ? "bg-primary dark:bg-neutral-600 text-white dark:text-neutral-300"
+                        : "bg-primary/10 text-amber-800 dark:bg-amber-800/20 dark:text-amber-300 border border-amber-400/50 dark:border-amber-800/50"
+                    )}>
+                      {displaySelectedCodes()}
+                    </span>
+                  </div>
+                </div>
+                <ChevronsUpDown
+                  className={cn(
+                    "h-5 w-5 text-muted-foreground transition-all duration-200 ease-in-out group-hover:text-foreground",
+                    isSticky ? "opacity-100" : "opacity-70"
+                  )}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-[250px]">
+              <div className="flex justify-between items-center px-2 py-1">
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => setTempSelectedCodes([...repCodes, ...officeCodes])}
+                  className="text-xs h-auto p-0"
+                >
+                  Select All
+                </Button>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => setTempSelectedCodes([])}
+                  className="text-xs h-auto p-0"
+                >
+                  Deselect All
+                </Button>
+              </div>
+              <div className="p-2 pt-1">
+                <p className="text-xs font-semibold mb-2 text-muted-foreground">REP CODES</p>
+                {repCodes.map(code => (
+                  <div key={code} className="flex items-center space-x-2 mb-1">
+                    <Checkbox
+                      id={`rep-${code}`}
+                      checked={tempSelectedCodes.includes(code)}
+                      onCheckedChange={(checked) => handleTempSelectCode(code, checked)}
+                      className="rounded-full h-5 w-5"
+                    />
+                    <label htmlFor={`rep-${code}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      {code}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div className="p-2">
+                <p className="text-xs font-semibold mb-2 text-muted-foreground">OFFICE CODES</p>
+                {officeCodes.map(code => (
+                  <div key={code} className="flex items-center space-x-2 mb-1">
+                    <Checkbox
+                      id={`office-${code}`}
+                      checked={tempSelectedCodes.includes(code)}
+                      onCheckedChange={(checked) => handleTempSelectCode(code, checked)}
+                      className="rounded-full h-5 w-5"
+                    />
+                    <label htmlFor={`office-${code}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      {code}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <DropdownMenuSeparator />
+              <div className="flex justify-end gap-2 p-2">
+                <Button variant="ghost" size="sm" onClick={cancelCodeChanges}>Cancel</Button>
+                <Button variant="default" size="sm" onClick={applyCodeChanges}>Apply</Button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : showAccountDropdown ? (
+          <>
+            <h1 className="text-lg font-serif">{accountId ? "Account" : "Client"}</h1>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-3 rounded-lg border bg-background px-3 py-2 mt-2 text-sm transition-colors hover:bg-accent">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                      <Landmark className="h-5 w-5 text-primary" />
+                    </div>
+                    {accountId ? (
+                      <>
+                        <span className="font-medium">{title}</span>
+                        <div className="h-4 w-px bg-border" />
+                        <span className="text-muted-foreground">{accountId}</span>
+                      </>
+                    ) : (
+                      <span className="font-medium">{title}</span>
+                    )}
+                  </div>
+                  <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[350px]">
+                {dropdownGroups.map((group, index) => (
+                  <React.Fragment key={`${group.label}-${index}`}>
+                    {index > 0 && <DropdownMenuSeparator />}
+                    <div className="px-2 pl-4 py-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                      {group.label}
+                    </div>
+                    {group.items.map((item) => (
+                      <DropdownMenuItem
+                        key={item.id}
+                        onSelect={() => handleSelect(item.id)}
+                        className={cn(
+                          "cursor-pointer pl-4",
+                          (currentSelection === item.id) && "bg-accent"
+                        )}
+                      >
+                        <div className="flex items-center w-full">
+                          <div className="flex items-center flex-grow min-w-0 py-1 gap-4">
+                            {item.id !== 'client-home' && (
+                              <span className="text-muted-foreground flex-shrink-0">{item.id}</span>
+                            )}
+                            <span className="truncate text-left flex-grow">{item.name}</span>
+                          </div>
+                          {currentSelection === item.id && (
+                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                              <Check className="h-4 w-4 text-white" />
+                            </div>
+                          )}
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {accountId && (
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="rounded-full bg-accent dark:bg-accent/50">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                </Button>
+                <Button asChild variant="ghost" size="icon" className="rounded-full bg-accent dark:bg-accent/50">
+                  <Link href={clientId ? `/clients/${clientId}` : '#'}>
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  </Link>
+                </Button>
+                <Button variant="outline" className="bg-accent dark:bg-accent/50">
+                  <Move className="mr-2 h-4 w-4" />
+                  Move
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <h1 className="text-2xl font-serif">{title}</h1>
+        )}
+      </div>
+    </div>
+  );
+  // --- End: JSX Rendering Logic --- 
+}
+
+// Duplicate of PageTitle as FullSizePageTitle
+export function FullSizePageTitle({
+  title,
+  clientId,
+  clientName,
+  clientAccounts = [],
+  accountId,
+}: PageTitleProps) {
+  const { isSticky } = usePageHeaderContext();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // --- Start: Code Dropdown Logic (copy from PageTitle) ---
+  const repCodes = ["CA10", "CA12", "NY22", "TX30"];
+  const officeCodes = ["LA10", "SF01", "CHI33"];
+  const [selectedCodes, setSelectedCodes] = useState<string[]>([...repCodes, ...officeCodes]);
+  const [tempSelectedCodes, setTempSelectedCodes] = useState<string[]>(selectedCodes);
+  const [isCodeDropdownOpen, setIsCodeDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (isCodeDropdownOpen) {
+      setTempSelectedCodes(selectedCodes);
+    }
+  }, [isCodeDropdownOpen, selectedCodes]);
+
+  const handleTempSelectCode = (code: string, checked: boolean | 'indeterminate') => {
+    setTempSelectedCodes(prev =>
+      checked ? [...prev, code] : prev.filter(c => c !== code)
+    );
+  };
+
+  const applyCodeChanges = () => {
+    setSelectedCodes(tempSelectedCodes);
+    setIsCodeDropdownOpen(false);
+  };
+
+  const cancelCodeChanges = () => {
+    setIsCodeDropdownOpen(false);
+  };
+
+  const displaySelectedCodes = () => {
+    if (selectedCodes.length === 0) return " + Add Codes";
+    if (selectedCodes.length <= 2) return selectedCodes.join(", ");
+    return `${selectedCodes.slice(0, 2).join(", ")} +${selectedCodes.length - 2}`;
+  };
+  // --- End: Code Dropdown Logic ---
+
+  const simulatedStructure = useMemo(() => [
+    {
+      id: 'individual-jim',
+      type: 'individual',
+      name: "Jim Robinson",
+      accountIds: ["1PB10002", "1PB10004"],
+      icon: User
+    },
+    {
+      id: 'hh-jim-alexa',
+      type: 'household',
+      name: "Jim and Alexa Robinson household",
+      members: "Jim Robinson, Alexa Robinson",
+      accountIds: ["1PB10001", "1PB10003", "1PB10001-kids"],
+      icon: Users
+    },
+    {
+      id: 'hh-charlie-alexa',
+      type: 'household',
+      name: "Charlie and Alexa Robinson household",
+      members: "Jim Robinson, Alexa Robinson, James Robinson",
+      accountIds: ["1PB10001", "1PB10008"],
+      icon: Users
+    },
+  ], []);
+
+  const handleSelect = (selectedId: string) => {
+    if (!clientId) return;
+    if (selectedId === 'client-home') {
+      router.push(`/clients/${clientId}`);
+    } else {
+      router.push(`/account/${selectedId}`);
+    }
+  };
+
+  const showDropdown = !!clientId && !!clientName && clientAccounts.length > 0;
+  const currentSelection = accountId ? accountId : (clientId ? 'client-home' : undefined);
+
+  type DropdownGroup = {
+    label: string;
+    labelIcon?: React.ElementType;
+    items: { id: string; name: string; }[];
+  };
+
+  const dropdownGroups = useMemo(() => {
+    if (!showDropdown) return [];
+    const groups: DropdownGroup[] = [
+      {
+        label: 'Client',
+        items: [
+          { id: 'client-home', name: `${clientName} (Overview)` }
+        ]
+      }
+    ];
+    simulatedStructure.forEach(simGroup => {
+      const groupAccounts = clientAccounts.filter(acc => simGroup.accountIds.includes(acc.id));
+      if (groupAccounts.length > 0) {
+        groups.push({
+          label: simGroup.name,
+          labelIcon: simGroup.icon,
+          items: groupAccounts.map(acc => ({ id: acc.id, name: acc.name }))
+        });
+      }
+    });
+    return groups;
+  }, [showDropdown, clientName, clientAccounts, simulatedStructure]);
+
+  const showCodeDropdown = pathname.startsWith('/reports');
+  const showAccountDropdown = showDropdown && currentSelection;
+
+  return (
+    <div className={cn("flex w-full items-center justify-between", inter.className)}>
+      <div className="flex items-center gap-x-4">
+        {showCodeDropdown ? (
+          <DropdownMenu open={isCodeDropdownOpen} onOpenChange={setIsCodeDropdownOpen}>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center justify-between items-start w-full cursor-pointer group hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md py-2 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-0">
+                <div className="flex items-start gap-x-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className={cn(
+                      "font-medium",
+                      isSticky ? "text-sm" : "text-sm"
+                    )}>
+                      Rep/Office Codes
+                    </span>
+                    <span className={cn(
+                      "inline-block rounded px-2 py-0.5 transition-all duration-200 ease-in-out mt-1",
+                      isSticky ? "text-xs" : "text-xs",
+                      selectedCodes.length > 0
+                        ? "bg-primary dark:bg-neutral-600 text-white dark:text-neutral-300"
+                        : "bg-primary/10 text-amber-800 dark:bg-amber-800/20 dark:text-amber-300 border border-amber-400/50 dark:border-amber-800/50"
+                    )}>
+                      {displaySelectedCodes()}
+                    </span>
+                  </div>
+                </div>
+                <ChevronsUpDown
+                  className={cn(
+                    "h-5 w-5 text-muted-foreground transition-all duration-200 ease-in-out group-hover:text-foreground",
+                    isSticky ? "opacity-100" : "opacity-70"
+                  )}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-[250px]">
+              <div className="flex justify-between items-center px-2 py-1">
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => setTempSelectedCodes([...repCodes, ...officeCodes])}
+                  className="text-xs h-auto p-0"
+                >
+                  Select All
+                </Button>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => setTempSelectedCodes([])}
+                  className="text-xs h-auto p-0"
+                >
+                  Deselect All
+                </Button>
+              </div>
+              <div className="p-2 pt-1">
+                <p className="text-xs font-semibold mb-2 text-muted-foreground">REP CODES</p>
+                {repCodes.map(code => (
+                  <div key={code} className="flex items-center space-x-2 mb-1">
+                    <Checkbox
+                      id={`rep-${code}`}
+                      checked={tempSelectedCodes.includes(code)}
+                      onCheckedChange={(checked) => handleTempSelectCode(code, checked)}
+                      className="rounded-full h-5 w-5"
+                    />
+                    <label htmlFor={`rep-${code}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      {code}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div className="p-2">
+                <p className="text-xs font-semibold mb-2 text-muted-foreground">OFFICE CODES</p>
+                {officeCodes.map(code => (
+                  <div key={code} className="flex items-center space-x-2 mb-1">
+                    <Checkbox
+                      id={`office-${code}`}
+                      checked={tempSelectedCodes.includes(code)}
+                      onCheckedChange={(checked) => handleTempSelectCode(code, checked)}
+                      className="rounded-full h-5 w-5"
+                    />
+                    <label htmlFor={`office-${code}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      {code}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <DropdownMenuSeparator />
+              <div className="flex justify-end gap-2 p-2">
+                <Button variant="ghost" size="sm" onClick={cancelCodeChanges}>Cancel</Button>
+                <Button variant="default" size="sm" onClick={applyCodeChanges}>Apply</Button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : showAccountDropdown ? (
+          <>
+            <h1 className="text-lg font-serif">{accountId ? "Account" : "Client"}</h1>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-3 rounded-lg border bg-background my-2 px-3 py-1 bg-white text-sm transition-colors hover:bg-accent">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                      <Landmark className="h-5 w-5 text-primary" />
+                    </div>
+                    {accountId ? (
+                      <>
+                        <span className="font-medium">{title}</span>
+                        <div className="h-4 w-px bg-border" />
+                        <span className="text-muted-foreground">{accountId}</span>
+                      </>
+                    ) : (
+                      <span className="font-medium">{title}</span>
+                    )}
+                  </div>
+                  <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[350px]">
+                {dropdownGroups.map((group, index) => (
+                  <React.Fragment key={`${group.label}-${index}`}>
+                    {index > 0 && <DropdownMenuSeparator />}
+                    <div className="px-2 pl-4 py-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                      {group.label}
+                    </div>
+                    {group.items.map((item) => (
+                      <DropdownMenuItem
+                        key={item.id}
+                        onSelect={() => handleSelect(item.id)}
+                        className={cn(
+                          "cursor-pointer pl-4",
+                          (currentSelection === item.id) && "bg-accent"
+                        )}
+                      >
+                        <div className="flex items-center w-full">
+                          <div className="flex items-center flex-grow min-w-0 py-1 gap-4">
+                            {item.id !== 'client-home' && (
+                              <span className="text-muted-foreground flex-shrink-0">{item.id}</span>
+                            )}
+                            <span className="truncate text-left flex-grow">{item.name}</span>
+                          </div>
+                          {currentSelection === item.id && (
+                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                              <Check className="h-4 w-4 text-white" />
+                            </div>
+                          )}
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {accountId && (
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="rounded-full bg-accent dark:bg-accent/50">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                </Button>
+                <Button asChild variant="ghost" size="icon" className="rounded-full bg-accent dark:bg-accent/50">
+                  <Link href={clientId ? `/clients/${clientId}` : '#'}>
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <h1 className="text-2xl font-serif">{title}</h1>
+        )}
+      </div>
+    </div>
+  );
+}
