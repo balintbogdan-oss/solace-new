@@ -1,17 +1,157 @@
 // Supabase implementation for account data
 import { createClient } from '@supabase/supabase-js';
-import { AccountData, Security, Holding, MarketData, Trade, Activity, Client, RealizedTrade, UnrealizedPosition, CommissionRecord } from '@/types/account';
+import { AccountData, Security, Holding, MarketData, Trade, Activity, Client, Household, RealizedTrade, UnrealizedPosition, CommissionRecord } from '@/types/account';
 import { getMarketDataForSymbols } from './marketDataService';
-import { getValidatedEnv } from '@/lib/env-validation';
 
-// Validate environment variables at startup
-const env = getValidatedEnv();
+// Get environment variables - these should be available on both client and server
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing required Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Supabase client initialized
 
 export class SupabaseAccountService {
+
+  // Get household data by householdId
+  async getHouseholdData(householdId: string): Promise<{ household: Household; accounts: AccountData[] } | null> {
+    try {
+      // First get the household
+      const { data: householdData, error: householdError } = await supabase
+        .from('households')
+        .select('*')
+        .eq('id', householdId)
+        .single();
+
+      if (householdError) {
+        console.error('Error fetching household:', householdError);
+        return null;
+      }
+
+      if (!householdData) {
+        return null;
+      }
+
+      // Get all accounts for this household
+      const { data: accountsData, error: accountsError } = await supabase
+        .from('accounts')
+        .select(`
+          *,
+          clients:client_id (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            created_at,
+            last_updated
+          )
+        `)
+        .eq('household_id', householdId);
+
+      if (accountsError) {
+        console.error('Error fetching household accounts:', accountsError);
+        return null;
+      }
+
+      // Get account data for each account
+      const accounts: AccountData[] = [];
+      for (const account of accountsData || []) {
+        const accountData = await this.getAccountData(account.account_id);
+        if (accountData) {
+          // Add household info to account data
+          accountData.householdId = householdId;
+          accountData.household = householdData as Household;
+          accountData.isPrimary = account.is_primary || false;
+          accounts.push(accountData);
+        }
+      }
+
+      return {
+        household: householdData as Household,
+        accounts
+      };
+    } catch (error) {
+      console.error('Error in getHouseholdData:', error);
+      return null;
+    }
+  }
+
+  // Get client data by clientId
+  async getClientData(clientId: string): Promise<{ client: Client; accounts: AccountData[] } | null> {
+    try {
+      // First get the client
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+
+      if (clientError) {
+        console.error('Error fetching client:', clientError);
+        return null;
+      }
+
+      if (!clientData) {
+        return null;
+      }
+
+      // Get all accounts for this client
+      const { data: accountsData, error: accountsError } = await supabase
+        .from('accounts')
+        .select(`
+          *,
+          households:household_id (
+            id,
+            name,
+            description,
+            created_at,
+            last_updated
+          )
+        `)
+        .eq('client_id', clientId);
+
+      if (accountsError) {
+        console.error('Error fetching accounts:', accountsError);
+        return null;
+      }
+
+      // Get account data for each account
+      const accounts: AccountData[] = [];
+      for (const account of accountsData || []) {
+        const accountData = await this.getAccountData(account.account_id);
+        if (accountData) {
+          // Add household info to account data
+          if (account.household_id) {
+            accountData.householdId = account.household_id;
+            accountData.household = account.households as Household;
+            accountData.isPrimary = account.is_primary || false;
+          }
+          accounts.push(accountData);
+        }
+      }
+
+      return {
+        client: {
+          id: clientData.id,
+          firstName: clientData.first_name,
+          lastName: clientData.last_name,
+          email: clientData.email,
+          phone: clientData.phone,
+          createdAt: clientData.created_at,
+          lastUpdated: clientData.last_updated
+        },
+        accounts
+      };
+    } catch (error) {
+      console.error('Error in getClientData:', error);
+      return null;
+    }
+  }
 
   // Get account data by accountId
   async getAccountData(accountId: string): Promise<AccountData | null> {
@@ -297,6 +437,7 @@ export class SupabaseAccountService {
       accountType: (dataObj.account_type as 'individual' | 'joint' | 'ira' | 'roth_ira' | '401k' | '403b' | 'sep_ira' | 'simple_ira' | 'trust' | 'corporate' | 'partnership' | 'llc' | 'other') || 'individual',
       clientId: (dataObj.client_id as string) || 'unknown',
       client: this.transformClient(dataObj.client),
+      isPrimary: (dataObj.is_primary as boolean) || false,
       securities: ((dataObj.securities as unknown[]) || []).map(this.transformSecurity),
       holdings: ((dataObj.holdings as unknown[]) || []).map(this.transformHolding),
       marketData: (dataObj.marketData as MarketData[]) || [],

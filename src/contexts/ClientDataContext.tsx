@@ -1,0 +1,73 @@
+'use client'
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { SupabaseAccountService } from '@/services/supabaseService'
+import { Client, AccountData } from '@/types/account'
+
+interface ClientDataContextType {
+  data: {
+    client: Client | null
+    accounts: AccountData[]
+  } | null
+  loading: boolean
+  error: string | null
+  refetch: () => Promise<void>
+}
+
+const ClientDataContext = createContext<ClientDataContextType | undefined>(undefined)
+
+interface ClientDataProviderProps {
+  children: ReactNode
+  clientId: string
+}
+
+export function ClientDataProvider({ children, clientId }: ClientDataProviderProps) {
+  const [data, setData] = useState<{ client: Client | null; accounts: AccountData[] } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchClientData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const service = new SupabaseAccountService()
+      const result = await service.getClientData(clientId)
+      
+      if (result) {
+        setData(result)
+      } else {
+        setError('Client not found')
+      }
+    } catch (err) {
+      console.error('Error fetching client data:', err)
+      setError(err instanceof Error ? err.message : 'Failed to fetch client data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (clientId) {
+      fetchClientData()
+    }
+  }, [clientId])
+
+  const refetch = async () => {
+    await fetchClientData()
+  }
+
+  return (
+    <ClientDataContext.Provider value={{ data, loading, error, refetch }}>
+      {children}
+    </ClientDataContext.Provider>
+  )
+}
+
+export function useClientData() {
+  const context = useContext(ClientDataContext)
+  if (context === undefined) {
+    throw new Error('useClientData must be used within a ClientDataProvider')
+  }
+  return context
+}

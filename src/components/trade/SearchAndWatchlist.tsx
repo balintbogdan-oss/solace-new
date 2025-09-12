@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, Edit2, Clock, X } from 'lucide-react'
+import { useState } from 'react'
+import { Search, Edit2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { SearchModal } from './SearchModal'
 
 // Mock data for watchlist
 const WATCHLIST_DATA = [
@@ -17,14 +18,6 @@ const WATCHLIST_DATA = [
   { symbol: 'JPM', cusip: '037833100', name: 'JPMorgan Chase & Co.', price: 120.00, change: -1.15, changePercent: -0.95, volume: 96000.00 }
 ]
 
-// Mock recent searches
-const RECENT_SEARCHES = [
-  { symbol: 'AAPL', name: 'Apple Inc.', timestamp: '2024-04-25T09:30:00Z' },
-  { symbol: 'NVDA', name: 'NVIDIA Corporation', timestamp: '2024-04-25T09:15:00Z' },
-  { symbol: 'MSFT', name: 'Microsoft Corporation', timestamp: '2024-04-25T09:00:00Z' },
-  { symbol: 'GOOGL', name: 'Alphabet Inc.', timestamp: '2024-04-24T16:45:00Z' },
-  { symbol: 'AMZN', name: 'Amazon.com Inc.', timestamp: '2024-04-24T16:30:00Z' },
-]
 
 // Mock order data (Moved here) - Ordered by status priority: Pending, Cancelled/Partially Filled, Filled
 const mockOrders = [
@@ -43,121 +36,39 @@ const mockOrders = [
   { id: 'ORD-5V6W7X', symbol: 'JPM', type: 'Buy', quantity: 75, orderType: 'Limit @ $120.50', status: 'Filled', timestamp: '2024-04-25 11:30:45 ET', cost: 9037.50, isClosed: true },
 ];
 
-// Filter function for search results
-function filterSecurities(query: string) {
-  if (!query) return [];
-  const lowercaseQuery = query.toLowerCase();
-  return WATCHLIST_DATA.filter(
-    item => 
-      item.symbol.toLowerCase().includes(lowercaseQuery) ||
-      item.name.toLowerCase().includes(lowercaseQuery) ||
-      item.cusip.includes(lowercaseQuery)
-  );
-}
 
-// The inline search component
-function InlineSearch({ onSelectSymbol }: { onSelectSymbol: (symbol: string) => void }) {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<typeof WATCHLIST_DATA>([]);
-  const [isFocused, setIsFocused] = useState(false);
-
-  useEffect(() => {
-    setResults(filterSecurities(query));
-  }, [query]);
+// Simple search button component that opens the SearchModal
+function SearchButton() {
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
-    <div className="relative w-full">
+    <>
       <div className="relative">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          className="w-full p-4 pl-12 rounded-lg border  bg-card-blend dark:bg-card-blend-dark focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Search stocks, options, funds by symbol or name..."
-        />
-        <Search className="w-5 h-5 text-muted-foreground absolute left-4 top-1/2 transform -translate-y-1/2" />
-        {query && (
-          <button
-            onClick={() => setQuery('')}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2"
-          >
-            <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
-          </button>
-        )}
+        <button
+          onClick={() => setShowSearchModal(true)}
+          className="w-full p-4 pl-12 rounded-lg border bg-card-blend dark:bg-card-blend-dark focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+        >
+          <Search className="w-5 h-5 text-muted-foreground absolute left-4 top-1/2 transform -translate-y-1/2" />
+          <span className="text-muted-foreground">Search stocks, options, funds by symbol or name...</span>
+        </button>
       </div>
-
-      {/* Dropdown for results or recent searches */}
-      {isFocused && (
-        <div className="absolute w-full mt-2 bg-white/40 dark:bg-black/40 backdrop-blur-xl rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-10">
-          {query === '' ? (
-            // Show recent searches when no query
-            <div className="p-2">
-              <div className="px-3 py-2 text-sm text-muted-foreground">Recent searches</div>
-              {RECENT_SEARCHES.map((item) => (
-                <button
-                  key={item.symbol}
-                  onClick={() => {
-                    onSelectSymbol(item.symbol);
-                    setIsFocused(false);
-                  }}
-                  className="w-full px-3 py-2 flex items-center gap-3 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 rounded"
-                >
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <div className="flex-1 text-left">
-                    <div className="font-medium">{item.symbol}</div>
-                    <div className="text-muted-foreground text-xs">{item.name}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : results.length > 0 ? (
-            // Show search results when there's a query
-            <div className="p-2">
-              {results.map((item) => (
-                <button
-                  key={item.symbol}
-                  onClick={() => {
-                    onSelectSymbol(item.symbol);
-                    setIsFocused(false);
-                    setQuery('');
-                  }}
-                  className="w-full px-3 py-2 flex items-center gap-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
-                >
-                  <div className="flex-1">
-                    <div className="font-medium">{item.symbol}</div>
-                    <div className="text-muted-foreground text-xs">{item.name}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium">${item.price.toFixed(2)}</div>
-                    <div className={`text-xs ${item.change >= 0 ? 'text-lime-600 dark:text-lime-300' : 'text-red-500'}`}>
-                      {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : query.length > 0 ? (
-            // Show no results message
-            <div className="p-6 text-center text-muted-foreground">
-              No results found for &quot;{query}&quot;
-            </div>
-          ) : null}
-        </div>
-      )}
-    </div>
+      
+      <SearchModal
+        isOpen={showSearchModal}
+        onOpenChange={setShowSearchModal}
+        onSelectSymbol={() => {}}
+      />
+    </>
   );
 }
 
 interface WatchlistTableProps {
-    onSelectSymbol: (symbol: string) => void;
     showVolumeColumn?: boolean; 
     showPriceColumn?: boolean; // Add prop for price column
 }
 
 // The watchlist table component
 export function WatchlistTable({ 
-    onSelectSymbol,
     showVolumeColumn = true,
     showPriceColumn = true // Default to true
 }: WatchlistTableProps) {
@@ -186,7 +97,6 @@ export function WatchlistTable({
               <TableRow 
                 key={item.symbol}
                 className="border-b hover:bg-black/10 dark:hover:bg-white/10 cursor-pointer text-sm"
-                onClick={() => onSelectSymbol(item.symbol)}
               >
                 <TableCell className="py-2 pr-4">
                   <div>{item.symbol}</div>
@@ -206,6 +116,24 @@ export function WatchlistTable({
       </div>
     </div>
   )
+}
+
+// Helper function to get status color
+function getStatusColor(status: string) {
+  switch (status) {
+    case 'Pending':
+      return 'bg-yellow-500';
+    case 'Working':
+      return 'bg-blue-500';
+    case 'Partially Filled (5/10)':
+      return 'bg-orange-500';
+    case 'Cancelled':
+      return 'bg-red-500';
+    case 'Filled':
+      return 'bg-green-500';
+    default:
+      return 'bg-gray-500';
+  }
 }
 
 // OrderTable component (Moved here)
@@ -242,7 +170,12 @@ function OrderTable({ orders }: { orders: typeof mockOrders }) {
                   <TableCell>{order.quantity}</TableCell>
                   <TableCell>{order.orderType}</TableCell>
                   <TableCell>{order.timestamp}</TableCell>
-                  <TableCell>{order.status}</TableCell> 
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${getStatusColor(order.status)}`}></div>
+                      <span>{order.status}</span>
+                    </div>
+                  </TableCell> 
                 </TableRow>
               ))
             )}
@@ -255,24 +188,21 @@ function OrderTable({ orders }: { orders: typeof mockOrders }) {
 
 // The main component that combines everything
 interface SearchAndWatchlistProps {
-  onSelectSymbol: (symbol: string) => void;
   showVolumeColumn?: boolean; // Add prop
   showPriceColumn?: boolean;  // Add prop
 }
 
 export function SearchAndWatchlist({ 
-  onSelectSymbol, 
-  showVolumeColumn,  // Use prop
-  showPriceColumn   // Use prop
+  showVolumeColumn = true,  // Use prop
+  showPriceColumn = true   // Use prop
 }: SearchAndWatchlistProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left section: Search (unboxed) */}
         <div className="md:col-span-2">
-          <h1 className="text-xl font-semibold mb-2">Trade securities</h1>
           <span className="text-muted-foreground mb-4 text-sm block">Search for anything you want to trade or research</span>
-          <InlineSearch onSelectSymbol={onSelectSymbol} />
+          <SearchButton />
 
           {/* Order Table below the search */}
           <OrderTable orders={mockOrders} />
@@ -281,7 +211,6 @@ export function SearchAndWatchlist({
         {/* Right card: Watchlist */}
         <div className="p-6 bg-card-blend dark:bg-card-blend-dark rounded-lg border">
           <WatchlistTable 
-            onSelectSymbol={onSelectSymbol} 
             showVolumeColumn={showVolumeColumn} // Pass prop down
             showPriceColumn={showPriceColumn}   // Pass prop down
           />

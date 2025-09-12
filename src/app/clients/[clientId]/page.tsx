@@ -2,24 +2,20 @@
 
 import {
   User,
-  Eye,
   ChevronDown,
   Mail,
   Phone,
-  MapPin,
   Calendar,
   Hash,
-  CreditCard,
-  Users,
   ChevronRight,
+  Building2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ComposedChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine, Area, CartesianGrid, TooltipProps } from 'recharts'
 import { generateMockData } from '@/lib/mockData'
 import { useTheme } from 'next-themes'
 import { Card } from '@/components/ui/card'
-import { MOCK_CLIENT, MOCK_HOUSEHOLDS } from '@/lib/mock-data'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { useState, useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import React from 'react'
@@ -29,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ClientDataProvider, useClientData } from '@/contexts/ClientDataContext'
 
 // Define TimePeriod type locally
 type TimePeriod = '1D' | '1W' | '1M' | '6M' | 'YTD' | '1Y'
@@ -78,12 +75,13 @@ const CustomClientTooltip = ({ active, payload, label }: TooltipProps<number, st
   return null
 }
 
-export default function ClientDetailPage() {
+// Client content component that uses the context
+function ClientContent() {
   const router = useRouter()
+  const { data, loading, error } = useClientData()
   
   // State for collapsed sections
   const [isPersonalAccountsCollapsed, setIsPersonalAccountsCollapsed] = useState(false)
-  const [collapsedHouseholds, setCollapsedHouseholds] = useState<Record<string, boolean>>({})
 
   // State for chart
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('1Y')
@@ -93,14 +91,20 @@ export default function ClientDetailPage() {
   const [portfolioColor, setPortfolioColor] = useState('')
   const [cashColor, setCashColor] = useState('')
 
+  // Calculate total portfolio value from accounts
+  const totalPortfolioValue = useMemo(() => {
+    if (!data?.accounts) return 0
+    return data.accounts.reduce((sum, account) => {
+      return sum + (account.balances?.totalValue || 0)
+    }, 0)
+  }, [data?.accounts])
+
   // Generate Chart Data (adapt base value and volatility)
-  // Attempt to parse MOCK_CLIENT.portfolioValue to get a number
-  const currentPortfolioValue = parseFloat(MOCK_CLIENT.portfolioValue?.replace(/[^\d.-]/g, '') || '4000000')
   const clientChartData = useMemo(() => generateMockData({
-    baseValue: currentPortfolioValue, 
+    baseValue: totalPortfolioValue || 4000000, 
     months: 12, 
     volatility: 0.02 // Example volatility
-  }), [currentPortfolioValue])
+  }), [totalPortfolioValue])
 
   // Filter data based on selectedPeriod (similar to AUMWidget)
   const filteredClientChartData = useMemo(() => {
@@ -128,7 +132,7 @@ export default function ClientDetailPage() {
     const dataMax = Math.max(...values, ...deposits)
     const range = dataMax - dataMin
     const desiredTicks = 5
-    const roughIncrement = range > 0 ? range / (desiredTicks - 1) : currentPortfolioValue / 10
+    const roughIncrement = range > 0 ? range / (desiredTicks - 1) : totalPortfolioValue / 10
     let increment = 1_000_000
     const thresholds = [50_000_000, 25_000_000, 10_000_000, 5_000_000, 2_500_000, 1_000_000, 500_000, 100_000, 50_000, 10_000, 1_000]
     for (const t of thresholds) {
@@ -148,7 +152,7 @@ export default function ClientDetailPage() {
     }
     const domain: [number, number] = [tickMin, tickMax > tickMin ? tickMax : tickMin + (increment > 0 ? increment : 1)]
     return { yAxisTicks: ticks, yAxisDomain: domain }
-  }, [clientChartData, currentPortfolioValue])
+  }, [clientChartData, totalPortfolioValue])
   const xAxisDomain: [number, number | string] = useMemo(() => {
       if (!filteredClientChartData || filteredClientChartData.length === 0) return [0, 1]
       return [filteredClientChartData[0].timestamp, 'dataMax']
@@ -168,6 +172,29 @@ export default function ClientDetailPage() {
     }
   }, [isMounted, theme])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Loading client data...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !data?.client) {
+    return (
+      <div className="min-h-screen w-full p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-destructive">Error: {error || 'Client not found'}</div>
+        </div>
+      </div>
+    )
+  }
+
+  const client = data.client
+  const accounts = data.accounts || []
+
   // Chart mouse handlers
   const handleMouseMove = (state: unknown) => {
     const anyState = state as { activeCoordinate?: unknown; activePayload?: Array<{ payload?: { timestamp?: number } }> }
@@ -179,18 +206,15 @@ export default function ClientDetailPage() {
   }
   const handleMouseLeave = () => { setHoveredTimestamp(null) }
 
-  const toggleHouseholdCollapse = (householdId: string) => {
-    setCollapsedHouseholds(prev => ({
-      ...prev,
-      [householdId]: !prev[householdId]
-    }))
-  }
 
   return (
     <div className="min-h-screen w-full p-6">
         <div className='pb-6'>
-          <h2 className="text-3xl font-serif">Client overview</h2>
-            </div>
+          <h1 className="text-4xl font-serif">
+            {data?.client ? `${data.client.firstName} ${data.client.lastName}` : 'Loading...'}
+          </h1>
+          <h2 className="text-2xl font-serif text-muted-foreground mt-2">Client overview</h2>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4  ">
           {/* Left Column - Chart and Accounts */}
           
@@ -202,15 +226,15 @@ export default function ClientDetailPage() {
                 {/* Left side: Value + G/L */} 
                 <div className="space-y-2">
                 <span className="text-muted-foreground text-sm mb-2">Portfolio Market Value</span>
-                  <div className="text-xl md:text-3xl font-serif">{MOCK_CLIENT.portfolioValue}</div>
+                  <div className="text-xl md:text-3xl font-serif">${totalPortfolioValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Today&apos;s G/L</span>
-                      <span className="text-sm text-positive">{MOCK_CLIENT.todayGL}</span>
+                      <span className="text-sm text-positive">+$0.00</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Total Unrealized G/L</span>
-                      <span className="text-sm text-positive">{MOCK_CLIENT.totalUnrealizedGL}</span>
+                      <span className="text-sm text-positive">+$0.00</span>
                     </div>
                   </div>
                 </div>
@@ -218,20 +242,31 @@ export default function ClientDetailPage() {
                 {/* Right side: Dropdown + Timeframe + Legend */} 
                 <div className="flex flex-col items-end space-y-2"> 
                    <div className="flex items-center gap-2"> {/* Container for Dropdown and Timeframe */} 
-                    {/* Client Dropdown */} 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="flex items-center gap-2">
-                          <span>{MOCK_CLIENT.name}</span>
-                          <ChevronDown className="h-4 w-4 opacity-50" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Household 1</DropdownMenuItem>
-                        <DropdownMenuItem>Household 2</DropdownMenuItem>
-                        <DropdownMenuItem>Add Comparison</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                     {/* Client Dropdown */} 
+                     <DropdownMenu>
+                       <DropdownMenuTrigger asChild>
+                         <Button variant="outline" className="flex items-center gap-2">
+                           <span>{client.firstName} {client.lastName}</span>
+                           <ChevronDown className="h-4 w-4 opacity-50" />
+                         </Button>
+                       </DropdownMenuTrigger>
+                       <DropdownMenuContent align="end">
+                         {accounts.some(acc => acc.householdId) && (
+                           <DropdownMenuItem 
+                             onClick={() => {
+                               const householdId = accounts.find(acc => acc.householdId)?.householdId
+                               if (householdId) {
+                                 router.push(`/households/${householdId}`)
+                               }
+                             }}
+                           >
+                             <Building2 className="w-4 h-4 mr-2" />
+                             View Household
+                           </DropdownMenuItem>
+                         )}
+                         <DropdownMenuItem>Add Comparison</DropdownMenuItem>
+                       </DropdownMenuContent>
+                     </DropdownMenu>
                     
                     {/* Timeframe switcher */} 
                      <div className="flex items-center bg-muted p-1 rounded-md space-x-1">
@@ -364,53 +399,35 @@ export default function ClientDetailPage() {
               {/* <div className="col-span-2">
                 <h3 className="text-2xl font-serif mb-4">{MOCK_CLIENT.name}</h3>
               </div> */}
-              <h3 className="text-2xl font-serif mb-4 col-span-2">{MOCK_CLIENT.name}</h3>
+              <h3 className="text-2xl font-serif mb-4 col-span-2">{client.firstName} {client.lastName}</h3>
 
               {/* Email Row */}
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="w-5 h-5" />
                 <span>Email</span>
               </div>
-              <span className="text-left">{MOCK_CLIENT.email}</span> {/* Ensure text-left */} 
+              <span className="text-left">{client.email || 'N/A'}</span>
 
               {/* Phone Row */}
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Phone className="w-5 h-5" />
                 <span>Phone</span>
               </div>
-              <span className="text-left">{MOCK_CLIENT.phone}</span>
+              <span className="text-left">{client.phone || 'N/A'}</span>
 
-              {/* Address Row */}
-              <div className="flex items-center gap-3 text-muted-foreground">
-                <MapPin className="w-5 h-5" />
-                <span>Address</span>
-              </div>
-              {/* Removed text-right and max-w */}
-              <span className="text-left break-words">{MOCK_CLIENT.address}</span> 
-
-              {/* DOB Row */}
-              <div className="flex items-center gap-3 text-muted-foreground">
-                <Calendar className="w-5 h-5" />
-                <span>DOB</span>
-              </div>
-              <span className="text-left">{MOCK_CLIENT.dob}</span>
-
-              {/* Age Row */}
+              {/* Client ID Row */}
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Hash className="w-5 h-5" />
-                <span>Age</span>
+                <span>Client ID</span>
               </div>
-              <span className="text-left">{MOCK_CLIENT.age}</span>
+              <span className="text-left">{client.id}</span>
 
-              {/* SSN Row */} 
+              {/* Created Date Row */}
               <div className="flex items-center gap-3 text-muted-foreground">
-                <CreditCard className="w-5 h-5" />
-                <span>SSN</span>
+                <Calendar className="w-5 h-5" />
+                <span>Created</span>
               </div>
-              <div className="flex items-center gap-2 text-left"> {/* Keep flex for Eye icon */} 
-                <span>{MOCK_CLIENT.ssn}</span>
-                <Eye className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-              </div>
+              <span className="text-left">{new Date(client.createdAt).toLocaleDateString()}</span>
             </div>
 
             <div className="pt-6">
@@ -430,16 +447,17 @@ export default function ClientDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="font-regular border-b border-t">
-                        <th className="w-10 p-2"></th>
-                        <th className="text-left text-muted-foreground p-2">Account</th>
-                        <th className="text-right text-muted-foreground p-2">Funds Available</th>
-                        <th className="text-right text-muted-foreground p-2">Invested value</th>
-                        <th className="text-right text-muted-foreground p-2">Market value</th>
-                        <th className="text-right text-muted-foreground p-2">Cash + FDIC Sweep</th>
-                        <th className="text-right text-muted-foreground p-2">Margin balance</th>
-                        <th className="text-right text-muted-foreground p-2 pr-4">Total Account Value</th>
-                        <th className="w-4 pr-2"></th></tr>
+                     <tr className="font-regular border-b border-t">
+                       <th className="w-10 p-2"></th>
+                       <th className="text-left text-muted-foreground p-2">Account</th>
+                       <th className="text-left text-muted-foreground p-2">Household</th>
+                       <th className="text-right text-muted-foreground p-2">Funds Available</th>
+                       <th className="text-right text-muted-foreground p-2">Invested value</th>
+                       <th className="text-right text-muted-foreground p-2">Market value</th>
+                       <th className="text-right text-muted-foreground p-2">Cash + FDIC Sweep</th>
+                       <th className="text-right text-muted-foreground p-2">Margin balance</th>
+                       <th className="text-right text-muted-foreground p-2 pr-4">Total Account Value</th>
+                       <th className="w-4 pr-2"></th></tr>
                       </thead>
                       <tbody>
                         {/* --- Personal Accounts Section Header Row --- */}
@@ -451,9 +469,9 @@ export default function ClientDetailPage() {
                               <User className="w-5 h-5 text-primary mx-auto" />
                            </td> 
                            <td colSpan={6} className="p-2 "> 
-                              <h3 className="text-base font-medium">{MOCK_CLIENT.name}</h3>
+                              <h3 className="text-base font-medium">{client.firstName} {client.lastName}</h3>
                            </td>
-                           <td className="p-2 text-right font-medium pr-4">{MOCK_CLIENT.portfolioValue}</td>
+                           <td className="p-2 text-right font-medium pr-4">${totalPortfolioValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                            <td className="p-2 pr-2 align-middle"> 
                              <ChevronDown 
                                 className={cn(
@@ -464,64 +482,40 @@ export default function ClientDetailPage() {
                             </td></tr>
 
                         {/* --- Personal Accounts Data Rows (Conditional) --- */}
-                        {!isPersonalAccountsCollapsed && MOCK_CLIENT.accounts.map((account) => (
-                          <tr 
-                            key={`${MOCK_CLIENT.id}-${account.id}`}
-                            onClick={() => router.push(`/account/${account.id}`)}
-                            className=" hover:bg-accent dark:hover:bg-accent cursor-pointer transition-colors"
-                          >
-                             <td></td> 
-                             <td className=" border-t py-2 border-b dark:border-neutral-800"> 
-                               <div className="font-semibold">{account.name}</div>
-                               <div className="text-sm text-muted-foreground">{account.id} • {account.type}</div></td>
-                             <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">$0.00</td>
-                             <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">{account.investedValue}</td>
-                             <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">{account.marketValue}</td>
-                             <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">{account.fdicSweep}</td>
-                             <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">{account.availableMargin}</td>
-                             <td className="border-t py-2 text-right text-muted-foreground pr-4 border-b dark:border-neutral-800">{account.marketValue}</td>
-                             <td className="border-t py-2 pr-2 border-b dark:border-neutral-800"><ChevronRight className="h-4 w-4 text-muted-foreground" /></td></tr>
-                        ))}
-                        {MOCK_HOUSEHOLDS.map((household) => (
-                          <React.Fragment key={household.id}>
-                            <tr 
-                              className="border-t-4  bg-muted/30 dark:bg-muted/10 border-t dark:border-neutral-800 cursor-pointer hover:bg-accent dark:hover:bg-accent transition-colors"
-                               onClick={() => toggleHouseholdCollapse(household.id)}
-                            >
-                              <td className="py-4 align-middle"> 
-                                <Users className="w-5 h-5 text-primary mx-auto" />
-                              </td>
-                              <td colSpan={6} className="py-4 border-b "> 
-                                <div> 
-                                  <h3 className="text-base font-medium">{household.name}</h3>
-                                  <span className="block text-sm text-muted-foreground">{household.members.join(', ')}</span>
+                        {!isPersonalAccountsCollapsed && accounts.map((account) => (
+                         <tr 
+                           key={`${client.id}-${account.accountId}`}
+                           onClick={() => router.push(`/account/${account.accountId}`)}
+                           className=" hover:bg-accent dark:hover:bg-accent cursor-pointer transition-colors"
+                         >
+                            <td></td> 
+                            <td className=" border-t py-2 border-b dark:border-neutral-800"> 
+                              <div className="font-semibold">{account.accountName}</div>
+                              <div className="text-sm text-muted-foreground">{account.accountId} • {account.accountType}</div></td>
+                            <td className="border-t py-2 text-left border-b dark:border-neutral-800">
+                              {account.household ? (
+                                <div className="flex items-center gap-2">
+                                  <Building2 className="w-4 h-4 text-primary" />
+                                  <div>
+                                    <div className="text-sm font-medium">{account.household.name}</div>
+                                    {account.isPrimary && (
+                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary text-primary-foreground">
+                                        Primary
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
-                              </td>
-                              <td className="p-2 text-right font-medium pr-4 align-middle border-b">{household.portfolioValue}</td>
-                              <td className="p-2 pr-2 align-middle border-b"><ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", collapsedHouseholds[household.id] ? "rotate-180" : "")} /></td></tr>
-                            {!collapsedHouseholds[household.id] && household.accounts.map((account) => {
-                              return (
-                                <tr 
-                                  key={`${household.id}-${account.id}`}
-                                  onClick={() => router.push(`/account/${account.id}`)}
-                                  className="hover:bg-accent dark:hover:bg-accent cursor-pointer transition-colors"
-                                >
-                                  <td></td> 
-                                  <td className="py-2 border-b dark:border-neutral-800"> 
-                                    <div className="font-semibold">{account.name}</div>
-                                    <div className="text-sm text-muted-foreground">{account.id} • {account.type}</div>
-                                  </td>
-                                  <td className="py-2 text-right text-muted-foreground border-b dark:border-neutral-800">$0.00</td>
-                                  <td className="py-2 text-right text-muted-foreground border-b dark:border-neutral-800">{account.investedValue}</td>
-                                  <td className="py-2 text-right text-muted-foreground border-b dark:border-neutral-800">{account.marketValue}</td>
-                                  <td className="py-2 text-right text-muted-foreground border-b dark:border-neutral-800">{account.fdicSweep}</td>
-                                  <td className="py-2 text-right text-muted-foreground border-b dark:border-neutral-800">{account.availableMargin}</td>
-                                  <td className="py-2 text-right text-muted-foreground pr-4 border-b dark:border-neutral-800">{account.marketValue}</td>
-                                  <td className="py-2 pr-2 border-b dark:border-neutral-800"><ChevronRight className="h-4 w-4 text-muted-foreground" /></td>
-                                </tr>
-                              );
-                            })}
-                          </React.Fragment>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </td>
+                            <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">${(account.balances?.buyingPower || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">${(account.balances?.investedValue || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">${(account.balances?.totalValue || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">${(account.balances?.cash || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">${(account.balances?.margin || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td className="border-t py-2 text-right text-muted-foreground pr-4 border-b dark:border-neutral-800">${(account.balances?.totalValue || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td className="border-t py-2 pr-2 border-b dark:border-neutral-800"><ChevronRight className="h-4 w-4 text-muted-foreground" /></td></tr>
                         ))}
                       </tbody>
                   </table>
@@ -531,5 +525,27 @@ export default function ClientDetailPage() {
          </div>
         </Card>    
     </div>
+  )
+}
+
+// Main component that provides the context
+export default function ClientDetailPage() {
+  const params = useParams()
+  const clientId = params?.clientId as string
+
+  if (!clientId) {
+    return (
+      <div className="min-h-screen w-full p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-destructive">Invalid client ID</div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <ClientDataProvider clientId={clientId}>
+      <ClientContent />
+    </ClientDataProvider>
   )
 }

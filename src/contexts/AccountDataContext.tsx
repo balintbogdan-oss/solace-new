@@ -49,6 +49,7 @@ export function AccountDataProvider({
               createdAt: new Date().toISOString(),
               lastUpdated: new Date().toISOString()
             },
+            isPrimary: true,
             securities: [],
             holdings: [],
             marketData: [],
@@ -89,6 +90,7 @@ export function AccountDataProvider({
               createdAt: new Date().toISOString(),
               lastUpdated: new Date().toISOString()
             },
+            isPrimary: false,
             securities: [],
             holdings: [],
             marketData: [],
@@ -129,6 +131,7 @@ export function AccountDataProvider({
           createdAt: new Date().toISOString(),
           lastUpdated: new Date().toISOString()
         },
+        isPrimary: false,
         securities: [],
         holdings: [],
         marketData: [],
@@ -563,6 +566,7 @@ export function AccountDataProvider({
           createdAt: new Date().toISOString(),
           lastUpdated: new Date().toISOString()
         },
+        isPrimary: true,
         securities: [],
         holdings: [],
         marketData: [],
@@ -599,6 +603,7 @@ export function AccountDataProvider({
           createdAt: new Date().toISOString(),
           lastUpdated: new Date().toISOString()
         },
+        isPrimary: false,
         securities: [],
         holdings: [],
         marketData: [],

@@ -7,10 +7,12 @@ import { cn } from '@/lib/utils'
 import { Button } from "@/components/ui/button"
 import { AnimatedPriceDisplay } from '@/components/ui/AnimatedPriceDisplay'
 import { StockInfo } from './StockDetailPanel' // Assuming StockInfo is exported from here
+import { MutualFundInfo } from '@/types/account'
 
 interface SecurityHeaderProps {
   symbol: string;
-  stock: StockInfo;
+  stock?: StockInfo;
+  mutualFund?: MutualFundInfo;
   isPositive: boolean;
   isWatchlisted: boolean;
   onChangeSymbolClick: () => void;
@@ -22,6 +24,7 @@ interface SecurityHeaderProps {
 export const SecurityHeader: React.FC<SecurityHeaderProps> = ({
   symbol,
   stock,
+  mutualFund,
   isPositive,
   isWatchlisted,
   onChangeSymbolClick,
@@ -30,18 +33,27 @@ export const SecurityHeader: React.FC<SecurityHeaderProps> = ({
   isDrawer = false,
 }) => {
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     // Set initial time on client side only - static, no ticking
     setCurrentTime(new Date().toLocaleTimeString());
   }, []);
+
+  // Determine which data to use
+  const securityData = mutualFund || stock;
+  if (!securityData) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex flex-col gap-3 md:gap-2">
       {/* Top Row: Exchange Info and Action Buttons */}
       <div className="flex justify-between items-center">
         {/* Exchange Info - Moved here */}
         <p className="text-xs text-muted-foreground">
-            {stock.exchangeInfo}
+            {securityData.exchangeInfo}
         </p>
         {/* Right side: Action Buttons - Moved here */}
         <div className="flex items-center gap-2">
@@ -92,23 +104,32 @@ export const SecurityHeader: React.FC<SecurityHeaderProps> = ({
         {/* Symbol and Search Button */}
         <div className="flex items-center gap-2 mb-1">
           <h2 className={isDrawer ? "text-xl md:text-2xl font-serif" : "text-4xl font-serif"}>{symbol?.toUpperCase()}</h2>
-          <button onClick={onChangeSymbolClick} className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors" aria-label="Change symbol">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={onChangeSymbolClick} 
+            className="p-2 aspect-square" 
+            aria-label="Change symbol"
+          >
             <Search className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
         {/* Price and Change */}
         <div className="flex items-baseline gap-1.5 sm:gap-2 w-full">
-          <AnimatedPriceDisplay price={stock.price} className="text-lg sm:text-xl md:text-2xl font-medium" />
+          <AnimatedPriceDisplay 
+            price={mutualFund ? mutualFund.nav : stock?.price || 0} 
+            className="text-lg sm:text-xl md:text-2xl font-medium" 
+          />
           <span className={cn(
             "text-sm sm:text-base md:text-lg font-medium", 
             isPositive ? "text-positive" : "text-negative"
           )}>
-            {isPositive ? '+' : ''}{stock.change.toFixed(2)} ({isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%)
+            {isPositive ? '+' : ''}{securityData.change.toFixed(2)} ({isPositive ? '+' : ''}{securityData.changePercent.toFixed(2)}%)
           </span>
         </div>
         {/* Last Updated Timestamp */}
         <div className="text-xs text-muted-foreground">
-          Last updated: {currentTime || 'Loading...'}
+          Last updated: {isMounted ? currentTime : '...'}
         </div>
       </div>
     </div>

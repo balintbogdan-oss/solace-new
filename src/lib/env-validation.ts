@@ -28,7 +28,7 @@ const OPTIONAL_ENV_VARS = {
 
 // Validation patterns
 const VALIDATION_PATTERNS = {
-  NEXT_PUBLIC_SUPABASE_URL: /^https:\/\/[a-zA-Z0-9-]+\.supabase\.co$/,
+  NEXT_PUBLIC_SUPABASE_URL: /^(https:\/\/[a-zA-Z0-9-]+\.supabase\.co|http:\/\/127\.0\.0\.1:54321)$/,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: /^eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/,
   ADMIN_PASSWORD: /^.{8,}$/, // At least 8 characters
   NODE_ENV: /^(development|production|test)$/

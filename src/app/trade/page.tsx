@@ -28,7 +28,6 @@ export default function GlobalTradePage() {
         {/* L Column: Watchlist Section - Removed lg:col-span-1 */}
         <div className="p-4 rounded-lg border bg-card-blend dark:bg-card-blend-dark">
              <WatchlistTable 
-                onSelectSymbol={handleSymbolSelect} 
                 showVolumeColumn={false} 
                 showPriceColumn={false}
              />

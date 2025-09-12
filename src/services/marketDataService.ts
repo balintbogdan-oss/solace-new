@@ -1,12 +1,14 @@
 import { MarketData, Security } from '@/types/account';
 
-// Market data for stocks
-let stocksMarketData: unknown = null;
+// Market data for equities and mutual funds
+let equitiesMarketData: unknown = null;
+let mutualFundsMarketData: unknown = null;
 let optionsMarketData: unknown = null;
 
 // Function to clear cache and force reload
 export function clearMarketDataCache() {
-  stocksMarketData = null;
+  equitiesMarketData = null;
+  mutualFundsMarketData = null;
   optionsMarketData = null;
   // Market data cache cleared
 }
@@ -14,12 +16,12 @@ export function clearMarketDataCache() {
 // Function to force reload market data
 export async function forceReloadMarketData() {
   clearMarketDataCache();
-  return await loadStocksMarketData();
+  return await loadEquitiesMarketData();
 }
 
-// Load market data from JSON files
-export async function loadStocksMarketData(): Promise<unknown> {
-  if (stocksMarketData) return stocksMarketData;
+// Load equities market data from JSON files
+export async function loadEquitiesMarketData(): Promise<unknown> {
+  if (equitiesMarketData) return equitiesMarketData;
   
   try {
     if (typeof window === 'undefined') {
@@ -27,33 +29,77 @@ export async function loadStocksMarketData(): Promise<unknown> {
       try {
         const fs = await import('fs');
         const path = await import('path');
-        const filePath = path.join(process.cwd(), 'public/data/market-data-stocks.json');
+        const filePath = path.join(process.cwd(), 'public/data/market-data-equities.json');
         const fileContent = fs.readFileSync(filePath, 'utf8');
-        stocksMarketData = JSON.parse(fileContent);
+        equitiesMarketData = JSON.parse(fileContent);
       } catch (error) {
-        console.error('Error loading market data on server side:', error);
+        console.error('Error loading equities market data on server side:', error);
         const cacheBuster = new Date().getTime();
-        const response = await fetch(`http://localhost:3000/data/market-data-stocks.json?t=${cacheBuster}`);
-        stocksMarketData = await response.json();
+        const response = await fetch(`http://localhost:3000/data/market-data-equities.json?t=${cacheBuster}`);
+        equitiesMarketData = await response.json();
       }
     } else {
       // Client side - fetch from URL with cache busting
       const cacheBuster = new Date().getTime();
-      const url = `/data/market-data-stocks.json?t=${cacheBuster}`;
+      const url = `/data/market-data-equities.json?t=${cacheBuster}`;
       const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      stocksMarketData = await response.json();
+      equitiesMarketData = await response.json();
     }
     
-    return stocksMarketData;
+    return equitiesMarketData;
   } catch (error) {
-    console.error('Error loading stocks market data:', error);
+    console.error('Error loading equities market data:', error);
     return null;
   }
+}
+
+// Load mutual funds market data from JSON files
+export async function loadMutualFundsMarketData(): Promise<unknown> {
+  if (mutualFundsMarketData) return mutualFundsMarketData;
+  
+  try {
+    if (typeof window === 'undefined') {
+      // Server side - read file directly
+      try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const filePath = path.join(process.cwd(), 'public/data/market-data-mutual-funds.json');
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        mutualFundsMarketData = JSON.parse(fileContent);
+      } catch (error) {
+        console.error('Error loading mutual funds market data on server side:', error);
+        const cacheBuster = new Date().getTime();
+        const response = await fetch(`http://localhost:3000/data/market-data-mutual-funds.json?t=${cacheBuster}`);
+        mutualFundsMarketData = await response.json();
+      }
+    } else {
+      // Client side - fetch from URL with cache busting
+      const cacheBuster = new Date().getTime();
+      const url = `/data/market-data-mutual-funds.json?t=${cacheBuster}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      mutualFundsMarketData = await response.json();
+    }
+    
+    return mutualFundsMarketData;
+  } catch (error) {
+    console.error('Error loading mutual funds market data:', error);
+    return null;
+  }
+}
+
+// Backward compatibility
+export async function loadStocksMarketData(): Promise<unknown> {
+  return await loadEquitiesMarketData();
 }
 
 export async function loadOptionsMarketData(): Promise<unknown> {
@@ -131,6 +177,24 @@ export async function getMarketDataForSymbols(symbols: string[]): Promise<Market
         fiftyTwoWeekLow: (Number(stock.current_price) || 0) * 0.8, // Generate realistic 52W low
         sector: 'Technology', // Default sector
         description: String(stock.symbol || '') + ' Inc.', // Generate description
+        fundDetails: stock.fundDetails ? {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          previousClose: Number((stock.fundDetails as any).previousClose) || 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ytdReturn: Number((stock.fundDetails as any).ytdReturn) || 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          expenseRatio: Number((stock.fundDetails as any).expenseRatio) || 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          category: String((stock.fundDetails as any).category) || '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          netAssets: Number((stock.fundDetails as any).netAssets) || 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          yield: Number((stock.fundDetails as any).yield) || 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          frontLoad: String((stock.fundDetails as any).frontLoad) || '-',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          inceptionDate: String((stock.fundDetails as any).inceptionDate) || ''
+        } : undefined,
         lastUpdated: String(stock.last_updated) || new Date().toISOString()
       }));
       
@@ -142,22 +206,33 @@ export async function getMarketDataForSymbols(symbols: string[]): Promise<Market
     // Database fetch failed, falling back to JSON files
   }
   
-  // Fallback to local JSON files
-  const stocksData = await loadStocksMarketData();
+  // Fallback to local JSON files - check both equities and mutual funds
+  const equitiesData = await loadEquitiesMarketData();
+  const mutualFundsData = await loadMutualFundsMarketData();
   
-  if (!stocksData || !(stocksData as { stocks?: unknown[] }).stocks) {
-    console.error('No stocks data available');
+  let allSecurities: unknown[] = [];
+  
+  if (equitiesData && (equitiesData as { stocks?: unknown[] }).stocks) {
+    allSecurities = [...allSecurities, ...(equitiesData as { stocks: unknown[] }).stocks];
+  }
+  
+  if (mutualFundsData && (mutualFundsData as { mutualFunds?: unknown[] }).mutualFunds) {
+    allSecurities = [...allSecurities, ...(mutualFundsData as { mutualFunds: unknown[] }).mutualFunds];
+  }
+  
+  if (allSecurities.length === 0) {
+    console.error('No market data available');
     return [];
   }
   
-  const filteredStocks = (stocksData as { stocks: unknown[] }).stocks
-    .filter((stock: unknown) => symbols.includes((stock as { symbol: string }).symbol));
+  const filteredSecurities = allSecurities
+    .filter((security: unknown) => symbols.includes((security as { symbol: string }).symbol));
   
-  if (filteredStocks.length === 0) {
+  if (filteredSecurities.length === 0) {
     return [];
   }
   
-  const result = filteredStocks.map((stock: unknown) => {
+  const result = filteredSecurities.map((stock: unknown) => {
     const s = stock as {
       symbol: string;
       currentPrice?: number;
@@ -173,6 +248,16 @@ export async function getMarketDataForSymbols(symbols: string[]): Promise<Market
       fiftyTwoWeekLow?: number;
       sector?: string;
       description?: string;
+      fundDetails?: {
+        previousClose: number;
+        ytdReturn: number;
+        expenseRatio: number;
+        category: string;
+        netAssets: number;
+        yield: number;
+        frontLoad: string;
+        inceptionDate: string;
+      };
       lastUpdated?: string;
     };
     return {
@@ -190,6 +275,7 @@ export async function getMarketDataForSymbols(symbols: string[]): Promise<Market
       fiftyTwoWeekLow: s.fiftyTwoWeekLow || 0,
       sector: s.sector || '',
       description: s.description || '',
+      fundDetails: s.fundDetails,
       lastUpdated: s.lastUpdated || new Date().toISOString()
     };
   });
@@ -204,28 +290,58 @@ export async function getMarketDataForSymbol(symbol: string): Promise<MarketData
   return marketData.length > 0 ? marketData[0] : null;
 }
 
-// Get all available stocks
+// Get all available securities (equities and mutual funds)
 export async function getAllStocks(): Promise<Security[]> {
-  const stocksData = await loadStocksMarketData();
-  if (!stocksData) return [];
+  const equitiesData = await loadEquitiesMarketData();
+  const mutualFundsData = await loadMutualFundsMarketData();
   
-  return (stocksData as { stocks: unknown[] }).stocks.map((stock: unknown) => {
-    const s = stock as {
-      symbol: string;
-      cusip: string;
-      description: string;
-      sector: string;
-    };
-    return {
-      symbol: s.symbol,
-      cusip: s.cusip,
-      description: s.description,
-      sector: s.sector,
-      type: 'equity' as const,
-      exchange: 'NASDAQ',
-      lastUpdated: (stock as { lastUpdated?: string }).lastUpdated || new Date().toISOString()
-    };
-  });
+  let allSecurities: Security[] = [];
+  
+  // Process equities
+  if (equitiesData && (equitiesData as { stocks?: unknown[] }).stocks) {
+    const equities = (equitiesData as { stocks: unknown[] }).stocks.map((stock: unknown) => {
+      const s = stock as {
+        symbol: string;
+        cusip: string;
+        description: string;
+        sector: string;
+      };
+      return {
+        symbol: s.symbol,
+        cusip: s.cusip,
+        description: s.description,
+        sector: s.sector,
+        type: 'equity' as const,
+        exchange: 'NASDAQ',
+        lastUpdated: (stock as { lastUpdated?: string }).lastUpdated || new Date().toISOString()
+      };
+    });
+    allSecurities = [...allSecurities, ...equities];
+  }
+  
+  // Process mutual funds
+  if (mutualFundsData && (mutualFundsData as { mutualFunds?: unknown[] }).mutualFunds) {
+    const mutualFunds = (mutualFundsData as { mutualFunds: unknown[] }).mutualFunds.map((fund: unknown) => {
+      const f = fund as {
+        symbol: string;
+        cusip: string;
+        description: string;
+        sector: string;
+      };
+      return {
+        symbol: f.symbol,
+        cusip: f.cusip,
+        description: f.description,
+        sector: f.sector,
+        type: 'mutual_fund' as const,
+        exchange: 'Mutual Fund',
+        lastUpdated: (fund as { lastUpdated?: string }).lastUpdated || new Date().toISOString()
+      };
+    });
+    allSecurities = [...allSecurities, ...mutualFunds];
+  }
+  
+  return allSecurities;
 }
 
 // Get options for a specific underlying symbol
@@ -320,16 +436,19 @@ export async function searchOptions(criteria: {
 
 // Get market data summary
 export async function getMarketDataSummary(): Promise<{
-  totalStocks: number;
+  totalEquities: number;
+  totalMutualFunds: number;
   totalOptions: number;
   lastUpdated: string;
 }> {
-  const stocksData = await loadStocksMarketData();
+  const equitiesData = await loadEquitiesMarketData();
+  const mutualFundsData = await loadMutualFundsMarketData();
   const optionsData = await loadOptionsMarketData();
   
   return {
-    totalStocks: (stocksData as { stocks?: unknown[] })?.stocks?.length || 0,
+    totalEquities: (equitiesData as { stocks?: unknown[] })?.stocks?.length || 0,
+    totalMutualFunds: (mutualFundsData as { mutualFunds?: unknown[] })?.mutualFunds?.length || 0,
     totalOptions: (optionsData as { options?: unknown[] })?.options?.length || 0,
-    lastUpdated: (stocksData as { lastUpdated?: string })?.lastUpdated || new Date().toISOString()
+    lastUpdated: (equitiesData as { lastUpdated?: string })?.lastUpdated || new Date().toISOString()
   };
 }

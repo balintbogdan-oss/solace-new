@@ -1,0 +1,86 @@
+{
+  "lastUpdated": "2025-01-10T20:30:00.000Z",
+  "mutualFunds": [
+    {
+      "symbol": "VTSAX",
+      "cusip": "VTSAX00",
+      "currentPrice": 158.11,
+      "previousClose": 157.26,
+      "dayChange": 0.85,
+      "dayChangePercent": 0.54,
+      "volume": 0,
+      "marketCap": 435010000000,
+      "open": 157.50,
+      "high": 158.25,
+      "low": 157.20,
+      "fiftyTwoWeekHigh": 165.00,
+      "fiftyTwoWeekLow": 140.00,
+      "sector": "Mutual Fund",
+      "description": "Vanguard Total Stock Market Index Fund Admiral Shares",
+      "fundDetails": {
+        "previousClose": 157.26,
+        "ytdReturn": 10.50,
+        "expenseRatio": 0.04,
+        "category": "US Equity Large Cap Blend",
+        "netAssets": 435.01,
+        "yield": 1.16,
+        "frontLoad": "-",
+        "inceptionDate": "13 Nov 2000"
+      }
+    },
+    {
+      "symbol": "VFIAX",
+      "cusip": "VFIAX00",
+      "currentPrice": 503.56,
+      "previousClose": 459.80,
+      "dayChange": 43.76,
+      "dayChangePercent": 9.52,
+      "volume": 0,
+      "marketCap": 850250000000,
+      "open": 490.10,
+      "high": 504.00,
+      "low": 489.50,
+      "fiftyTwoWeekHigh": 510.00,
+      "fiftyTwoWeekLow": 450.00,
+      "sector": "Mutual Fund",
+      "description": "Vanguard 500 Index Fund Admiral Shares",
+      "fundDetails": {
+        "previousClose": 459.80,
+        "ytdReturn": 12.30,
+        "expenseRatio": 0.04,
+        "category": "US Equity Large Cap Blend",
+        "netAssets": 850.25,
+        "yield": 1.45,
+        "frontLoad": "-",
+        "inceptionDate": "13 Nov 2000"
+      }
+    },
+    {
+      "symbol": "VTSMX",
+      "cusip": "VTSMX00",
+      "currentPrice": 125.45,
+      "previousClose": 124.63,
+      "dayChange": 0.82,
+      "dayChangePercent": 0.66,
+      "volume": 0,
+      "marketCap": 150500000000,
+      "open": 124.80,
+      "high": 125.55,
+      "low": 124.70,
+      "fiftyTwoWeekHigh": 130.25,
+      "fiftyTwoWeekLow": 105.30,
+      "sector": "Mutual Fund",
+      "description": "Vanguard Total Stock Market Index Fund Investor Shares",
+      "fundDetails": {
+        "previousClose": 124.63,
+        "ytdReturn": 10.25,
+        "expenseRatio": 0.14,
+        "category": "US Equity Large Cap Blend",
+        "netAssets": 150.50,
+        "yield": 1.20,
+        "frontLoad": "-",
+        "inceptionDate": "27 Apr 1992"
+      }
+    }
+  ]
+}

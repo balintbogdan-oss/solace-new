@@ -13,7 +13,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Account } from "@/lib/mock-data";
 import { usePageHeaderContext } from '@/contexts/PageHeaderContext'; // Import the context hook
-import { cn } from "@/lib/utils"; // Import cn for conditional classes
+import { cn, formatAccountType } from "@/lib/utils"; // Import cn for conditional classes and formatAccountType
 import React from 'react'; // Ensure React is imported for Fragment
 
 
@@ -179,7 +179,7 @@ export function FullSizePageTitle({
                       <span className="font-semibold text-gray-900 dark:text-white text-sm font-medium">
                         {(() => {
                           const account = clientAccounts.find(acc => acc.id === accountId);
-                          return account?.type ? account.type.charAt(0).toUpperCase() + account.type.slice(1) : 'Individual';
+                          return account?.type ? formatAccountType(account.type) : 'Individual';
                         })()}
                       </span>
                       <span className="text-gray-400 dark:text-gray-500">•</span>
@@ -244,7 +244,7 @@ export function FullSizePageTitle({
                                       <div className="text-sm text-foreground flex items-center gap-1.5 font-semibold">
                                          <span>{account.id}</span>
                                          <span>•</span>
-                                         <span>{account.type}</span>
+                                         <span>{formatAccountType(account.type)}</span>
                                       </div>
                                       <span className="font-normal text-sm text-muted-foreground">{account.name}</span>
                                   </div>

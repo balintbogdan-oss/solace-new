@@ -1,6 +1,6 @@
 # Solace Demo - Financial Portfolio Management Platform
 
-> **Note**: This is a vibecoded and hardcoded demo version of Solace - the advisor workstation. This implementation serves as a demonstration and development environment with mock data and simplified functionality. Supabase is currently only used for trading functionality, while the other parts of the website use hardcoded data.
+> **Note**: This is a demo version of Solace - the advisor workstation. This implementation serves as a demonstration and development environment with mixed data sources: Supabase integration for client management, navigation, and search functionality, while financial/account pages use hardcoded data for demonstration purposes.
 
 A comprehensive Next.js-based financial portfolio management platform demo with real-time data integration, dynamic navigation, and multi-account support.
 
@@ -28,19 +28,29 @@ src/
 │   │   ├── activity/            # Activity page
 │   │   ├── balances/            # Balances page
 │   │   ├── commission/          # Commission page
+│   │   ├── holdings/[symbol]/   # Holdings detail pages
+│   │   ├── performance/         # Performance page
 │   │   ├── realized-gl/         # Realized G/L page
+│   │   ├── statements-reports/  # Statements & reports
+│   │   ├── trade/[symbol]/      # Trading pages
 │   │   └── unrealized-gl/       # Unrealized G/L page
-│   ├── clients/                 # Client management pages
+│   ├── clients/[clientId]/      # Client management pages
+│   ├── households/[householdId]/ # Household pages
 │   ├── reports/                 # Reporting pages
 │   ├── settings/                # App settings page
-│   └── trade/                   # Trading interface
+│   ├── trade/                   # Trading interface
+│   ├── api/                     # API routes
+│   └── admin/                   # Admin pages
 ├── components/                   # Reusable UI components
 │   ├── layout/                  # Layout components (Header, Sidebar, etc.)
 │   ├── ui/                      # Base UI components (buttons, inputs, etc.)
 │   ├── widgets/                 # Dashboard widgets
-│   └── charts/                  # Chart components
+│   ├── charts/                  # Chart components
+│   ├── trade/                   # Trading-specific components
+│   └── reports/                 # Report components
 ├── contexts/                    # React Context providers
-├── data/                        # Seed data and mock data
+├── data/                        # Sample data and utilities
+├── hooks/                       # Custom React hooks
 ├── services/                    # External service integrations
 ├── types/                       # TypeScript type definitions
 └── lib/                         # Utility functions and configurations
@@ -52,147 +62,93 @@ src/
 The application uses a normalized PostgreSQL schema with the following key tables:
 
 #### Core Tables
-- **`accounts`**: Account metadata and timestamps
+- **`clients`**: Client information (name, email, phone, etc.)
+- **`households`**: Household/group information for shared accounts
+- **`accounts`**: Account metadata, types, and relationships
+- **`balances`**: Account balance information (buying power, total value, etc.)
 - **`securities`**: Master list of all tradable instruments (stocks, options, etc.)
 - **`holdings`**: User's positions referencing securities
 - **`market_data`**: Real-time market prices and metrics
 - **`trades`**: Trade execution records
 - **`activities`**: Account activity log (deposits, withdrawals, etc.)
-- **`balances`**: Account balance information
 - **`realized_gl`**: Realized gains/losses from closed positions
 - **`unrealized_gl`**: ~~Removed~~ - Now calculated dynamically from market data
 - **`commissions`**: Commission tracking and reporting
 
 #### Key Relationships
 ```sql
-accounts (1) → (many) securities
-accounts (1) → (many) holdings
-securities (1) → (many) holdings
-securities (1) → (1) market_data
+clients (1) → (many) accounts
+households (1) → (many) accounts
+accounts (1) → (1) clients
+accounts (1) → (0..1) households
 accounts (1) → (1) balances
 accounts (1) → (many) trades
 accounts (1) → (many) activities
+securities (1) → (many) holdings
+securities (1) → (1) market_data
 ```
 
 ### Data Flow Architecture
 
-#### 1. **Data Loading Pipeline**
-```
-Supabase Database → SupabaseAccountService → SupabaseAccountDataContext → React Components
-```
+### Data Flow
+- **Database**: Supabase PostgreSQL with real-time capabilities
+- **Services**: Centralized data access via `supabaseService` and `searchService`
+- **Context**: React Context providers for state management
+- **Components**: React components consume data from contexts
 
-#### 2. **Context Providers Hierarchy**
-```tsx
-<SettingsProvider>           // Global app settings
-  <NavigationProvider>       // Navigation state
-    <SupabaseAccountDataProvider>  // Account-specific data
-      <AccountPages />
-    </SupabaseAccountDataProvider>
-  </NavigationProvider>
-</SettingsProvider>
-```
+### Key Features
+- **Real-time Updates**: Database changes reflect immediately
+- **Data Transformation**: Automatic conversion between database and app formats
+- **Type Safety**: Full TypeScript coverage throughout
+- **Dynamic Calculations**: Market values and gains/losses calculated on-demand
 
-#### 3. **Data Transformation Layer**
-- **`SupabaseAccountService`**: Handles all database operations
-- **Data Transformation**: Converts snake_case (DB) ↔ camelCase (TypeScript)
-- **Type Safety**: Strict TypeScript interfaces for all data structures
-
-#### 4. **Dynamic Calculations**
-- **Market Data Integration**: Loads real-time prices from local JSON files
-- **Dynamic G/L Calculations**: Unrealized gains/losses calculated on-demand
-- **Real-time Updates**: Values update automatically when market data changes
-- **Calculation Formula**:
-  ```typescript
-  marketValue = quantity × currentPrice
-  unrealizedGL = marketValue - (quantity × avgPrice)
-  unrealizedGLPercent = (unrealizedGL / investedValue) × 100
-  ```
-
-### Data Types & Interfaces
-
-#### Core Data Types
-```typescript
-interface AccountData {
-  accountId: string;
-  securities: Security[];        // Master list of all securities
-  holdings: Holding[];          // User's positions (raw data)
-  marketData: MarketData[];     // Live market data
-  trades: Trade[];
-  activities: Activity[];
-  balances: AccountBalances;
-  realizedGL: RealizedTrade[];
-  commissions: CommissionRecord[];
-  lastUpdated: string;
-  // unrealizedGL calculated dynamically from holdings + marketData
-}
-
-interface Security {
-  symbol: string;
-  cusip: string;
-  description: string;
-  sector: string;
-  type: 'equity' | 'option' | 'mutual_fund' | 'etf' | 'bond';
-  exchange?: string;
-  // ... additional fields
-}
-
-// Raw holding data from database (no calculated values)
-interface Holding {
-  symbol: string;              // References Security.symbol
-  quantity: number;
-  avgPrice: number;
-  lastUpdated: string;
-}
-
-// Holdings with calculated values (computed dynamically)
-interface HoldingWithCalculations {
-  symbol: string;
-  quantity: number;
-  avgPrice: number;
-  lastUpdated: string;
-  // Calculated values (computed from Security + MarketData + quantity)
-  marketValue: number;
-  unrealizedGL: number;
-  unrealizedGLPercent: number;
-}
-
-interface HoldingWithDetails extends HoldingWithCalculations {
-  security: Security;
-  marketData: MarketData;
-}
-```
+### Data Types
+- **AccountData**: Core account information with client relationships
+- **Client**: Client profiles with contact information
+- **Security**: Financial instruments (stocks, bonds, etc.)
+- **Holding**: Portfolio positions with calculated values
+- **MarketData**: Real-time price and market information
+- **Trade**: Transaction records and history
 
 ## 🔧 Configuration & Setup
 
 ### Environment Variables
-Create a `.env.local` file with:
+Create a `.env.local` file with the shared team credentials:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-POLYGON_API_KEY=your_polygon_api_key  # For live market data
+ADMIN_PASSWORD=your_admin_password
 ```
 
+**Application Credentials (for running the app):**
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL (shared team credentials)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key (shared team credentials)
+- `ADMIN_PASSWORD`: Admin password for protected routes (minimum 8 characters)
+
+**Database Credentials (for downloading data):**
+- Database host, username, and password (from 1Password vault)
+- Required for: `supabase db pull`, database dumps, or direct PostgreSQL access
+
+**Optional Variables:**
+- `NODE_ENV`: Environment mode (defaults to 'development')
+
+**Note**: Both application and database credentials are shared team credentials.
+
 ### Database Setup
-1. **Install Supabase CLI**:
-   ```bash
-   npm install -g supabase
-   ```
+This project uses a **shared team database** approach with centralized credential management.
 
-2. **Initialize Supabase**:
-   ```bash
-   supabase init
-   supabase link --project-ref your-project-ref
-   ```
+**Database Access:**
+- **Team Approach**: Shared Supabase project credentials in Qapital's 1Password vault
+- **No Individual Access**: Developers don't need Supabase project invitations
+- **Credentials Management**: All database access through shared team credentials
 
-3. **Run Migrations**:
-   ```bash
-   supabase db push
-   ```
+**Setup Steps:**
+1. **Get Access**: Request access to Qapital's 1Password vault
+2. **Retrieve Credentials**: Get Supabase project URL and anonymous key from vault
+3. **Configure Local Environment**: Add credentials to your `.env.local` file
+4. **Start Development**: Database is already configured and seeded with sample data
 
-4. **Seed Data**:
-   ```bash
-   node scripts/migrate-data.js
-   ```
+**Note**: This is a team-based setup where all developers work against the same shared database. Individual Supabase project access is not required.
 
 ### Development Setup
 ```bash
@@ -235,19 +191,25 @@ The application uses a sophisticated feature toggle system for dynamic navigatio
 - **Persistence**: Settings persist across browser sessions
 
 ### Dynamic Navigation Implementation
-```typescript
-// Navigation filtering based on settings
-const filteredNavigation = navigationItems.filter(item => 
-  settings.navigation[item.key] !== false
-);
-
-// Account-specific navigation
-const accountNavigation = accountNavItems.filter(item =>
-  settings.accountNavigation[item.key] !== false
-);
-```
+- Navigation items can be toggled on/off via settings
+- Settings persist across browser sessions
+- Account-specific navigation available
 
 ## 📊 Data Management
+
+### Mixed Data Sources
+The application uses a hybrid approach with different data sources for different features:
+
+#### **Supabase Integration** (Real Database)
+- **Client Management**: Client profiles, contact information, relationships
+- **Account Metadata**: Account types, names, client associations
+- **Search Functionality**: Global search across clients and accounts
+- **Navigation**: Dynamic breadcrumbs and client/account navigation
+
+#### **Hardcoded Data** (Demo/Development)
+- **Financial Data**: Holdings, trades, market data, balances
+- **Account Pages**: Portfolio values, performance metrics, transactions
+- **Trading Interface**: Market data, order execution, positions
 
 ### Account Data Context
 The `SupabaseAccountDataContext` provides:
@@ -265,12 +227,50 @@ The `SupabaseAccountDataContext` provides:
 
 ### Data Seeding
 The application includes comprehensive seed data:
-- **8 Sample Securities**: Major tech stocks (AAPL, MSFT, GOOGL, etc.)
-- **8 Holdings**: Realistic portfolio positions
+
+#### **Database Data** (Supabase)
+- **10 Sample Clients**: Realistic client profiles with contact information
+- **2-5 Accounts per Client**: Various account types (individual, joint, IRA, trust, etc.)
+- **Households**: Family groups with shared accounts
+- **Account Metadata**: Account names, types, and relationships
+
+#### **Hardcoded Data** (Local Files)
+- **Financial Holdings**: Portfolio positions and securities
 - **Market Data**: Current prices, day changes, volume
 - **Trade History**: Sample buy/sell transactions
+- **Account Balances**: Complete balance information with buying power
 - **Activities**: Deposits, withdrawals, dividends
-- **Balances**: Complete account balance breakdown
+
+## 🔍 Search & Navigation System
+
+### Global Search Functionality
+The application features a comprehensive search system with the following capabilities:
+
+#### Search Features
+- **Multi-Entity Search**: Search across clients, accounts, and households
+- **Real-time Results**: Instant search results as you type
+- **Recent Searches**: Displays recently viewed clients and accounts
+- **Account Values**: Shows account balances in search results
+- **Formatted Display**: User-friendly account type formatting
+
+#### Search Implementation
+- **SearchService**: Handles database queries and result formatting
+- **useSearch Hook**: React hook for search state management
+- **Real-time Results**: Instant search as you type
+- **Recent Searches**: Dynamic recent items from database
+
+#### Account Type Formatting
+- **Database Storage**: Lowercase with underscores (e.g., `sep_ira`)
+- **Display Format**: User-friendly names (e.g., "SEP IRA")
+- **Utility Function**: `formatAccountType()` for consistent formatting
+
+#### Supported Account Types
+- **Individual Accounts**: Individual, Joint, Single Account
+- **Retirement Accounts**: IRA, Roth IRA, 401(k), 403(b), SEP IRA, SIMPLE IRA
+- **Trust Accounts**: Trust, Irrevocable Trust, Testamentary Trust, Revocable Trust
+- **Business Accounts**: Corporate, Partnership, LLC
+- **Special Accounts**: Custodian Minor/UTMA/UGMA, 529 Plan, Estate
+- **Guardian Accounts**: Guardian/Conservator Minor, Guardian/Conservator Incompetent
 
 ## 🎨 UI/UX System
 
@@ -300,9 +300,9 @@ The application includes comprehensive seed data:
 3. **`SupabaseAccountDataContext`**: Account-specific data management
 
 ### State Flow
-```
-User Action → Context Update → Component Re-render → UI Update
-```
+- User interactions trigger context updates
+- Components re-render automatically
+- UI reflects current state
 
 ### Data Persistence
 - **Settings**: `localStorage` for user preferences
@@ -330,60 +330,3 @@ The application is optimized for Vercel deployment:
 - **Backups**: Regular database backups recommended
 - **Scaling**: Supabase handles horizontal scaling
 
-## 🧪 Development Guidelines
-
-### Code Organization
-- **Feature-Based**: Group related components and logic
-- **Type Safety**: Strict TypeScript throughout
-- **Component Composition**: Reusable, composable components
-- **Custom Hooks**: Extract reusable logic into hooks
-
-### Testing Strategy
-- **Component Testing**: Test individual components
-- **Integration Testing**: Test data flow and context
-- **E2E Testing**: Test complete user workflows
-- **Type Testing**: Leverage TypeScript for compile-time testing
-
-### Performance Optimization
-- **Memoization**: `useMemo` and `useCallback` for expensive operations
-- **Code Splitting**: Dynamic imports for large components
-- **Image Optimization**: Next.js Image component
-- **Bundle Analysis**: Regular bundle size monitoring
-
-## 📈 Future Enhancements
-
-### Planned Features
-- **Real-time Market Data**: Live price updates via WebSocket
-- **Advanced Charting**: More sophisticated chart types
-- **Portfolio Analytics**: Advanced portfolio analysis tools
-- **Multi-Account Support**: Enhanced multi-account management
-- **Mobile App**: React Native mobile application
-- **API Integration**: Third-party financial data providers
-
-### Technical Improvements
-- **Caching Strategy**: Redis for improved performance
-- **Error Monitoring**: Sentry integration for error tracking
-- **Analytics**: User behavior analytics
-- **A/B Testing**: Feature flag system for experimentation
-
-## 🤝 Contributing
-
-### Development Workflow
-1. **Feature Branch**: Create feature branch from `main`
-2. **Development**: Implement feature with tests
-3. **Code Review**: Submit pull request for review
-4. **Testing**: Ensure all tests pass
-5. **Merge**: Merge to `main` after approval
-
-### Code Standards
-- **ESLint**: Enforced code quality rules
-- **Prettier**: Consistent code formatting
-- **TypeScript**: Strict type checking
-- **Conventional Commits**: Standardized commit messages
-
-## 📞 Support
-
-For questions or issues:
-- **Documentation**: Check this README and inline code comments
-- **Issues**: Create GitHub issues for bugs or feature requests
-- **Discussions**: Use GitHub discussions for questions

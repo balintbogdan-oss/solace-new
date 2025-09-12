@@ -1,6 +1,15 @@
+// Household information
+export interface Household {
+  id: string; // UUID
+  name: string;
+  description?: string;
+  createdAt: string;
+  lastUpdated: string;
+}
+
 // Client information
 export interface Client {
-  id: string;
+  id: string; // UUID
   firstName: string;
   lastName: string;
   email?: string;
@@ -26,6 +35,48 @@ export interface Security {
   expenseRatio?: number;
   // Metadata
   lastUpdated: string;
+}
+
+// Mutual Fund specific information
+export interface MutualFundInfo {
+  symbol: string;
+  name: string;
+  exchangeInfo: string; // e.g., "Mutual Fund - NAV • USD"
+  nav: number; // Net Asset Value (equivalent to price for stocks)
+  change: number;
+  changePercent: number;
+  expenseRatio?: number;
+  minimumInvestment?: number;
+  chartData: Record<string, ChartPoint[]> | ChartPoint[];
+  marketStats: {
+    open: number;
+    high: number;
+    low: number;
+    prevClose: number;
+    '52W High': number;
+    '52W Low': number;
+    ytdReturn?: number;
+    inceptionDate?: string;
+    totalAssets?: number;
+  };
+  // Additional mutual fund specific data points
+  fundDetails?: {
+    previousClose: number;
+    ytdReturn: number;
+    expenseRatio: number;
+    category: string;
+    netAssets: number; // in billions
+    yield: number;
+    frontLoad: string; // e.g., "-" for no load
+    inceptionDate: string;
+  };
+}
+
+// Chart data point for mutual funds
+export interface ChartPoint {
+  time: string;
+  nav: number; // Use NAV instead of price for mutual funds
+  volume?: number;
 }
 
 // User's holdings - references securities by symbol (raw data from database)
@@ -75,6 +126,17 @@ export interface MarketData {
   fiftyTwoWeekLow?: number;
   sector?: string;
   description?: string;
+  // Optional mutual fund specific details
+  fundDetails?: {
+    previousClose: number;
+    ytdReturn: number;
+    expenseRatio: number;
+    category: string;
+    netAssets: number; // in billions
+    yield: number;
+    frontLoad: string; // e.g., "-" for no load
+    inceptionDate: string;
+  };
   lastUpdated: string;
 }
 
@@ -178,9 +240,12 @@ export interface CommissionRecord {
 export interface AccountData {
   accountId: string;
   accountName: string;
-  accountType: 'individual' | 'joint' | 'ira' | 'roth_ira' | '401k' | '403b' | 'sep_ira' | 'simple_ira' | 'trust' | 'corporate' | 'partnership' | 'llc' | 'other';
+  accountType: 'individual' | 'joint' | 'ira' | 'roth_ira' | '401k' | '403b' | 'sep_ira' | 'simple_ira' | 'trust' | 'corporate' | 'partnership' | 'llc' | 'custodian_minor' | '529_plan' | '529_plan_utma' | 'ira_shell' | 'estate' | 'guardian_conservator_minor' | 'guardian_conservator_incompetent' | 'irrevocable_trust' | 'testamentary_trust' | 'corporate_pension' | 'single_account' | 'joint_jtwros' | 'community_property' | 'community_property_survivorship' | 'tenants_in_common' | 'revocable_trust' | 'other';
   clientId: string;
   client: Client;
+  householdId?: string; // Optional household ID
+  household?: Household; // Optional household details
+  isPrimary: boolean; // Whether this is the primary account in the household
   securities: Security[]; // Master list of all securities
   holdings: Holding[]; // User's holdings (references securities)
   marketData: MarketData[]; // Live market data for holdings

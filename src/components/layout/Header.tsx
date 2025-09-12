@@ -12,35 +12,15 @@ import {
   Menu,
   Search,
   History,
-  X
+  User,
+  Users,
+  Landmark
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { MOCK_CLIENT } from "@/lib/mock-data";
 import { MobileNav } from "@/components/navigation/MobileNav";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getFilteredTopLevelNavItems } from "@/lib/navigation";
-
-// Mock recent searches - in a real app this would come from localStorage or backend
-const RECENT_SEARCHES = [
-  {
-    type: 'account',
-    id: '1PB10001',
-    name: 'Jim & Alexa account',
-    accountType: 'Joint'
-  },
-  {
-    type: 'client',
-    id: 'jim-robinson',
-    name: 'Jim Robinson',
-    email: 'jim.robinson@example.com'
-  },
-  {
-    type: 'account',
-    id: '1PB10002',
-    name: "Jim's 401K BROK",
-    accountType: 'Single'
-  }
-];
+import { useSearch } from "@/hooks/useSearch";
 
 export function Header() {
   const pathname = usePathname();
@@ -48,11 +28,20 @@ export function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { theme, setTheme } = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
-  const [recentSearches, setRecentSearches] = useState(RECENT_SEARCHES);
   const { navigationSettings } = useSettings();
+  
+  // Use the search hook
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    results: searchResults,
+    recentSearches,
+    isLoading: isSearchLoading,
+    showResults: showSearchResults,
+    setShowResults: setShowSearchResults,
+    handleSearchItemClick
+  } = useSearch();
   
   // Get filtered navigation items based on settings
   const filteredNavItems = getFilteredTopLevelNavItems(navigationSettings);
@@ -69,15 +58,6 @@ export function Header() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Filter search results based on query
-  const searchResults = searchQuery ? {
-    client: searchQuery.toLowerCase().includes(MOCK_CLIENT.name.toLowerCase()) ? MOCK_CLIENT : null,
-    accounts: MOCK_CLIENT.accounts.filter(account => 
-      account.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      account.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  } : null;
   
   // Don't render header on login page
   if (pathname === '/login') {
@@ -101,61 +81,43 @@ export function Header() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowSearchResults(false);
-    if (searchQuery.trim()) {
-      // If exact account match, go to account page
-      const exactAccount = MOCK_CLIENT.accounts.find(
-        account => account.id.toLowerCase() === searchQuery.toLowerCase()
-      );
-      if (exactAccount) {
-        router.push(`/account/${exactAccount.id}`);
-      }
-      // If client name match, go to client page
-      else if (searchQuery.toLowerCase() === MOCK_CLIENT.name.toLowerCase()) {
-        router.push(`/clients/${MOCK_CLIENT.id}`);
-      }
+    if (searchQuery.trim() && searchResults.length > 0) {
+      // Navigate to first result
+      const firstResult = searchResults[0];
+      handleSearchItemClick(firstResult);
     }
   };
 
-  const clearRecentSearch = (index: number, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setRecentSearches(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSearchItemClick = (path: string) => {
-    setShowSearchResults(false);
-    setSearchQuery('');
-    router.push(path);
-  };
-
   return (
-    <header className="dark:border-b sticky top-0 z-50 h-14 px-6 flex items-center justify-between bg-black dark:bg-black/30 dark:backdrop-blur-xl">
-      <div className="flex items-center gap-2 z-10">
-        <svg width="28" height="17" viewBox="0 0 28 17" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-          <path fillRule="evenodd" clipRule="evenodd" d="M19.2158 1.93618C19.7433 0 21.326 0 21.326 0H27.3634L22.9672 14.492C22.4397 16.4282 20.857 16.4282 20.857 16.4282H14.8196L19.2158 1.93618ZM13.0025 1.64266C13.0025 1.64266 11.5957 1.64266 11.0682 3.40282L7.08228 16.428H12.4749C12.4749 16.428 13.8817 16.428 14.4093 14.6679L18.3952 1.58398L13.0025 1.64266ZM5.441 3.75516C5.441 3.75516 4.21006 3.75516 3.79975 5.28063L0.400024 16.4283H5.03069C5.03069 16.4283 6.26162 16.4283 6.67194 14.9028L10.0717 3.69649L5.441 3.75516Z" fill="currentColor"/>
-        </svg>
-        <nav className="hidden md:flex items-center text-white">
-          {filteredNavItems.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <Button 
-                variant="ghost" 
-                className={cn(
-                  "text-sm font-medium hover:bg-white/10 cursor-pointer", 
-                  (pathname === item.href || 
-                    (item.href !== '/' && pathname?.startsWith(item.href)) ||
-                   (item.href === '/crm' && pathname?.includes('/crm'))) && 
-                  'bg-black/10 dark:bg-white/10'
-                )}
-              >
-                {item.label}
-              </Button>
-            </Link>
-          ))}
-        </nav>
-      </div>
+    <header className="dark:border-b sticky top-0 z-50 h-14 px-6 bg-black dark:bg-black/30 dark:backdrop-blur-xl">
+      <div className="grid grid-cols-3 items-center h-full">
+        {/* Column 1: Logo and Menu */}
+        <div className="flex items-center gap-2 z-10">
+          <svg width="28" height="17" viewBox="0 0 28 17" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+            <path fillRule="evenodd" clipRule="evenodd" d="M19.2158 1.93618C19.7433 0 21.326 0 21.326 0H27.3634L22.9672 14.492C22.4397 16.4282 20.857 16.4282 20.857 16.4282H14.8196L19.2158 1.93618ZM13.0025 1.64266C13.0025 1.64266 11.5957 1.64266 11.0682 3.40282L7.08228 16.428H12.4749C12.4749 16.428 13.8817 16.428 14.4093 14.6679L18.3952 1.58398L13.0025 1.64266ZM5.441 3.75516C5.441 3.75516 4.21006 3.75516 3.79975 5.28063L0.400024 16.4283H5.03069C5.03069 16.4283 6.26162 16.4283 6.67194 14.9028L10.0717 3.69649L5.441 3.75516Z" fill="currentColor"/>
+          </svg>
+          <nav className="hidden md:flex items-center text-white">
+            {filteredNavItems.map((item) => (
+              <Link key={item.href} href={item.href}>
+                <Button 
+                  variant="ghost" 
+                  className={cn(
+                    "text-sm font-medium hover:bg-white/10 cursor-pointer", 
+                    (pathname === item.href || 
+                      (item.href !== '/' && pathname?.startsWith(item.href)) ||
+                     (item.href === '/crm' && pathname?.includes('/crm'))) && 
+                    'bg-black/10 dark:bg-white/10'
+                  )}
+                >
+                  {item.label}
+                </Button>
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-      <div className="flex items-center gap-4 z-10 w-[800px]">
+        {/* Column 2: Search Bar - Centered */}
+        <div className="flex justify-center">
         {/* Mobile search icon button */}
         {!showSearchInput && (
           <button
@@ -173,7 +135,7 @@ export function Header() {
           <div
             id="search-container"
             className={cn(
-              " relative w-full max-w-2xl md:block ",
+              "relative w-full w-[600px] md:block",
               showSearchInput ? "block" : "hidden md:block"
             )}
           >
@@ -185,101 +147,170 @@ export function Header() {
                   setSearchQuery(e.target.value);
                   setShowSearchResults(true);
                 }}
-                onFocus={() => setShowSearchResults(true)}
+                onFocus={() => {
+                  console.log('Search input focused, showing results');
+                  setShowSearchResults(true);
+                }}
                 placeholder="Search by account name, account number or client name"
-                className="bg-zinc-800 w-full border-0 rounded-md pl-10 pr-4 py-3 text-sm placeholder:text-zinc-400 focus:ring-0 focus:outline-none"
+                className="bg-zinc-800 w-full border-0 rounded-md pl-10 pr-4 py-3 text-sm text-white placeholder:text-zinc-400 focus:ring-0 focus:outline-none"
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             </form>
 
             {showSearchResults && (
-              <div className="absolute mt-2 w-full bg-white dark:bg-black rounded-md border  z-60">
+              <div className="absolute mt-2 w-[600px] bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-xl z-50 max-h-96 overflow-y-auto">
                 {/* Show recent searches when no query */}
-                {!searchQuery && recentSearches.length > 0 && (
-                  <div className="p-2">
-                    <div className="flex items-center justify-between px-3 py-1">
-                      <div className="text-xs font-medium text-muted-foreground">Recent searches</div>
-                      <button
-                        onClick={() => setRecentSearches([])}
-                        className="text-xs text-muted-foreground hover:text-primary"
-                      >
-                        Clear all
-                      </button>
-                    </div>
-                    {recentSearches.map((item, index) => (
-                      <div
-                        key={`${item.type}-${item.id}`}
-                        className="relative group"
-                      >
-                        <Link
-                          href={item.type === 'client' ? `/clients/${item.id}` : `/account/${item.id}`}
-                          onClick={() => handleSearchItemClick(item.type === 'client' ? `/clients/${item.id}` : `/account/${item.id}`)}
-                          className="flex items-center px-3 py-2 hover:bg-accent rounded-md group"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <History className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm font-medium text-foreground">{item.name}</span>
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {item.type === 'client' ? item.email : `${item.id} • ${item.accountType}`}
-                            </div>
-                          </div>
-                          <button
-                            onClick={(e) => clearRecentSearch(index, e)}
-                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-muted rounded"
-                          >
-                            <X className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        </Link>
+                {!searchQuery && (
+                  <div className="p-4">
+                    {recentSearches.length > 0 ? (
+                      <>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">Recently viewed</div>
+                        </div>
+                        <div className="space-y-1">
+                          {recentSearches.map((item) => {
+                            const getIcon = () => {
+                              switch (item.type) {
+                                case 'account':
+                                  return <Landmark className="h-4 w-4 text-primary" />;
+                                case 'client':
+                                  return <User className="h-4 w-4 text-primary" />;
+                                case 'household':
+                                  return <Users className="h-4 w-4 text-primary" />;
+                                default:
+                                  return <History className="h-4 w-4 text-gray-400" />;
+                              }
+                            };
+
+                            const getAccountValue = () => {
+                              if (item.type === 'account' && 'data' in item) {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                const accountData = item.data as any;
+                                return accountData.balances?.totalValue ? 
+                                  `$${accountData.balances.totalValue.toLocaleString()}` : 
+                                  'No value';
+                              }
+                              return null;
+                            };
+
+                            return (
+                              <div
+                                key={`${item.type}-${item.id}`}
+                                className="relative group"
+                              >
+                                <Link
+                                  href={item.href}
+                                  onClick={() => handleSearchItemClick(item)}
+                                  className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors group"
+                                >
+                                  <div className="flex items-center gap-3 flex-1">
+                                    {getIcon()}
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {item.name}
+                                      </div>
+                                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                                        {item.subtitle}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {getAccountValue() && (
+                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                      {getAccountValue()}
+                                    </div>
+                                  )}
+                                </Link>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                        No recent searches. Start typing to search for clients, accounts, or households.
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
 
                 {/* Show search results when there's a query */}
-                {searchQuery && searchResults && (searchResults.client || searchResults.accounts.length > 0) && (
-                  <>
-                    {searchResults.client && (
-                      <div className="p-2">
-                        <div className="text-xs font-medium text-muted-foreground px-3 py-1">Client</div>
-                        <Link
-                          href={`/clients/${searchResults.client?.id}`}
-                          onClick={() => handleSearchItemClick(`/clients/${searchResults.client?.id}`)}
-                          className="block px-3 py-2 hover:bg-accent rounded-md"
-                        >
-                          <div className="text-sm font-medium text-foreground">{searchResults.client?.name}</div>
-                          <div className="text-xs text-muted-foreground">{searchResults.client?.email}</div>
-                        </Link>
+                {searchQuery && (
+                  <div className="p-4">
+                    {isSearchLoading ? (
+                      <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                        Searching...
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <div className="space-y-1">
+                        {searchResults.map((item) => {
+                          const getIcon = () => {
+                            switch (item.type) {
+                              case 'account':
+                                return <Landmark className="h-4 w-4 text-primary" />;
+                              case 'client':
+                                return <User className="h-4 w-4 text-primary" />;
+                              case 'household':
+                                return <Users className="h-4 w-4 text-primary" />;
+                              default:
+                                return <Search className="h-4 w-4 text-gray-400" />;
+                            }
+                          };
+
+                          const getAccountValue = () => {
+                            if (item.type === 'account' && 'data' in item) {
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              const accountData = item.data as any;
+                              return accountData.balances?.totalValue ? 
+                                `$${accountData.balances.totalValue.toLocaleString()}` : 
+                                'No value';
+                            }
+                            return null;
+                          };
+
+                          return (
+                            <Link
+                              key={`${item.type}-${item.id}`}
+                              href={item.href}
+                              onClick={() => handleSearchItemClick(item)}
+                              className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            >
+                              <div className="flex items-center gap-3 flex-1">
+                                {getIcon()}
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {item.name}
+                                  </div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    {item.subtitle}
+                                  </div>
+                                </div>
+                              </div>
+                              {getAccountValue() && (
+                                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  {getAccountValue()}
+                                </div>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                        No results found for &quot;{searchQuery}&quot;
                       </div>
                     )}
-                    {searchResults.accounts.length > 0 && (
-                      <div className="p-2 border-t border-border">
-                        <div className="text-xs font-medium text-muted-foreground px-3 py-1">Accounts</div>
-                        {searchResults.accounts.map(account => (
-                          <Link
-                            key={account.id}
-                            href={`/account/${account.id}`}
-                            onClick={() => handleSearchItemClick(`/account/${account.id}`)}
-                            className="block px-3 py-2 hover:bg-accent rounded-md"
-                          >
-                            <div className="text-sm font-medium text-foreground">{account.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {account.id} • {account.type}
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
+                  </div>
                 )}
               </div>
             )}
           </div>
         )}
+        </div>
 
-        {/* Icons for tablet and desktop*/}
-        <div className="hidden md:flex justify-around text-white">
+        {/* Column 3: Notifications, Theme Toggle, and Profile */}
+        <div className="flex items-center justify-end gap-4 z-10">
+          {/* Icons for tablet and desktop*/}
+          <div className="hidden md:flex items-center gap-2 text-white">
           <Button variant="ghost" size="icon" className="hover:bg-black/10 dark:hover:bg-white/10">
             <Bell className="h-4 w-4" />
           </Button>
@@ -320,16 +351,17 @@ export function Header() {
               </div>
             </div>
           )}
-        </div>
+          </div>
 
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setShowMobileMenu(!showMobileMenu)}
-          className="md:hidden p-2 rounded-md hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black dark:focus:ring-white"
-          aria-label="Toggle menu"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="md:hidden p-2 rounded-md hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black dark:focus:ring-white"
+            aria-label="Toggle menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}

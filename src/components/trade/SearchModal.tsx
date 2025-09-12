@@ -1,26 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, X } from 'lucide-react'
+import { useRouter, useParams } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-
-// Mock data for recent searches - we can move this to a shared constants file later if needed
-const RECENT_SEARCHES = [
-  { symbol: 'AAPL', name: 'Apple Inc.', accountId: '1PB10001', price: 132.45, changePercent: 3.46 },
-  { symbol: 'VFIAX', name: 'Vanguard 500 Index Fund', accountId: '1PB10001', price: 503.56, changePercent: 11.46 },
-  { symbol: 'AMZN', name: 'Amazon', accountId: '1PB10001', price: 167.21, changePercent: -8.02 },
-  { symbol: 'MSFT', name: 'Microsoft', accountId: '1PB10001', price: 348.22, changePercent: 8.46 },
-  { symbol: 'META', name: 'Meta Platforms, Inc.', accountId: '1PB10001', price: 585.77, changePercent: 8.46 },
-  { symbol: 'INTC', name: 'Intel Corporation', accountId: '1PB10001', price: 21.53, changePercent: 2.84 }
-]
-
-const WATCHLIST_DATA = [
-  { symbol: 'AAPL', name: 'Apple Inc.', price: 380.47, change: 2.54, changePercent: 1.45, volume: 438100.00 },
-  { symbol: 'VFIAX', name: 'Vanguard 500 Index Fund', price: 503.56, change: 43.76, changePercent: 9.52, volume: 262695.00 },
-  { symbol: 'TSLA', name: 'Tesla Inc.', price: 550.35, change: 2.49, changePercent: 1.45, volume: 81408.80 },
-  { symbol: 'META', name: 'Meta Platforms Inc.', price: 350.20, change: 28.32, changePercent: 8.09, volume: 105060.00 },
-  { symbol: 'MSFT', name: 'Microsoft Corporation', price: 410.18, change: 2.51, changePercent: 1.45, volume: 175310.00 }
-]
+import { getAllStocks } from '@/services/marketDataService'
 
 interface SearchModalProps {
   isOpen: boolean
@@ -28,89 +12,216 @@ interface SearchModalProps {
   onSelectSymbol: (symbol: string) => void
 }
 
-export function SearchModal({ isOpen, onOpenChange, onSelectSymbol }: SearchModalProps) {
+export function SearchModal({ isOpen, onOpenChange }: SearchModalProps) {
+  const router = useRouter()
+  const params = useParams()
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeTab, setActiveTab] = useState<'recent' | 'watchlist'>('recent')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'stocks' | 'mutual-funds'>('all')
+  const [allSecurities, setAllSecurities] = useState<unknown[]>([])
+  const [filteredSecurities, setFilteredSecurities] = useState<unknown[]>([])
+
+  // Helper function to navigate with query parameters
+  const navigateToSymbol = (symbol: string, type?: 'equities' | 'options') => {
+    const accountId = params?.accountId
+    const basePath = accountId ? `/account/${accountId}/trade/${symbol}` : `/trade/${symbol}`
+    const url = type ? `${basePath}?type=${type}` : basePath
+    router.push(url)
+    onOpenChange(false)
+  }
+
+  // Load all securities when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const loadSecurities = async () => {
+        try {
+          const securities = await getAllStocks()
+          setAllSecurities(securities)
+        } catch (error) {
+          console.error('Error loading securities:', error)
+        }
+      }
+      loadSecurities()
+    }
+  }, [isOpen])
+
+  // Filter securities based on search query and filter
+  useEffect(() => {
+    let filtered = allSecurities
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((security: any) => // eslint-disable-line @typescript-eslint/no-explicit-any 
+        security.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        security.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    // Apply asset class filter
+    if (activeFilter === 'stocks') {
+      filtered = filtered.filter((security: any) => security.sector !== 'Mutual Fund') // eslint-disable-line @typescript-eslint/no-explicit-any
+    } else if (activeFilter === 'mutual-funds') {
+      filtered = filtered.filter((security: any) => security.sector === 'Mutual Fund') // eslint-disable-line @typescript-eslint/no-explicit-any
+    }
+
+           // Remove duplicates based on symbol
+           const uniqueSecurities = filtered.reduce((acc: unknown[], current: unknown) => {
+             const currentSecurity = current as { symbol: string }
+             const existingIndex = acc.findIndex((security: unknown) => (security as { symbol: string }).symbol === currentSecurity.symbol)
+             if (existingIndex === -1) {
+               acc.push(current)
+             }
+             return acc
+           }, [])
+
+    setFilteredSecurities(uniqueSecurities)
+  }, [searchQuery, allSecurities, activeFilter])
+
+  const clearSearch = () => {
+    setSearchQuery('')
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[600px] max-h-[400px] overflow-y-auto p-6 border backdrop-blur-xl bg-white/20 dark:bg-black/20">
+      <DialogContent className="w-[1000px] max-w-none max-h-[600px] overflow-y-auto p-6 border bg-white dark:bg-black">
         <DialogTitle></DialogTitle>
         <div className="space-y-4">
+          {/* Search Input */}
           <div className="relative">
-            <Search className="absolute  left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <input
               type="text"
               placeholder="Search stocks, options, funds by symbol or name..."
-              className="w-full pl-10 pr-4 py-2 border rounded-lg  bg-input border-border"
+              className="w-full pl-10 pr-10 py-2 border rounded-lg bg-input text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
             />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
-          <div className="flex gap-2 border-b">
-            <button
-              className={`px-4 py-2 ${activeTab === 'recent' ? 'border-b-2 border-primary font-medium' : ''}`}
-              onClick={() => setActiveTab('recent')}
-            >
-              Recent
-            </button>
-            <button
-              className={`px-4 py-2 ${activeTab === 'watchlist' ? 'border-b-2 border-primary font-medium' : ''}`}
-              onClick={() => setActiveTab('watchlist')}
-            >
-              Watchlist
-            </button>
+          {/* Filter Buttons */}
+          <div className="flex items-center gap-3">
+            <div className="text-sm font-medium text-muted-foreground">Filter by</div>
+            <div className="flex gap-2">
+              <button
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeFilter === 'all'
+                    ? 'bg-black text-white'
+                    : 'bg-accent text-accent-foreground hover:bg-accent/80'
+                }`}
+                onClick={() => setActiveFilter('all')}
+              >
+                All
+              </button>
+              <button
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeFilter === 'stocks'
+                    ? 'bg-black text-white'
+                    : 'bg-accent text-accent-foreground hover:bg-accent/80'
+                }`}
+                onClick={() => setActiveFilter('stocks')}
+              >
+                Stocks
+              </button>
+              <button
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeFilter === 'mutual-funds'
+                    ? 'bg-black text-white'
+                    : 'bg-accent text-accent-foreground hover:bg-accent/80'
+                }`}
+                onClick={() => setActiveFilter('mutual-funds')}
+              >
+                Mutual Funds
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            {activeTab === 'recent' && RECENT_SEARCHES.map((item) => (
-              <div
-                key={item.symbol}
-                className="flex items-center justify-between p-3 hover:bg-black/10 dark:hover:bg-white/10 rounded-lg cursor-pointer"
-                onClick={() => {
-                  onSelectSymbol(item.symbol)
-                  onOpenChange(false)
-                }}
-              >
-                <div>
-                  <div className="font-medium">{item.symbol} • {item.name}</div>
-                  <div className="text-sm text-muted-foreground">{item.accountId}</div>
+          {/* Results Table */}
+          <div className="space-y-2 min-h-[500px]">
+            {filteredSecurities.length > 0 ? (
+              <>
+                {/* Table Header */}
+                <div className="grid grid-cols-4 gap-4 py-2 px-3 text-sm font-medium text-muted-foreground border-b">
+                  <div>Symbol</div>
+                  <div>Description</div>
+                  <div>CUSIP</div>
+                  <div>Asset class</div>
                 </div>
-                <div className="text-right">
-                  <div>${item.price}</div>
-                  <div className={item.changePercent >= 0 ? 'text-green-500' : 'text-red-500'}>
-                    {item.changePercent >= 0 ? '+' : ''}{item.changePercent}%
-                  </div>
+                
+                {/* Table Rows */}
+                <div className="space-y-1">
+                  {filteredSecurities.map((security: any, index) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+                    const isMutualFund = security.sector === 'Mutual Fund'
+                    return (
+                      <div
+                        key={`${security.symbol}-${index}`}
+                        className="group relative grid grid-cols-4 gap-4 py-3 px-3 rounded-md transition-all duration-200 hover:bg-muted cursor-pointer"
+                        onClick={() => {
+                          if (isMutualFund) {
+                            navigateToSymbol(security.symbol)
+                          } else {
+                            // For stocks, clicking the row goes to stock details (equities tab)
+                            navigateToSymbol(security.symbol, 'equities')
+                          }
+                        }}
+                      >
+                        <div className="font-medium text-sm">{security.symbol}</div>
+                        <div className="text-sm text-muted-foreground truncate">
+                          {security.description || security.symbol}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {security.cusip || '-'}
+                        </div>
+                        <div className={`text-sm text-muted-foreground ${!isMutualFund ? 'group-hover:opacity-0' : ''} transition-opacity duration-200`}>
+                          {isMutualFund ? 'Mutual Fund' : 'Stocks'}
+                        </div>
+                        
+                        {/* Hover Actions for Stocks */}
+                        {!isMutualFund && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                            <button
+                              className="px-4 py-2 text-sm bg-white text-black rounded-md hover:bg-gray-100 transition-colors shadow-sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                navigateToSymbol(security.symbol, 'options')
+                              }}
+                            >
+                              Option chain
+                            </button>
+                            <button
+                              className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                navigateToSymbol(security.symbol, 'equities')
+                              }}
+                            >
+                              Stock details
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
+              </>
+            ) : (
+              <div className="text-center text-muted-foreground py-8">
+                {searchQuery.trim() 
+                  ? `No securities found for "${searchQuery}"`
+                  : 'No securities available'
+                }
               </div>
-            ))}
-
-            {activeTab === 'watchlist' && WATCHLIST_DATA.map((item) => (
-              <div
-                key={item.symbol}
-                className="flex items-center justify-between p-3 hover:bg-black/10 dark:hover:bg-white/10 rounded-lg cursor-pointer"
-                onClick={() => {
-                  onSelectSymbol(item.symbol)
-                  onOpenChange(false)
-                }}
-              >
-                <div>
-                  <div className="font-medium">{item.symbol} • {item.name}</div>
-                  <div className="text-sm text-muted-foreground">Volume: ${item.volume.toLocaleString()}</div>
-                </div>
-                <div className="text-right">
-                  <div>${item.price.toFixed(2)}</div>
-                  <div className={item.change >= 0 ? 'text-green-500' : 'text-red-500'}>
-                    {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)} ({item.changePercent.toFixed(2)}%)
-                  </div>
-                </div>
-              </div>
-            ))}
+            )}
           </div>
         </div>
       </DialogContent>
     </Dialog>
   )
-} 
+}

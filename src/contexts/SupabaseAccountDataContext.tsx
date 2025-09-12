@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { AccountData, AccountDataContextType, Holding, Trade, Activity, AccountBalances, MarketData, Security, HoldingWithDetails, UnrealizedPosition, RealizedTrade, CommissionRecord } from '@/types/account';
 import { supabaseAccountService } from '@/services/supabaseService';
-import { forceReloadMarketData } from '@/services/marketDataService';
+import { forceReloadMarketData, loadMutualFundsMarketData, loadEquitiesMarketData } from '@/services/marketDataService';
 
 const AccountDataContext = createContext<AccountDataContextType | undefined>(undefined);
 
@@ -23,6 +23,75 @@ const loadMockData = async (): Promise<{ realizedGL: RealizedTrade[]; commission
   } catch (error) {
     console.error('Error loading mock data:', error);
     return { realizedGL: [], commissions: [] };
+  }
+};
+
+// Load market data from JSON files
+const loadMarketData = async (): Promise<MarketData[]> => {
+  try {
+    const [equitiesData, mutualFundsData] = await Promise.all([
+      loadEquitiesMarketData(),
+      loadMutualFundsMarketData()
+    ]);
+
+    let allMarketData: MarketData[] = [];
+
+    // Process equities data
+    if (equitiesData && (equitiesData as { stocks?: unknown[] }).stocks) {
+      const stocks = (equitiesData as { stocks: unknown[] }).stocks;
+      allMarketData = [...allMarketData, ...stocks.map((stock: unknown) => {
+        const s = stock as Record<string, unknown>;
+        return {
+          symbol: String(s.symbol || ''),
+          currentPrice: Number(s.currentPrice) || 0,
+          previousClose: Number(s.previousClose) || 0,
+          dayChange: Number(s.dayChange) || 0,
+          dayChangePercent: Number(s.dayChangePercent) || 0,
+          volume: Number(s.volume) || 0,
+          marketCap: Number(s.marketCap) || 0,
+          open: Number(s.open) || 0,
+          high: Number(s.high) || 0,
+          low: Number(s.low) || 0,
+          fiftyTwoWeekHigh: Number(s.fiftyTwoWeekHigh) || 0,
+          fiftyTwoWeekLow: Number(s.fiftyTwoWeekLow) || 0,
+          sector: String(s.sector || ''),
+          description: String(s.description || ''),
+          lastUpdated: String(s.lastUpdated || new Date().toISOString())
+        };
+      })];
+    }
+
+    // Process mutual funds data
+    if (mutualFundsData && (mutualFundsData as { mutualFunds?: unknown[] }).mutualFunds) {
+      const mutualFunds = (mutualFundsData as { mutualFunds: unknown[] }).mutualFunds;
+      allMarketData = [...allMarketData, ...mutualFunds.map((fund: unknown) => {
+        const f = fund as Record<string, unknown>;
+        return {
+          symbol: String(f.symbol || ''),
+          currentPrice: Number(f.currentPrice) || 0,
+          previousClose: Number(f.previousClose) || 0,
+          dayChange: Number(f.dayChange) || 0,
+          dayChangePercent: Number(f.dayChangePercent) || 0,
+          volume: Number(f.volume) || 0,
+          marketCap: Number(f.marketCap) || 0,
+          open: Number(f.open) || 0,
+          high: Number(f.high) || 0,
+          low: Number(f.low) || 0,
+          fiftyTwoWeekHigh: Number(f.fiftyTwoWeekHigh) || 0,
+          fiftyTwoWeekLow: Number(f.fiftyTwoWeekLow) || 0,
+          sector: String(f.sector || ''),
+          description: String(f.description || ''),
+          fundDetails: f.fundDetails as MarketData['fundDetails'],
+          lastUpdated: String(f.lastUpdated || new Date().toISOString())
+        };
+      })];
+    }
+
+    console.log('Loaded market data:', allMarketData.length, 'securities');
+    return allMarketData;
+  } catch (error) {
+    console.error('Error loading market data:', error);
+    return [];
   }
 };
 
@@ -55,13 +124,17 @@ export function SupabaseAccountDataProvider({
       console.log('Fetching fresh account data for', accountId);
       const accountData = await supabaseAccountService.getAccountData(accountId);
       
-      // Load mock data
-      const mockData = await loadMockData();
+      // Load mock data and market data
+      const [mockData, marketData] = await Promise.all([
+        loadMockData(),
+        loadMarketData()
+      ]);
       
       if (accountData) {
-        // Merge mock data with account data
+        // Merge mock data and market data with account data
         const enhancedAccountData = {
           ...accountData,
+          marketData: marketData,
           realizedGL: mockData.realizedGL,
           commissions: mockData.commissions
         };
@@ -82,9 +155,10 @@ export function SupabaseAccountDataProvider({
             createdAt: new Date().toISOString(),
             lastUpdated: new Date().toISOString()
           },
+          isPrimary: false,
           securities: [],
           holdings: [],
-          marketData: [],
+          marketData: marketData,
           trades: [],
           activities: [],
           balances: {
@@ -124,6 +198,7 @@ export function SupabaseAccountDataProvider({
           createdAt: new Date().toISOString(),
           lastUpdated: new Date().toISOString()
         },
+        isPrimary: false,
         securities: [],
         holdings: [],
         marketData: [],

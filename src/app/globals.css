@@ -22,7 +22,7 @@
     --primary: 142 85 4; /* Original: indigo-600, now RGB for Tailwind alpha support */
     --primary-foreground: 255 255 255; /* Original: white */
 
-    --muted: #e1ded8; /* Original: gray-100 */
+    --muted: 246 245 244; /* Original: gray-100 */
     --muted-foreground: #64615a; /* Original: gray-500 */
 
     --accent: 246 245 244; /* CORRECTED: gray-100 as RGB components */
@@ -74,7 +74,7 @@
     --secondary: 30 41 59; 
     --secondary-foreground: 148 163 184;
 
-    --muted: #9f8c6a; /* Reverted */
+    --muted: 23 23 23; /* Reverted */
     --muted-foreground: #afa79c; /* Reverted */
 
     --accent: 23 23 23; /* Reverted */
