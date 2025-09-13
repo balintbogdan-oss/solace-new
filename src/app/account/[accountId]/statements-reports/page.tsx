@@ -16,6 +16,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import { PDFViewer } from '@/components/ui/pdf-viewer'
 import { format } from 'date-fns'
 import { Download, Eye, ChevronDown, Search, Calendar, ExternalLink } from 'lucide-react'
 
@@ -28,6 +29,43 @@ export default function StatementsReportsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [startDate, setStartDate] = useState<Date | undefined>(new Date('2025-01-01'))
   const [endDate, setEndDate] = useState<Date | undefined>(new Date('2025-06-06'))
+  
+  // PDF Viewer state
+  const [isPDFViewerOpen, setIsPDFViewerOpen] = useState(false)
+  const [currentPDFUrl, setCurrentPDFUrl] = useState('')
+  const [currentPDFTitle, setCurrentPDFTitle] = useState('')
+
+  // PDF URLs - in a real app, these would come from your database
+  const pdfUrls = {
+    'monthly-statements': {
+      'August 2025': 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/monthly-statements/2025/2025-08-statement.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvbW9udGhseS1zdGF0ZW1lbnRzLzIwMjUvMjAyNS0wOC1zdGF0ZW1lbnQucGRmIiwiaWF0IjoxNzU3NzgzMDI3LCJleHAiOjE3ODkzMTkwMjd9.26Jj13-wVCefiKeBFYy2c19oXWhtcVeV28ELsWnQl-A'
+    },
+    'tax-statements': {
+      'FORM 1042-S': 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/tax-documents/2024/1042-s-2024.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvdGF4LWRvY3VtZW50cy8yMDI0LzEwNDItcy0yMDI0LnBkZiIsImlhdCI6MTc1Nzc4OTYzNCwiZXhwIjoxNzg5MzI1NjM0fQ.NWvw5tKIPpoqhVldw9_-O_WsDN_8zp3lJt5ThivDpbA',
+      'FORM 1099-INT': 'https://example.com/tax-documents/form-1099-int.pdf',
+      'FORM 1099-B': 'https://example.com/tax-documents/form-1099-b.pdf'
+    },
+    'trade-confirmations': {
+      '2025-08-13-RWT': 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/trade-confirmations/2025/2025-08-13-RWT-confirmation.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvdHJhZGUtY29uZmlybWF0aW9ucy8yMDI1LzIwMjUtMDgtMTMtUldULWNvbmZpcm1hdGlvbi5wZGYiLCJpYXQiOjE3NTc3ODk4MzEsImV4cCI6MTc4OTMyNTgzMX0.CBSqDBBTqsHvQlIfhgbUjR-ios5RDRyFVII9-VS8NYY'
+    },
+    'open-order-confirmations': {
+      '2025-order-confirm': 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/order-confirmations/2025/order_confirm_display.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvb3JkZXItY29uZmlybWF0aW9ucy8yMDI1L29yZGVyX2NvbmZpcm1fZGlzcGxheS5wZGYiLCJpYXQiOjE3NTc3ODk5NjgsImV4cCI6MTc4OTMyNTk2OH0.fyHBWimltjCG4JVj1K3hxORF5KPHPGpjbWlRfH_HGxg'
+    }
+  }
+
+  // Helper function to open PDF viewer
+  const openPDFViewer = (url: string, title: string) => {
+    setCurrentPDFUrl(url)
+    setCurrentPDFTitle(title)
+    setIsPDFViewerOpen(true)
+  }
+
+  // Helper function to close PDF viewer
+  const closePDFViewer = () => {
+    setIsPDFViewerOpen(false)
+    setCurrentPDFUrl('')
+    setCurrentPDFTitle('')
+  }
 
   // Mock data for monthly statements
   const monthlyStatements = [
@@ -50,6 +88,7 @@ export default function StatementsReportsPage() {
 
   // Mock data for trade confirmations
   const tradeConfirmations = [
+    { date: '8/13/2025', symbol: 'RWT', cusip: '037833100', description: 'Redwood Trust Inc. - Real Estate Investment Trust', pdfKey: '2025-08-13-RWT' },
     { date: '3/10/2025', symbol: 'MSFT', cusip: '037833100', description: 'Apple Inc. - Technology company specializing in consumer electronics' },
     { date: '2/28/2025', symbol: 'GOOGL', cusip: '037833100', description: 'Amazon.com Inc. - E-commerce and cloud computing company...' },
     { date: '2/25/2025', symbol: 'NVDA', cusip: '037833100', description: 'Vanguard Total Stock Market ETF - Broad market index fund...' },
@@ -65,6 +104,7 @@ export default function StatementsReportsPage() {
 
   // Mock data for open order confirmations
   const openOrderConfirmations = [
+    { date: '8/15/2025', symbol: 'ORDER', cusip: '037833100', description: 'Order Confirmation Display - General order confirmation document', pdfKey: '2025-order-confirm' },
     { date: '3/10/2025', symbol: 'MSFT', cusip: '037833100', description: 'Apple Inc. - Technology company specializing in consumer electronics' },
     { date: '2/28/2025', symbol: 'GOOGL', cusip: '037833100', description: 'Amazon.com Inc. - E-commerce and cloud computing company...' },
     { date: '2/25/2025', symbol: 'NVDA', cusip: '037833100', description: 'Vanguard Total Stock Market ETF - Broad market index fund...' },
@@ -72,17 +112,17 @@ export default function StatementsReportsPage() {
 
   // Mock data for shareholder documents
   const shareholderDocuments = [
-    { date: '12/15/2023', symbol: 'AAPL', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '12/15/2023', status: 'green' },
-    { date: '11/28/2023', symbol: 'TLT', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Regulatory', dueDate: '', status: 'orange' },
-    { date: '10/15/2023', symbol: 'AMD', cusip: '037833100', issuer: 'Proxy Statement', issuerName: 'ABRDN GLOBAL INFRASTRUCTURE INC FD', type: 'Regulatory', dueDate: '10/15/2023', status: 'orange' },
-    { date: '9/22/2023', symbol: 'META', cusip: '037833100', issuer: 'Section 19a', issuerName: 'CASH RESERVES FEDERAL MONEY MARKET -ADM', type: 'Regulatory', dueDate: '', status: 'green' },
-    { date: '8/30/2023', symbol: 'AMZN', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '', status: 'orange' },
-    { date: '7/15/2023', symbol: 'ADBE', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Annual Meeting', dueDate: '', status: 'green' },
-    { date: '8/30/2023', symbol: 'INTC', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Regulatory', dueDate: '8/30/2023', status: 'green' },
-    { date: '7/15/2023', symbol: 'VNQ', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Annual Meeting', dueDate: '', status: 'orange' },
-    { date: '8/30/2023', symbol: 'CRM', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '', status: 'orange' },
-    { date: '7/15/2023', symbol: 'ORCL', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Regulatory', dueDate: '', status: 'orange' },
-    { date: '8/30/2023', symbol: 'MSFT', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Regulatory', dueDate: '8/30/2023', status: 'orange' },
+    { date: '12/15/2023', symbol: 'AAPL', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '12/15/2023' },
+    { date: '11/28/2023', symbol: 'TLT', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Regulatory', dueDate: '' },
+    { date: '10/15/2023', symbol: 'AMD', cusip: '037833100', issuer: 'Proxy Statement', issuerName: 'ABRDN GLOBAL INFRASTRUCTURE INC FD', type: 'Regulatory', dueDate: '10/15/2023' },
+    { date: '9/22/2023', symbol: 'META', cusip: '037833100', issuer: 'Section 19a', issuerName: 'CASH RESERVES FEDERAL MONEY MARKET -ADM', type: 'Regulatory', dueDate: '' },
+    { date: '8/30/2023', symbol: 'AMZN', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '' },
+    { date: '7/15/2023', symbol: 'ADBE', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Annual Meeting', dueDate: '' },
+    { date: '8/30/2023', symbol: 'INTC', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Regulatory', dueDate: '8/30/2023' },
+    { date: '7/15/2023', symbol: 'VNQ', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Annual Meeting', dueDate: '' },
+    { date: '8/30/2023', symbol: 'CRM', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '' },
+    { date: '7/15/2023', symbol: 'ORCL', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Regulatory', dueDate: '' },
+    { date: '8/30/2023', symbol: 'MSFT', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Regulatory', dueDate: '8/30/2023' },
   ]
 
   const tabs = [
@@ -136,16 +176,47 @@ export default function StatementsReportsPage() {
                 </thead>
                 <tbody>
                   {monthlyStatements.map((statement, index) => (
-                    <tr key={`${statement.month}-${statement.year}`} className={`border-b ${index % 2 === 1 ? 'bg-card' : ''}`}>
+                    <tr 
+                      key={`${statement.month}-${statement.year}`} 
+                      className={`border-b cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? 'bg-card' : ''}`}
+                      onClick={() => {
+                        const pdfUrl = pdfUrls['monthly-statements'][`${statement.month} ${statement.year}` as keyof typeof pdfUrls['monthly-statements']]
+                        if (pdfUrl) {
+                          openPDFViewer(pdfUrl, `${statement.month} ${statement.year} Statement`)
+                        }
+                      }}
+                    >
                       <td className="px-6 py-3 text-foreground">
                         {statement.month} {statement.year}
                       </td>
                       <td className="px-6 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation() // Prevent row click
+                              const pdfUrl = pdfUrls['monthly-statements'][`${statement.month} ${statement.year}` as keyof typeof pdfUrls['monthly-statements']]
+                              if (pdfUrl) {
+                                window.open(pdfUrl, '_blank')
+                              }
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation() // Prevent row click
+                              const pdfUrl = pdfUrls['monthly-statements'][`${statement.month} ${statement.year}` as keyof typeof pdfUrls['monthly-statements']]
+                              if (pdfUrl) {
+                                openPDFViewer(pdfUrl, `${statement.month} ${statement.year} Statement`)
+                              }
+                            }}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </div>
@@ -194,23 +265,58 @@ export default function StatementsReportsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {taxStatements.map((statement, index) => (
-                    <tr key={statement.name} className={`border-b ${index % 2 === 1 ? 'bg-card' : ''}`}>
-                      <td className="px-6 py-3 text-foreground">
-                        {statement.name}
-                      </td>
-                      <td className="px-6 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {taxStatements.map((statement, index) => {
+                    const pdfUrl = pdfUrls['tax-statements'][statement.name as keyof typeof pdfUrls['tax-statements']]
+                    const hasPDF = pdfUrl && !pdfUrl.includes('example.com')
+                    
+                    return (
+                      <tr 
+                        key={statement.name} 
+                        className={`border-b ${hasPDF ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''} ${index % 2 === 1 ? 'bg-card' : ''}`}
+                        onClick={() => {
+                          if (hasPDF) {
+                            openPDFViewer(pdfUrl, `${statement.name} - ${selectedTaxYear}`)
+                          }
+                        }}
+                      >
+                        <td className="px-6 py-3 text-foreground">
+                          {statement.name}
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation() // Prevent row click
+                                if (hasPDF) {
+                                  window.open(pdfUrl, '_blank')
+                                }
+                              }}
+                              disabled={!hasPDF}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation() // Prevent row click
+                                if (hasPDF) {
+                                  openPDFViewer(pdfUrl, `${statement.name} - ${selectedTaxYear}`)
+                                }
+                              }}
+                              disabled={!hasPDF}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -274,32 +380,63 @@ export default function StatementsReportsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {tradeConfirmations.map((confirmation, index) => (
-                    <tr key={`${confirmation.date}-${confirmation.symbol}`} className={`border-b ${index % 2 === 1 ? 'bg-card' : ''}`}>
-                      <td className="px-6 py-3 text-foreground">
-                        {confirmation.date}
-                      </td>
-                      <td className="px-6 py-3 text-foreground">
-                        <div>
-                          <div className="font-medium">{confirmation.symbol}</div>
-                          <div className="text-xs text-muted-foreground">{confirmation.cusip}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-3 text-foreground">
-                        {confirmation.description}
-                      </td>
-                      <td className="px-6 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {tradeConfirmations.map((confirmation, index) => {
+                    const pdfUrl = confirmation.pdfKey ? pdfUrls['trade-confirmations'][confirmation.pdfKey as keyof typeof pdfUrls['trade-confirmations']] : null
+                    return (
+                      <tr 
+                        key={`${confirmation.date}-${confirmation.symbol}`} 
+                        className={`border-b cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? 'bg-card' : ''}`}
+                        onClick={() => {
+                          if (pdfUrl) {
+                            openPDFViewer(pdfUrl, `Trade Confirmation - ${confirmation.symbol} - ${confirmation.date}`)
+                          }
+                        }}
+                      >
+                        <td className="px-6 py-3 text-foreground">
+                          {confirmation.date}
+                        </td>
+                        <td className="px-6 py-3 text-foreground">
+                          <div>
+                            <div className="font-medium">{confirmation.symbol}</div>
+                            <div className="text-xs text-muted-foreground">{confirmation.cusip}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-3 text-foreground">
+                          {confirmation.description}
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation() // Prevent row click
+                                if (pdfUrl) {
+                                  window.open(pdfUrl, '_blank')
+                                }
+                              }}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation() // Prevent row click
+                                if (pdfUrl) {
+                                  openPDFViewer(pdfUrl, `Trade Confirmation - ${confirmation.symbol} - ${confirmation.date}`)
+                                }
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -363,32 +500,63 @@ export default function StatementsReportsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {openOrderConfirmations.map((confirmation, index) => (
-                    <tr key={`${confirmation.date}-${confirmation.symbol}`} className={`border-b ${index % 2 === 1 ? 'bg-card' : ''}`}>
-                      <td className="px-6 py-3 text-foreground">
-                        {confirmation.date}
-                      </td>
-                      <td className="px-6 py-3 text-foreground">
-                        <div>
-                          <div className="font-medium">{confirmation.symbol}</div>
-                          <div className="text-xs text-muted-foreground">{confirmation.cusip}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-3 text-foreground">
-                        {confirmation.description}
-                      </td>
-                      <td className="px-6 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {openOrderConfirmations.map((confirmation, index) => {
+                    const pdfUrl = confirmation.pdfKey ? pdfUrls['open-order-confirmations'][confirmation.pdfKey as keyof typeof pdfUrls['open-order-confirmations']] : null
+                    return (
+                      <tr 
+                        key={`${confirmation.date}-${confirmation.symbol}`} 
+                        className={`border-b cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? 'bg-card' : ''}`}
+                        onClick={() => {
+                          if (pdfUrl) {
+                            openPDFViewer(pdfUrl, `Order Confirmation - ${confirmation.symbol} - ${confirmation.date}`)
+                          }
+                        }}
+                      >
+                        <td className="px-6 py-3 text-foreground">
+                          {confirmation.date}
+                        </td>
+                        <td className="px-6 py-3 text-foreground">
+                          <div>
+                            <div className="font-medium">{confirmation.symbol}</div>
+                            <div className="text-xs text-muted-foreground">{confirmation.cusip}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-3 text-foreground">
+                          {confirmation.description}
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation() // Prevent row click
+                                if (pdfUrl) {
+                                  window.open(pdfUrl, '_blank')
+                                }
+                              }}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation() // Prevent row click
+                                if (pdfUrl) {
+                                  openPDFViewer(pdfUrl, `Order Confirmation - ${confirmation.symbol} - ${confirmation.date}`)
+                                }
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -450,12 +618,6 @@ export default function StatementsReportsPage() {
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
-                      <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Status</span>
-                        <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                      </button>
-                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -489,15 +651,6 @@ export default function StatementsReportsPage() {
                       </td>
                       <td className="px-6 py-3 text-foreground">
                         {document.dueDate || ''}
-                      </td>
-                      <td className="px-6 py-3 text-foreground">
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          document.status === 'green' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                            : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-                        }`}>
-                          Placeholder
-                        </span>
                       </td>
                     </tr>
                   ))}
@@ -613,6 +766,14 @@ export default function StatementsReportsPage() {
         {/* Tab Content */}
         {renderTabContent()}
       </div>
+
+      {/* PDF Viewer Modal */}
+      <PDFViewer
+        isOpen={isPDFViewerOpen}
+        onClose={closePDFViewer}
+        pdfUrl={currentPDFUrl}
+        title={currentPDFTitle}
+      />
     </div>
   )
 }

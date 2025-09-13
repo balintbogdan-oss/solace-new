@@ -123,7 +123,7 @@ export default function SortableWidget({ id, widget, onRemove, dropIndicator, he
              
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1">
-                  <h3 className="text-sm font-medium text-muted-foreground truncate">{widget.title}</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground truncate font-sans">{widget.title}</h3>
                   {/* Conditionally render Info icon only for commission widget */}
                   {widget.id === 'commission' && (
                     <Info className="h-4 w-4 text-gray-400 shrink-0" />

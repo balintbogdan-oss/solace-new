@@ -40,7 +40,7 @@ export function ActivityWidget() {
       <div className="flex-grow space-y-4 pt-2">
         {/* Trades Section */}
         <div>
-          <div className="text-sm text-muted-foreground mb-1">Trades</div>
+          <div className="text-sm text-muted-foreground mb-1 font-sans">Trades</div>
           <div className="text-4xl font-serif font-light mb-1">{activityData.trades.total}</div>
           <div className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
             <span>Buy <span className="font-medium text-foreground">{activityData.trades.buy}</span></span>
@@ -54,7 +54,7 @@ export function ActivityWidget() {
 
         {/* Net Deposits Section - Updated Styling */}
         <div>
-          <div className="text-sm text-muted-foreground mb-1" >Net deposits</div>
+          <div className="text-sm text-muted-foreground mb-1 font-sans" >Net deposits</div>
           <div className="text-2xl font-serif font-medium mb-3">{formatCurrency(activityData.deposits.net)}</div>
           <div className="text-sm flex items-center gap-3 flex-wrap">
             {/* In Section - Primary icon, primary/30 background */}

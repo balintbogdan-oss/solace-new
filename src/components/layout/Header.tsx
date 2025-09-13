@@ -29,6 +29,7 @@ export function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { theme, setTheme } = useTheme();
   const [showSearchInput, setShowSearchInput] = useState(false);
+  const [searchFilter, setSearchFilter] = useState<'all' | 'clients' | 'accounts'>('all');
   const { navigationSettings } = useSettings();
   
   // Use the search hook
@@ -45,6 +46,33 @@ export function Header() {
   
   // Get filtered navigation items based on settings
   const filteredNavItems = getFilteredTopLevelNavItems(navigationSettings);
+
+  // Filter search results based on selected filter
+  const filteredSearchResults = searchResults.filter(item => {
+    if (searchFilter === 'all') return true;
+    if (searchFilter === 'clients') return item.type === 'client';
+    if (searchFilter === 'accounts') return item.type === 'account';
+    return true;
+  });
+
+  // Helper function to highlight search term in text
+  const highlightSearchTerm = (text: string, searchTerm: string) => {
+    if (!searchTerm) return text;
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, index) => 
+      regex.test(part) ? (
+        <span key={index} className="font-semibold bg-yellow-200 dark:bg-yellow-800 px-0.5 rounded">
+          {part}
+        </span>
+      ) : part
+    );
+  };
+
+  // Reset filter when search query changes
+  useEffect(() => {
+    setSearchFilter('all');
+  }, [searchQuery]);
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -188,7 +216,7 @@ export function Header() {
                                 const accountData = item.data as any;
                                 return accountData.balances?.totalValue ? 
                                   `$${accountData.balances.totalValue.toLocaleString()}` : 
-                                  'No value';
+                                  null;
                               }
                               return null;
                             };
@@ -235,14 +263,68 @@ export function Header() {
 
                 {/* Show search results when there's a query */}
                 {searchQuery && (
-                  <div className="p-4">
-                    {isSearchLoading ? (
-                      <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
-                        Searching...
+                  <>
+                    {/* Sticky header section for search results */}
+                    <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 p-4 pb-0">
+                      {/* Filter buttons */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="text-sm font-medium text-muted-foreground">Filter by</div>
+                        <div className="flex gap-2">
+                          <button
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                              searchFilter === 'all'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                            }`}
+                            onClick={() => setSearchFilter('all')}
+                          >
+                            All
+                          </button>
+                          <button
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                              searchFilter === 'clients'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                            }`}
+                            onClick={() => setSearchFilter('clients')}
+                          >
+                            <User className="h-3 w-3" />
+                            Clients
+                          </button>
+                          <button
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                              searchFilter === 'accounts'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                            }`}
+                            onClick={() => setSearchFilter('accounts')}
+                          >
+                            <Landmark className="h-3 w-3" />
+                            Accounts
+                          </button>
+                        </div>
                       </div>
-                    ) : searchResults.length > 0 ? (
-                      <div className="space-y-1">
-                        {searchResults.map((item) => {
+
+                      {/* Results header */}
+                      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Results
+                        </div>
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Total account value
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Scrollable results content */}
+                    <div className="p-4 pt-0">
+                      {isSearchLoading ? (
+                        <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                          Searching...
+                        </div>
+                      ) : filteredSearchResults.length > 0 ? (
+                        <div className="space-y-1">
+                          {filteredSearchResults.map((item) => {
                           const getIcon = () => {
                             switch (item.type) {
                               case 'account':
@@ -262,7 +344,7 @@ export function Header() {
                               const accountData = item.data as any;
                               return accountData.balances?.totalValue ? 
                                 `$${accountData.balances.totalValue.toLocaleString()}` : 
-                                'No value';
+                                null;
                             }
                             return null;
                           };
@@ -278,7 +360,7 @@ export function Header() {
                                 {getIcon()}
                                 <div className="flex-1">
                                   <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {item.name}
+                                    {highlightSearchTerm(item.name, searchQuery)}
                                   </div>
                                   <div className="text-xs text-gray-500 dark:text-gray-400">
                                     {item.subtitle}
@@ -293,13 +375,14 @@ export function Header() {
                             </Link>
                           );
                         })}
-                      </div>
-                    ) : (
-                      <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
-                        No results found for &quot;{searchQuery}&quot;
-                      </div>
-                    )}
-                  </div>
+                        </div>
+                      ) : (
+                        <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                          No {searchFilter === 'all' ? '' : searchFilter} results found for &quot;{searchQuery}&quot;
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
             )}

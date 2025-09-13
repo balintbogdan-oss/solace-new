@@ -71,7 +71,6 @@ export class SearchService {
 
       if (accountsError) {
         console.error('Error searching accounts:', accountsError);
-        console.error('Error details:', JSON.stringify(accountsError, null, 2));
       }
 
 
@@ -209,8 +208,8 @@ export class SearchService {
             results.push({
               type: 'account',
               id: account.account_id,
-              name: account.account_name,
-              subtitle: `${account.account_id} • ${formatAccountType(account.account_type)}`,
+              name: `${account.account_id} • ${formatAccountType(account.account_type)}`,
+              subtitle: account.account_name,
               href: `/account/${account.account_id}`,
               data: {
                 accountId: account.account_id,
@@ -335,8 +334,8 @@ export class SearchService {
       items.push({
         type: 'account',
         id: account.accountId,
-        name: account.accountName,
-        subtitle: `${account.accountId} • ${account.accountType}`,
+        name: `${account.accountId} • ${formatAccountType(account.accountType)}`,
+        subtitle: account.accountName,
         href: `/account/${account.accountId}`,
         data: account
       });
