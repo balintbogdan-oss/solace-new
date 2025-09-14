@@ -18,11 +18,17 @@ export default function GlobalTradePage() {
   };
 
   return (
-    <div>
-  
+    <div className="w-full bg-white dark:bg-black">
+      <div className="flex flex-col gap-7">
+        {/* Header */}
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-center pb-2">
+            <h1 className="text-3xl font-medium font-serif text-slate-900 dark:text-slate-100">Trade</h1>
+          </div>
+        </div>
 
-      {/* Changed grid definition for fixed left col, flexible right col */}
-      <div className="grid grid-cols-1 lg:grid-cols-[370px_1fr] gap-2">
+        {/* Changed grid definition for fixed left col, flexible right col */}
+        <div className="grid grid-cols-1 lg:grid-cols-[370px_1fr] gap-2">
         
         
         {/* L Column: Watchlist Section - Removed lg:col-span-1 */}
@@ -60,6 +66,7 @@ export default function GlobalTradePage() {
              {/* TODO: Add Recent Orders table here if desired */}
           </div>
           
+        </div>
       </div>
 
       {/* Modals */}

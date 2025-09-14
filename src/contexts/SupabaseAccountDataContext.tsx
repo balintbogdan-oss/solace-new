@@ -87,7 +87,6 @@ const loadMarketData = async (): Promise<MarketData[]> => {
       })];
     }
 
-    console.log('Loaded market data:', allMarketData.length, 'securities');
     return allMarketData;
   } catch (error) {
     console.error('Error loading market data:', error);
@@ -240,7 +239,7 @@ export function SupabaseAccountDataProvider({
       console.error('Error saving account data:', err);
       setError('Failed to save account data');
     }
-  }, []);
+  }, [accountId]);
 
   // Get security by symbol
   const getSecurity = useCallback((symbol: string): Security | undefined => {
@@ -548,7 +547,7 @@ export function SupabaseAccountDataProvider({
     console.log('3. Saving to database...');
     await saveData(updatedData);
     console.log('4. Database save completed');
-  }, [data, saveData]);
+  }, [data, saveData, calculateBuyingPower]);
 
   // Add trade
   const addTrade = useCallback(async (tradeData: Omit<Trade, 'id'>) => {
@@ -717,7 +716,7 @@ export function SupabaseAccountDataProvider({
     console.log('💾 Saving trade and holdings together...');
     await saveData(updatedData);
     console.log('✅ Trade executed successfully');
-  }, [data, saveData]);
+  }, [data, saveData, calculateBuyingPower]);
 
   // Force refresh market data
   const refreshMarketData = useCallback(async () => {
@@ -768,9 +767,6 @@ export function SupabaseAccountDataProvider({
   const generateHistoricalActivities = useCallback(async (forceRegenerate: boolean = false): Promise<void> => {
     if (!data) return;
 
-    console.log('🔄 Generating historical activities from holdings...');
-    console.log('📊 Current holdings:', data.holdings.length);
-    console.log('📋 Current activities:', data.activities.length);
 
     // Check if we already have historical BUY activities for holdings
     const existingTradeActivities = data.activities.filter(activity => activity.type === 'TRADE');
@@ -779,17 +775,14 @@ export function SupabaseAccountDataProvider({
       activity.action === 'BUY' && holdingsSymbols.includes(activity.symbol || '')
     );
 
-    console.log('🔍 Existing BUY activities for current holdings:', existingBuyActivities.length);
 
     // If we already have BUY activities for all holdings, skip (unless forcing regeneration)
     if (existingBuyActivities.length >= data.holdings.length && !forceRegenerate) {
-      console.log('📋 Historical BUY activities already exist for all holdings, skipping generation');
       return;
     }
 
     // If forcing regeneration, remove existing historical activities first
     if (forceRegenerate && existingTradeActivities.length > 0) {
-      console.log('🔄 Force regenerating - removing existing historical activities...');
       const nonHistoricalActivities = data.activities.filter(activity => 
         activity.type !== 'TRADE' || !activity.id.startsWith('historical-')
       );
@@ -801,7 +794,6 @@ export function SupabaseAccountDataProvider({
       };
       
       await saveData(updatedData);
-      console.log('🗑️ Removed existing historical activities');
     }
 
     // Generate activities for each holding that doesn't already have BUY activities
@@ -812,11 +804,9 @@ export function SupabaseAccountDataProvider({
       // Check if we already have BUY activities for this symbol
       const hasBuyActivity = existingBuyActivities.some(activity => activity.symbol === holding.symbol);
       if (hasBuyActivity && !forceRegenerate) {
-        console.log(`⏭️ Skipping ${holding.symbol} - already has BUY activity`);
         return;
       }
 
-      console.log(`📝 Generating historical activities for ${holding.symbol} (${holding.quantity} shares)`);
       // For large holdings, simulate multiple historical purchases
       const totalQuantity = holding.quantity;
       const avgPrice = holding.avgPrice;
@@ -890,10 +880,6 @@ export function SupabaseAccountDataProvider({
     });
 
     if (historicalActivities.length > 0) {
-      console.log(`📝 Generated ${historicalActivities.length} historical activities:`);
-      historicalActivities.forEach(activity => {
-        console.log(`  - ${activity.symbol}: ${activity.action} ${activity.quantity} shares @ $${activity.price} (${activity.date})`);
-      });
       
       // Add to existing activities
       const updatedData = {
@@ -902,11 +888,8 @@ export function SupabaseAccountDataProvider({
         lastUpdated: new Date().toISOString()
       };
 
-      console.log('💾 Saving historical activities to database...');
       await saveData(updatedData);
-      console.log('✅ Historical activities saved successfully to Supabase database');
     } else {
-      console.log('ℹ️ No new historical activities needed');
     }
   }, [data, saveData]);
 
@@ -1006,7 +989,6 @@ export function SupabaseAccountDataProvider({
   // Generate historical activities after data is loaded
   useEffect(() => {
     if (data && !loading) {
-      console.log('🔄 Data loaded, checking for historical activities generation...');
       generateHistoricalActivities();
     }
   }, [data, loading, generateHistoricalActivities]);

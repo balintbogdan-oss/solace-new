@@ -235,7 +235,7 @@ export default function DashboardPage() {
   const currentLayout = useMemo(() => calculateLayout(itemsToRender), [itemsToRender]);
 
   return (
-    <div className="min-h-screen p-6 ">
+    <div className="min-h-screen p-6 bg-neutral-50 dark:bg-neutral-950">
       <div className="space-y-4">
         <div className="flex justify-between items-center h-10">
           <h1 

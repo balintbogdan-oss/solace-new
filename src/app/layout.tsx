@@ -85,8 +85,8 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body>
-         {/*  <div className="background-gradient-effect fixed inset-0 -z-10 overflow-hidden">
-          </div> */}
+        {/* <div className="background-gradient-effect fixed inset-0 -z-10 overflow-hidden">
+        </div> */}
 
         <ThemeProvider
           attribute="class"

@@ -15,7 +15,7 @@ import React from 'react'
 
 export function Sidebar() { // Removed props
   const pathname = usePathname() ?? '';
-  const { currentSectionItems, currentBaseHref } = useNavigation(); // Get base href from context
+  const { currentSectionItems, currentBaseHref, currentSectionLabel } = useNavigation(); // Get base href and label from context
   const { isMinimized, toggleSidebar, setMinimized, resetManualSetting, isHydrated } = useSidebar();
   // Initialize expanded state based on current path belonging to a section
   const [expanded, setExpanded] = useState<string[]>(() => {
@@ -213,10 +213,10 @@ export function Sidebar() { // Removed props
     )}>
       <div className="flex flex-col h-full">
         {/* Sidebar Header */}
-        <div className={cn("flex items-center", isMinimized ? "justify-center" : "justify-between", "pt-4 pb-2")}>
-          {!isMinimized && (
+        <div className={cn("flex items-center", isMinimized ? "justify-center" : "justify-between", "pt-2 pb-2")}>
+          {!isMinimized && currentSectionLabel && (
             <span className="text-xs text-muted-foreground uppercase tracking-wider">
-              Account overview
+              {currentSectionLabel}
             </span>
           )}
           <button

@@ -119,7 +119,7 @@ export function AUMWidget({ selectedPeriod = '1Y' }: AUMWidgetProps) { // Defaul
     const startTime = startDate.getTime();
     return aumData.filter(d => d.timestamp >= startTime);
 
-  }, [selectedPeriod, aumData]);
+  }, [selectedPeriod]);
 
   // Recalculate monthly X ticks based on filtered data
   const monthlyTicks = useMemo(() => getMonthlyTicks(filteredAumData), [filteredAumData]);

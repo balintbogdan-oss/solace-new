@@ -65,9 +65,9 @@ const formatValue = (value: string | number | boolean | null | undefined, column
         return String(value);
 
       case 'date':
-        return new Date(String(value)).toLocaleString('en-US', {
-          ...column.format.options,
-        });
+        // Use a consistent date format to prevent hydration mismatches
+        const date = new Date(String(value));
+        return date.toISOString().split('T')[0]; // YYYY-MM-DD format
 
       default:
         return String(value);

@@ -197,10 +197,10 @@ function ClientContent() {
 
   // Chart mouse handlers
   const handleMouseMove = (state: unknown) => {
-    const anyState = state as { activeCoordinate?: unknown; activePayload?: Array<{ payload?: { timestamp?: number } }> }
+    const anyState = state as { activeCoordinate?: unknown; activePayload?: Array<{ payload?: { timestamp?: number } }> };
     if (state && anyState.activeCoordinate) {
       const payloadData = anyState.activePayload?.[0]?.payload
-      if (payloadData?.timestamp) { setHoveredTimestamp(payloadData.timestamp); return }
+      if (payloadData?.timestamp) { setHoveredTimestamp(payloadData.timestamp); return; }
     }
     setHoveredTimestamp(null)
   }
@@ -217,9 +217,8 @@ function ClientContent() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4  ">
           {/* Left Column - Chart and Accounts */}
-          
-            {/* Portfolio Chart Card */}
-            <Card className="lg:col-span-2 space-y-4 rounded-lg bg-card p-6 border">
+          {/* Portfolio Chart Card */}
+          <Card className="lg:col-span-2 space-y-4 rounded-lg bg-card p-6 border">
               
               {/* Top row container */} 
               <div className="flex justify-between items-start mb-4"> 
@@ -386,7 +385,6 @@ function ClientContent() {
                 )}
               </div>
             </Card>
-        
 
           {/* Right Column - Client Profile */}
       
@@ -438,11 +436,31 @@ function ClientContent() {
           </div>
         </div>
 
-        {/* Accounts Section - Restored */}
-        <Card className="w-full mt-4 md:mt-6">
-          <div className="space-y-2">
-            <div className="bg-white dark:bg-black rounded-md">
-              <h2 className="text-2xl font-serif pb-4">Accounts</h2>
+        {/* Household Accounts Section */}
+        <div className="w-full mt-4 md:mt-6">
+          <h2 className="text-2xl font-serif pb-4">Accounts</h2>
+          
+          {/* Individual Household Box */}
+          <Card className="w-full">
+            <div className="space-y-2">
+              {/* Household Summary Row */}
+              <div 
+                className="h-16 bg-muted/30 dark:bg-muted/10 cursor-pointer hover:bg-accent dark:hover:bg-accent transition-colors rounded-lg mb-2 flex items-center px-4"
+                onClick={() => setIsPersonalAccountsCollapsed(prev => !prev)}
+              >
+                <div className="flex items-center gap-4 w-full">
+                  <User className="w-5 h-5 text-primary" />
+                  <h3 className="text-base font-medium flex-1">{client.firstName} {client.lastName}</h3>
+                  <div className="text-right font-medium">${totalPortfolioValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                  <ChevronDown 
+                    className={cn(
+                      "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                      isPersonalAccountsCollapsed ? "rotate-180" : ""
+                    )} 
+                  />
+                </div>
+              </div>
+
               <div className="rounded-lg overflow-hidden ">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -460,26 +478,6 @@ function ClientContent() {
                        <th className="w-4 pr-2"></th></tr>
                       </thead>
                       <tbody>
-                        {/* --- Personal Accounts Section Header Row --- */}
-                        <tr 
-                          className="h-16 bg-muted/30 dark:bg-muted/10 cursor-pointer hover:bg-accent dark:hover:bg-accent transition-colors"
-                          onClick={() => setIsPersonalAccountsCollapsed(prev => !prev)}
-                        >
-                           <td className="p-2 align-middle"> 
-                              <User className="w-5 h-5 text-primary mx-auto" />
-                           </td> 
-                           <td colSpan={6} className="p-2 "> 
-                              <h3 className="text-base font-medium">{client.firstName} {client.lastName}</h3>
-                           </td>
-                           <td className="p-2 text-right font-medium pr-4">${totalPortfolioValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                           <td className="p-2 pr-2 align-middle"> 
-                             <ChevronDown 
-                                className={cn(
-                                  "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                                  isPersonalAccountsCollapsed ? "rotate-180" : ""
-                                )} 
-                              />
-                            </td></tr>
 
                         {/* --- Personal Accounts Data Rows (Conditional) --- */}
                         {!isPersonalAccountsCollapsed && accounts.map((account) => (
@@ -515,15 +513,18 @@ function ClientContent() {
                             <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">${(account.balances?.cash || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                             <td className="border-t py-2 text-right text-muted-foreground border-b dark:border-neutral-800">${(account.balances?.margin || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                             <td className="border-t py-2 text-right text-muted-foreground pr-4 border-b dark:border-neutral-800">${(account.balances?.totalValue || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td className="border-t py-2 pr-2 border-b dark:border-neutral-800"><ChevronRight className="h-4 w-4 text-muted-foreground" /></td></tr>
+                            <td className="border-t py-2 pr-2 border-b dark:border-neutral-800">
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            </td>
+                          </tr>
                         ))}
                       </tbody>
                   </table>
                 </div>
               </div>
-           </div> 
-         </div>
-        </Card>    
+            </div>
+          </Card>
+        </div>
     </div>
   )
 }

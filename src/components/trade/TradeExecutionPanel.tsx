@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from '@/components/ui/switch'
-import { ArrowLeft, Check, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, ChevronUp, X, CheckCircle, Info } from 'lucide-react'
 import { AccountSelectionModal } from './AccountSelectionModal'
 import { cn } from '@/lib/utils'
 import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 // Mock data (Should ideally be fetched or passed as props)
 // TODO: Replace with actual data fetching logic for price & account details
@@ -50,6 +51,7 @@ interface TradeExecutionPanelProps {
   accountId: string;
   initialTradeMode?: TradeMode;
   onClose?: () => void;
+  // onAccountChange?: (newAccountId: string) => void;
   strikePrice?: number;
   optionType?: OptionType;
   limitPrice?: number;
@@ -63,6 +65,7 @@ export function TradeExecutionPanel({
   accountId, 
   initialTradeMode = null, 
   onClose,
+  // onAccountChange,
   strikePrice,
   optionType,
   limitPrice,
@@ -73,6 +76,7 @@ export function TradeExecutionPanel({
   const [orderState, setOrderState] = useState<OrderState>('entry')
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [tradeMode, setTradeMode] = useState<TradeMode>(initialTradeMode)
+  
   const notesTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [isReviewAdvancedOpen, setIsReviewAdvancedOpen] = useState(false);
@@ -175,10 +179,16 @@ export function TradeExecutionPanel({
       return {
         name: accountData.accountName,
         type: accountData.accountType === 'individual' ? 'Individual' : 
-              accountData.accountType || 'Individual'
+              accountData.accountType || 'Individual',
+        clientName: accountData.client ? `${accountData.client.firstName} ${accountData.client.lastName}` : 'Unknown Client'
       };
     }
-    return MOCK_ACCOUNTS[accountId] || { name: 'Unknown Account', type: 'Individual' };
+    const mockAccount = MOCK_ACCOUNTS[accountId] || { name: 'Unknown Account', type: 'Individual' };
+    return {
+      name: mockAccount.name,
+      type: mockAccount.type,
+      clientName: 'Unknown Client'
+    };
   }, [accountData, accountId]);
 
   // Get current holding for this symbol
@@ -442,7 +452,8 @@ export function TradeExecutionPanel({
 
   const handleAccountSelect = (newAccountId: string) => {
     setIsAccountModalOpen(false);
-    router.push(`/account/${newAccountId}/trade/${symbol}`); 
+    // Always navigate to the new account URL to preserve trade mode
+    router.push(`/account/${newAccountId}/trade/${symbol}?mode=${tradeMode}`);
   };
 
   // --- Render Helper Function for Form Rows ---
@@ -455,10 +466,15 @@ export function TradeExecutionPanel({
 
 
   // --- Main Render Functions ---
-  const renderOrderEntry = () => (
-    <div>
-       {/* Trade execution form */}
-       {initialTradeMode && (
+  const renderOrderEntry = () => {
+    if (!initialTradeMode) {
+      return null;
+    }
+    
+    return (
+      <div>
+        {/* Trade execution form */}
+        {initialTradeMode && (
           <div className="text-left pb-3 mb-3">
             <h3 className="text-xl font-medium">
                 {isOptionTrade ? (
@@ -527,19 +543,6 @@ export function TradeExecutionPanel({
                 </div>
               </div>
             )}
-            {!isOptionTrade && (
-              <div className="text-sm text-muted-foreground mt-1">
-                <div className="mb-1">
-                  <span>NBBO Bid: $234.33 (500 shares) – from NYSE</span>
-                </div>
-                <div className="mb-1">
-                  <span>NBBO Ask: $234.37 (300 shares) – from NASDAQ</span>
-                </div>
-                <div>
-                  <span>Last sale price: $234.35 (200 shares)</span>
-                </div>
-              </div>
-            )}
           </div>
        )}
 
@@ -548,11 +551,16 @@ export function TradeExecutionPanel({
          <Button
            variant="outline" 
            onClick={() => setIsAccountModalOpen(true)} 
-           className="w-full h-auto px-3 py-2 flex items-center justify-between text-left"
+           className="w-full h-auto px-3 py-3 flex items-center justify-between text-left"
          >
-           <span className="font-medium text-sm">
-             {accountId} - <span className="text-foreground">{accountDetails.type}</span>
-           </span>
+           <div className="flex flex-col items-start">
+             <span className="font-medium text-sm">
+               {accountId} - <span className="text-foreground">{accountDetails.type}</span>
+             </span>
+             <span className="text-xs text-muted-foreground mt-1">
+               {accountDetails.clientName}
+             </span>
+           </div>
            <ChevronDown className="h-4 w-4 text-muted-foreground" />
          </Button>
        </div>
@@ -643,11 +651,30 @@ export function TradeExecutionPanel({
                ))}
              </>
            )}
-           {orderType === 'market' && !isOptionTrade && renderFormRow('Market Price', (
-             <div className="flex items-center gap-1 text-right">
-               <span className="font-medium">${marketPrice.toFixed(2)}</span>
+           {orderType === 'market' && !isOptionTrade && (
+             <div className="flex items-center justify-between py-2 text-sm">
+               <div className="flex items-center gap-1">
+                 <label className="text-muted-foreground whitespace-nowrap">Market Price</label>
+                 <TooltipProvider>
+                   <Tooltip>
+                     <TooltipTrigger asChild>
+                       <Info className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help" />
+                     </TooltipTrigger>
+                     <TooltipContent side="right" className="text-sm">
+                       <div className="space-y-1">
+                         <div>NBBO Bid: $234.33 (500 shares) – from NYSE</div>
+                         <div>NBBO Ask: $234.37 (300 shares) – from NASDAQ</div>
+                         <div>Last sale price: $234.35 (200 shares)</div>
+                       </div>
+                     </TooltipContent>
+                   </Tooltip>
+                 </TooltipProvider>
+               </div>
+               <div className="flex-grow flex justify-end text-right">
+                 <span className="font-medium">${marketPrice.toFixed(2)}</span>
+               </div>
              </div>
-           ))}
+           )}
            <div className="py-2 text-sm">
              <div className="flex items-center justify-between">
                <label className="text-muted-foreground whitespace-nowrap mr-4">{isOptionTrade ? 'Contracts' : 'Quantity'}</label>
@@ -978,8 +1005,9 @@ export function TradeExecutionPanel({
            </div>
          </div>
        )}
-    </div>
-  );
+      </div>
+    );
+  };
 
  const renderOrderReview = () => (
      <div className="space-y-6">

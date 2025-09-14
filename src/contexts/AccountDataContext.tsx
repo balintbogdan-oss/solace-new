@@ -229,7 +229,6 @@ export function AccountDataProvider({
     }
 
     if (!data.securities || !Array.isArray(data.securities)) {
-      console.log('No securities data available');
       return [];
     }
 
@@ -238,7 +237,6 @@ export function AccountDataProvider({
       return [];
     }
 
-    console.log('Processing holdings:', data.holdings.length, 'securities:', data.securities.length, 'marketData:', data.marketData.length);
 
     return data.holdings.map(holding => {
       const security = data.securities.find(s => s.symbol === holding.symbol);

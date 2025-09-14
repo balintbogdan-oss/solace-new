@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { searchService, SearchResultItem } from '@/services/searchService';
 
 export function useSearch() {
@@ -24,41 +24,42 @@ export function useSearch() {
     loadRecentSearches();
   }, []);
 
-  // Debounced search function
-  const debouncedSearch = useCallback(
-    debounce(async (searchQuery: string) => {
-      console.log('Searching for:', searchQuery);
-      if (!searchQuery.trim()) {
-        setResults([]);
-        setIsLoading(false);
-        return;
-      }
+  // Search function
+  const performSearch = useCallback(async (searchQuery: string) => {
+    console.log('Searching for:', searchQuery);
+    if (!searchQuery.trim()) {
+      setResults([]);
+      setIsLoading(false);
+      return;
+    }
 
-      setIsLoading(true);
-      try {
-        const searchResults = await searchService.search(searchQuery);
-        console.log('Search results:', searchResults);
-        const searchItems = searchService.convertToSearchItems(searchResults);
-        console.log('Converted search items:', searchItems);
-        setResults(searchItems);
-      } catch (error) {
-        console.error('Search error:', error);
-        setResults([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 300),
-    []
-  );
+    setIsLoading(true);
+    try {
+      const searchResults = await searchService.search(searchQuery);
+      console.log('Search results:', searchResults);
+      const searchItems = searchService.convertToSearchItems(searchResults);
+      console.log('Converted search items:', searchItems);
+      setResults(searchItems);
+    } catch (error) {
+      console.error('Search error:', error);
+      setResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Create debounced search function with ref to avoid dependency issues
+  const debouncedSearchRef = useRef(debounce(performSearch, 300));
+  debouncedSearchRef.current = debounce(performSearch, 300);
 
   // Trigger search when query changes
   useEffect(() => {
     if (query.trim()) {
-      debouncedSearch(query);
+      debouncedSearchRef.current(query);
     } else {
       setResults([]);
     }
-  }, [query, debouncedSearch]);
+  }, [query, performSearch]);
 
   // Handle search item click
   const handleSearchItemClick = async (item: SearchResultItem) => {

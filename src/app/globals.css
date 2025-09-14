@@ -6,7 +6,7 @@
 @layer base {
   :root {
     /* Reverted to original hex/tailwind values */
-    --background: #F6F5F4; /* Original: white bg-[#ececef] dark:bg-black */
+    --background: 255 255 255; /* Original: white bg-[#ececef] dark:bg-black */
     --foreground: #111827; /* Original: gray-900 */
 
     --secondary: #f6f6f3; /* Original: gray-100 */

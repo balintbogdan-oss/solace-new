@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { SupabaseAccountService } from '@/services/supabaseService'
 import { Client, AccountData } from '@/types/account'
 
@@ -26,7 +26,7 @@ export function ClientDataProvider({ children, clientId }: ClientDataProviderPro
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchClientData = async () => {
+  const fetchClientData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -45,13 +45,13 @@ export function ClientDataProvider({ children, clientId }: ClientDataProviderPro
     } finally {
       setLoading(false)
     }
-  }
+  }, [clientId])
 
   useEffect(() => {
     if (clientId) {
       fetchClientData()
     }
-  }, [clientId])
+  }, [clientId, fetchClientData])
 
   const refetch = async () => {
     await fetchClientData()

@@ -85,7 +85,7 @@ export function Header() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [setShowSearchResults]);
   
   // Don't render header on login page
   if (pathname === '/login') {
@@ -186,7 +186,7 @@ export function Header() {
             </form>
 
             {showSearchResults && (
-              <div className="absolute mt-2 w-[600px] bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-xl z-50 max-h-96 overflow-y-auto">
+              <div className="absolute mt-2 w-[600px] bg-white dark:bg-neutral-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-xl z-50 max-h-96 overflow-y-auto">
                 {/* Show recent searches when no query */}
                 {!searchQuery && (
                   <div className="p-4">
@@ -229,7 +229,7 @@ export function Header() {
                                 <Link
                                   href={item.href}
                                   onClick={() => handleSearchItemClick(item)}
-                                  className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors group"
+                                  className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-neutral-800 rounded-lg transition-colors group"
                                 >
                                   <div className="flex items-center gap-3 flex-1">
                                     {getIcon()}
@@ -265,7 +265,7 @@ export function Header() {
                 {searchQuery && (
                   <>
                     {/* Sticky header section for search results */}
-                    <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 p-4 pb-0">
+                    <div className="sticky top-0 bg-white dark:bg-neutral-800 z-10 p-4 pb-0">
                       {/* Filter buttons */}
                       <div className="flex items-center gap-3 mb-4">
                         <div className="text-sm font-medium text-muted-foreground">Filter by</div>

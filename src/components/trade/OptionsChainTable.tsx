@@ -70,25 +70,32 @@ const generateMockOptionData = (symbol: string, strikeBase: number, count: numbe
     const timeToExpiry = 0.1; // ~36 days
     const timeValue = volatility * Math.sqrt(timeToExpiry) * currentPrice * 0.4;
     
-    // Base option prices
-    const callPrice = callIntrinsic + timeValue * (1 + Math.random() * 0.3);
-    const putPrice = putIntrinsic + timeValue * (1 + Math.random() * 0.3);
+    // Base option prices - use deterministic values based on strike and symbol
+    const randomSeed = (strike * 1000 + symbol.charCodeAt(0) + symbol.charCodeAt(1)) % 1000;
+    const randomFactor1 = (randomSeed / 1000) * 0.3;
+    const randomFactor2 = ((randomSeed * 7) % 1000 / 1000) * 0.3;
+    const callPrice = callIntrinsic + timeValue * (1 + randomFactor1);
+    const putPrice = putIntrinsic + timeValue * (1 + randomFactor2);
     
     // More realistic bid-ask spreads (1-3% of option price)
     const callSpread = Math.max(0.05, callPrice * 0.02);
     const putSpread = Math.max(0.05, putPrice * 0.02);
     
-    // More realistic daily changes (-20% to +20% of option price)
-    const callChange = (Math.random() - 0.5) * callPrice * 0.4;
-    const putChange = (Math.random() - 0.5) * putPrice * 0.4;
+    // More realistic daily changes - use deterministic values
+    const changeSeed1 = (strike * 13 + symbol.charCodeAt(0)) % 1000;
+    const changeSeed2 = (strike * 17 + symbol.charCodeAt(1)) % 1000;
+    const callChange = ((changeSeed1 / 1000) - 0.5) * callPrice * 0.4;
+    const putChange = ((changeSeed2 / 1000) - 0.5) * putPrice * 0.4;
     
     // Calculate percentage changes
     const callChangePercent = callPrice > 0 ? (callChange / callPrice) * 100 : 0;
     const putChangePercent = putPrice > 0 ? (putChange / putPrice) * 100 : 0;
     
-    // Volume and open interest (more realistic ranges)
-    const volume = Math.floor(Math.random() * 1000) + 10;
-    const openInterest = Math.floor(Math.random() * 5000) + 100;
+    // Volume and open interest - use deterministic values
+    const volumeSeed = (strike * 19 + symbol.charCodeAt(0) + symbol.charCodeAt(1)) % 1000;
+    const oiSeed = (strike * 23 + symbol.charCodeAt(0) + symbol.charCodeAt(1)) % 1000;
+    const volume = Math.floor((volumeSeed / 1000) * 1000) + 10;
+    const openInterest = Math.floor((oiSeed / 1000) * 5000) + 100;
 
     options.push({
       strike: strike,

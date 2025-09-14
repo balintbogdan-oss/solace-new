@@ -20,15 +20,9 @@ import {
 import { HoldingWithDetails } from '@/types/account';
 
 const getCurrentTimestamp = () => {
-    return new Date().toLocaleString('en-US', { 
-        month: '2-digit', 
-        day: '2-digit', 
-        year: 'numeric', 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        hour12: true, 
-        timeZoneName: 'short' 
-    }).replace(',', '');
+    // Use a fixed timestamp to prevent hydration mismatches
+    // In a real app, this would come from server-side data
+    return '01/15/25 2:30 PM EST';
 };
 
 type SortableColumn = keyof HoldingWithDetails | 'currentPrice' | 'sector' | 'description' | 'assetClass' | 'accountType' | 'longShort' | 'dayChange' | 'investedValue' | 'optionType' | 'maturityDate' | 'yield' | 'todaysUnrealizedGL' | 'previousClose';

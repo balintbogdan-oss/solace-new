@@ -318,7 +318,10 @@ export class SupabaseAccountService {
         
         const { error: holdingsError } = await supabase
           .from('holdings')
-          .insert(holdingsToSave);
+          .upsert(holdingsToSave, { 
+            onConflict: 'account_id,symbol',
+            ignoreDuplicates: false 
+          });
 
         if (holdingsError) {
           console.error('❌ Holdings insert error:', holdingsError);

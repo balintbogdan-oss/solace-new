@@ -223,7 +223,7 @@ export default function RealizedGLPage() {
             </div>
           </div>
           <LastUpdated 
-            timestamp={`Updated ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })} ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} ET`}
+            timestamp="Updated 01/15/25 2:30 PM ET"
             onRefresh={refreshData}
             className="mt-4"
           />

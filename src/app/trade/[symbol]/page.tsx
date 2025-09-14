@@ -43,16 +43,11 @@ export default function TradeSymbolPage() {
   const stock = useMemo(() => {
     const upperSymbol = symbol?.toUpperCase();
     
-    console.log('🔍 TradePage - Symbol:', upperSymbol);
-    console.log('🔍 TradePage - Market data available:', marketData?.length || 0);
-    
     // Try to get real market data first
     const realMarketData = marketData?.find(m => m.symbol === upperSymbol);
     
-    console.log('🔍 TradePage - Found real market data for', upperSymbol, ':', realMarketData);
     
     if (realMarketData) {
-      console.log('✅ TradePage - Using real market data for', upperSymbol, '- Price:', realMarketData.currentPrice);
       // Create StockInfo from real market data
       const stockInfo: StockInfo = {
         name: realMarketData.description || `${upperSymbol} Inc.`,
@@ -78,7 +73,6 @@ export default function TradeSymbolPage() {
       console.log('❌ TradePage - No real market data found, using mock data for', upperSymbol);
       // Fallback to mock data if not found
       const mockData = STOCK_DATA[upperSymbol] || STOCK_DATA.AAPL;
-      console.log('📊 TradePage - Using mock data:', mockData);
       return mockData;
     }
   }, [symbol, marketData]);
@@ -91,13 +85,11 @@ export default function TradeSymbolPage() {
       return null;
     }
     
-    console.log('🔍 TradePage - Processing mutual fund:', upperSymbol);
     
     // Try to get real market data first
     const realMarketData = marketData?.find(m => m.symbol === upperSymbol);
     
     if (realMarketData) {
-      console.log('✅ TradePage - Using real market data for mutual fund', upperSymbol, '- NAV:', realMarketData.currentPrice);
       // Create MutualFundInfo from real market data
       const mutualFundInfo: MutualFundInfo = {
         symbol: upperSymbol,
@@ -141,10 +133,18 @@ export default function TradeSymbolPage() {
   const isPositive = stock ? stock.change >= 0 : false;
   const isMutualFundSymbol = isMutualFund(symbol);
 
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  // Extract account ID from URL path
+  const accountIdFromPath = params?.accountId as string;
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountIdFromPath || null);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [currentTradeMode, setCurrentTradeMode] = useState<TradeMode>(null);
+  
+  // Initialize trade mode from URL parameters
+  const urlMode = searchParams?.get('mode');
+  const initialTradeMode = urlMode === 'buy' || urlMode === 'sell' ? urlMode : null;
+  const [currentTradeMode, setCurrentTradeMode] = useState<TradeMode>(initialTradeMode);
+  
+  
   // Initialize pageViewMode from URL parameters
   const urlType = searchParams?.get('type');
   const initialPageViewMode = urlType === 'options' ? 'options' : 'stock';
@@ -156,6 +156,24 @@ export default function TradeSymbolPage() {
     const newPageViewMode = currentUrlType === 'options' ? 'options' : 'stock';
     setPageViewMode(newPageViewMode);
   }, [searchParams]);
+
+  // Update trade mode when URL parameters change
+  useEffect(() => {
+    const currentUrlMode = searchParams?.get('mode');
+    const newTradeMode = currentUrlMode === 'buy' || currentUrlMode === 'sell' ? currentUrlMode : null;
+    setCurrentTradeMode(newTradeMode);
+  }, [searchParams]);
+
+  // Update selected account ID when URL path changes (only if not already set)
+  useEffect(() => {
+    const newAccountId = params?.accountId as string;
+    console.log('🔍 TradeSymbolPage - Account ID from URL:', newAccountId);
+    if (newAccountId && newAccountId !== selectedAccountId) {
+      setSelectedAccountId(newAccountId);
+    }
+  }, [params?.accountId, selectedAccountId]);
+
+
 
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [currentOptionTradeDetails, setCurrentOptionTradeDetails] = useState<OptionTradeDetails | null>(null);
@@ -169,6 +187,7 @@ export default function TradeSymbolPage() {
     setShowAccountModal(false);
   };
 
+
   const handleTradeActionClick = (tradeSymbol: string, action: TradeMode) => {
     if (!symbol) return;
     console.log(`Trade action triggered for ${tradeSymbol}: ${action}`);
@@ -176,7 +195,20 @@ export default function TradeSymbolPage() {
     console.log(`Resetting option trade details`);
     setCurrentTradeMode(action);
     setCurrentOptionTradeDetails(null); // Reset option trade details for equity trades
-    setShowAccountModal(true);
+    
+    // If we have an account from the URL, use it directly
+    if (accountIdFromPath) {
+      console.log(`🔍 TradeSymbolPage - Using account from URL:`, accountIdFromPath);
+      setSelectedAccountId(accountIdFromPath);
+    } else {
+      // Otherwise, show account selection modal
+      setShowAccountModal(true);
+    }
+    
+    // Update URL to include the trade mode
+    const typeParam = pageViewMode === 'stock' ? 'equities' : 'options';
+    const modeParam = action ? `&mode=${action}` : '';
+    router.push(`/trade/${symbol}?type=${typeParam}${modeParam}`);
   };
 
   const handleCloseStockDetail = () => {
@@ -222,10 +254,11 @@ export default function TradeSymbolPage() {
   };
 
   return (
-    <div>
-      {/* Main Content Grid: Watchlist | Center (Stock/Options) | Right (Trade Exec) */}
-      {/* Changed grid column definition for fixed outer cols, flexible center col */}
-      <div className="grid grid-cols-1 lg:grid-cols-[370px_1fr_400px] gap-2">
+    <div className="w-full bg-white dark:bg-black">
+      <div className="flex flex-col gap-7">
+        {/* Main Content Grid: Watchlist | Center (Stock/Options) | Right (Trade Exec) */}
+        {/* Changed grid column definition for fixed outer cols, flexible center col */}
+        <div className="grid grid-cols-1 lg:grid-cols-[370px_1fr_400px] gap-2">
         
         {/* Column 1: Watchlist */}
         <div className="lg:col-span-1 p-4 rounded-lg border">
@@ -322,6 +355,13 @@ export default function TradeSymbolPage() {
 
         {/* Column 3: Right Content (Trade Execution or Placeholder) */}
         <div className="lg:col-span-1 rounded-md">
+          {(() => {
+            console.log('🔍 TradeSymbolPage - Rendering check:');
+            console.log('  - selectedAccountId:', selectedAccountId);
+            console.log('  - currentTradeMode:', currentTradeMode);
+            console.log('  - Should show panel:', selectedAccountId && currentTradeMode);
+            return null;
+          })()}
           {selectedAccountId && currentTradeMode ? (
             <div className="bg-white border p-6 rounded-lg shadow-md">
             <TradeExecutionPanel
@@ -344,7 +384,8 @@ export default function TradeSymbolPage() {
           )}
         </div>
 
-      </div> { /* End of main 3-column grid */ }
+        </div> { /* End of main 3-column grid */ }
+      </div>
 
       {/* Modals remain outside the main grid */}
       <SearchModal

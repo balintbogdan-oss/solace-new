@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { SupabaseAccountService } from '@/services/supabaseService'
 import { Household, AccountData } from '@/types/account'
 
@@ -27,12 +27,12 @@ export function HouseholdDataProvider({ children, householdId }: HouseholdDataPr
   const [data, setData] = useState<HouseholdData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabaseService = new SupabaseAccountService()
 
-  const fetchHouseholdData = async () => {
+  const fetchHouseholdData = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
+      const supabaseService = new SupabaseAccountService()
       const householdData = await supabaseService.getHouseholdData(householdId)
       if (householdData) {
         setData(householdData)
@@ -47,7 +47,7 @@ export function HouseholdDataProvider({ children, householdId }: HouseholdDataPr
     } finally {
       setLoading(false)
     }
-  }
+  }, [householdId])
 
   useEffect(() => {
     if (householdId) {
@@ -57,7 +57,7 @@ export function HouseholdDataProvider({ children, householdId }: HouseholdDataPr
       setError('No household ID provided.')
       setData(null)
     }
-  }, [householdId])
+  }, [householdId, fetchHouseholdData])
 
   const refreshHouseholdData = () => {
     fetchHouseholdData()

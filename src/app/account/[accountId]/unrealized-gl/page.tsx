@@ -410,7 +410,7 @@ export default function UnrealizedGLPage() {
                 ) : (
                   filteredPositions.map((position, index) => (
                     <tr key={position.id} className={`border-b ${index % 2 === 1 ? 'bg-card' : ''}`}>
-                      <td className="px-6 py-3 text-foreground">{new Date(position.lastUpdated).toLocaleDateString()}</td>
+                      <td className="px-6 py-3 text-foreground">{new Date(position.lastUpdated).toISOString().split('T')[0]}</td>
                       <td className="px-6 py-3 text-right text-foreground">{position.quantity.toLocaleString()}</td>
                       <td className="px-6 py-3">
                         <div>

@@ -34,14 +34,12 @@ export async function loadEquitiesMarketData(): Promise<unknown> {
         equitiesMarketData = JSON.parse(fileContent);
       } catch (error) {
         console.error('Error loading equities market data on server side:', error);
-        const cacheBuster = new Date().getTime();
-        const response = await fetch(`http://localhost:3000/data/market-data-equities.json?t=${cacheBuster}`);
+        const response = await fetch(`http://localhost:3000/data/market-data-equities.json`);
         equitiesMarketData = await response.json();
       }
     } else {
-      // Client side - fetch from URL with cache busting
-      const cacheBuster = new Date().getTime();
-      const url = `/data/market-data-equities.json?t=${cacheBuster}`;
+      // Client side - fetch from URL
+      const url = `/data/market-data-equities.json`;
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -73,14 +71,12 @@ export async function loadMutualFundsMarketData(): Promise<unknown> {
         mutualFundsMarketData = JSON.parse(fileContent);
       } catch (error) {
         console.error('Error loading mutual funds market data on server side:', error);
-        const cacheBuster = new Date().getTime();
-        const response = await fetch(`http://localhost:3000/data/market-data-mutual-funds.json?t=${cacheBuster}`);
+        const response = await fetch(`http://localhost:3000/data/market-data-mutual-funds.json`);
         mutualFundsMarketData = await response.json();
       }
     } else {
-      // Client side - fetch from URL with cache busting
-      const cacheBuster = new Date().getTime();
-      const url = `/data/market-data-mutual-funds.json?t=${cacheBuster}`;
+      // Client side - fetch from URL
+      const url = `/data/market-data-mutual-funds.json`;
       const response = await fetch(url);
       
       if (!response.ok) {
