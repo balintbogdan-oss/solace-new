@@ -1,0 +1,219 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { X, RefreshCw } from 'lucide-react';
+
+interface MutualFundMarketDataOverlayProps {
+  symbol: string;
+  name: string;
+  nav: number;
+  change: number;
+  changePercent: number;
+  previousClose: number;
+  dayHigh: number;
+  dayLow: number;
+  yearHigh: number;
+  yearLow: number;
+  expenseRatio: number;
+  netAssets: number;
+  timestamp: string;
+}
+
+export function MutualFundMarketDataOverlay({
+  symbol,
+  name,
+  nav,
+  change,
+  changePercent,
+  previousClose,
+  dayHigh,
+  dayLow,
+  yearHigh,
+  yearLow,
+  expenseRatio,
+  netAssets,
+  timestamp,
+}: MutualFundMarketDataOverlayProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const overlayWidth = 320; // Approximate overlay width
+      const overlayHeight = 400; // Approximate overlay height
+
+      let left = rect.right + 10;
+      let top = rect.top;
+
+      // Adjust if overlay would go off the right edge
+      if (left + overlayWidth > viewportWidth) {
+        left = rect.left - overlayWidth - 10;
+      }
+
+      // Adjust if overlay would go off the bottom edge
+      if (top + overlayHeight > viewportHeight) {
+        top = viewportHeight - overlayHeight - 10;
+      }
+
+      // Ensure overlay doesn't go off the top edge
+      if (top < 10) {
+        top = 10;
+      }
+
+      setPosition({ top, left });
+    }
+    setIsOpen(!isOpen);
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        overlayRef.current &&
+        !overlayRef.current.contains(event.target as Node) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
+  const formatLargeNumber = (value: number) => {
+    if (value >= 1e12) {
+      return `$${(value / 1e12).toFixed(1)}T`;
+    } else if (value >= 1e9) {
+      return `$${(value / 1e9).toFixed(1)}B`;
+    } else if (value >= 1e6) {
+      return `$${(value / 1e6).toFixed(1)}M`;
+    } else if (value >= 1e3) {
+      return `$${(value / 1e3).toFixed(1)}K`;
+    }
+    return formatCurrency(value);
+  };
+
+  return (
+    <div>
+      <div
+        ref={triggerRef}
+        onClick={handleTriggerClick}
+        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-muted hover:bg-muted/80 cursor-pointer transition-colors"
+      >
+        <span className="text-xs font-medium text-muted-foreground">i</span>
+      </div>
+
+      {isOpen && (
+        <>
+          {/* 25% black overlay background */}
+          <div 
+            className="fixed inset-0 z-40 bg-black/25"
+            onClick={() => setIsOpen(false)}
+          />
+          {/* Modal content */}
+          <div
+            ref={overlayRef}
+            onClick={handleOverlayClick}
+            className="fixed z-50 bg-background border rounded-lg shadow-lg p-4 w-80"
+            style={{
+              top: `${position.top}px`,
+              left: `${position.left}px`,
+            }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-md font-semibold">{symbol}</div>
+                <p className="text-sm text-muted-foreground">{name}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {/* Current NAV */}
+              <div className="pb-3 border-b">
+                <h2 className="text-2xl font-normal">{formatCurrency(nav)}</h2>
+                <div className={`text-sm font-medium ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {change >= 0 ? '+' : ''}{change.toFixed(2)} ({changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%)
+                </div>
+              </div>
+
+              {/* Price Data */}
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <div className="text-muted-foreground">Previous Close</div>
+                  <div className="font-medium">{formatCurrency(previousClose)}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Day High</div>
+                  <div className="font-medium">{formatCurrency(dayHigh)}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Day Low</div>
+                  <div className="font-medium">{formatCurrency(dayLow)}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">52W High</div>
+                  <div className="font-medium">{formatCurrency(yearHigh)}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">52W Low</div>
+                  <div className="font-medium">{formatCurrency(yearLow)}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Expense Ratio</div>
+                  <div className="font-medium">{(expenseRatio * 100).toFixed(2)}%</div>
+                </div>
+              </div>
+
+              {/* Fund Information */}
+              <div className="pt-3 border-t">
+                <div className="text-sm">
+                  <div className="text-muted-foreground">Net Assets</div>
+                  <div className="font-medium">{formatLargeNumber(netAssets)}</div>
+                </div>
+              </div>
+
+              {/* Timestamp */}
+              <div className="text-xs text-muted-foreground pt-2 border-t">
+                {timestamp}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

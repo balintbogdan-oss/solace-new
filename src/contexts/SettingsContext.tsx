@@ -12,6 +12,8 @@ export interface NavigationSettings {
 export interface AppearanceSettings {
   primaryColor: string;
   fontFamily: string;
+  headerFontFamily: string;
+  bodyFontFamily: string;
   fontSize: 'sm' | 'base' | 'lg';
   borderRadius: 'none' | 'sm' | 'md' | 'lg';
   logoUrl: string;
@@ -38,6 +40,8 @@ const defaultSettings: NavigationSettings = {
 const defaultAppearanceSettings: AppearanceSettings = {
   primaryColor: 'brown', // This will map to the default 142 85 4 color
   fontFamily: 'Inter',
+  headerFontFamily: 'Source Serif 4',
+  bodyFontFamily: 'Inter',
   fontSize: 'base',
   borderRadius: 'md',
   logoUrl: '',
@@ -57,9 +61,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     
     // One-time migration: clear old appearance settings to force new defaults
     const appearanceVersion = localStorage.getItem('appearance-settings-version');
-    if (!appearanceVersion || appearanceVersion !== '2') {
+    if (!appearanceVersion || appearanceVersion !== '3') {
       localStorage.removeItem('appearance-settings');
-      localStorage.setItem('appearance-settings-version', '2');
+      localStorage.setItem('appearance-settings-version', '3');
     }
     
     const savedNavigationSettings = localStorage.getItem('navigation-settings');
@@ -81,6 +85,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         if (parsed.primaryColor === 'blue') {
           parsed.primaryColor = 'brown';
         }
+        
+        // Convert old Source Serif Pro to Source Serif 4
+        if (parsed.headerFontFamily === 'Source Serif Pro') {
+          parsed.headerFontFamily = 'Source Serif 4';
+        }
+        
         setAppearanceSettings({ ...defaultAppearanceSettings, ...parsed });
       } catch (error) {
         console.error('Failed to parse saved appearance settings:', error);

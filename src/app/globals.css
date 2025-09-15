@@ -111,6 +111,12 @@
     @apply bg-[var(--background)] text-[var(--foreground)];
     @apply min-h-screen font-sans font-medium antialiased;
     cursor: default;
+    font-family: var(--font-family, 'Inter', sans-serif);
+  }
+
+  /* Header font styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-headers, 'Inter', sans-serif);
   }
 
   h1 {

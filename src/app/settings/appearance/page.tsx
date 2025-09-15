@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Palette, Type, RotateCcw, Upload, X } from 'lucide-react';
+import { RotateCcw, Upload, X } from 'lucide-react';
 
 export default function AppearanceSettingsPage() {
   const { 
@@ -14,11 +13,9 @@ export default function AppearanceSettingsPage() {
     updateAppearanceSetting, 
     resetAppearanceSettings 
   } = useSettings();
-  const [hasChanges, setHasChanges] = useState(false);
 
   const handleAppearanceChange = (key: keyof typeof appearanceSettings, value: string) => {
     updateAppearanceSetting(key, value);
-    setHasChanges(true);
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +37,6 @@ export default function AppearanceSettingsPage() {
       reader.onload = (e) => {
         const result = e.target?.result as string;
         updateAppearanceSetting('logoUrl', result);
-        setHasChanges(true);
       };
       reader.readAsDataURL(file);
     }
@@ -48,12 +44,10 @@ export default function AppearanceSettingsPage() {
 
   const removeLogo = () => {
     updateAppearanceSetting('logoUrl', '');
-    setHasChanges(true);
   };
 
   const handleReset = () => {
     resetAppearanceSettings();
-    setHasChanges(false);
   };
 
   const primaryColors = [
@@ -75,6 +69,7 @@ export default function AppearanceSettingsPage() {
     { value: 'Lato', label: 'Lato', preview: 'font-sans' },
     { value: 'Montserrat', label: 'Montserrat', preview: 'font-sans' },
     { value: 'Source Sans Pro', label: 'Source Sans Pro', preview: 'font-sans' },
+    { value: 'Source Serif 4', label: 'Source Serif 4', preview: 'font-serif' },
     { value: 'Poppins', label: 'Poppins', preview: 'font-sans' },
     { value: 'Nunito', label: 'Nunito', preview: 'font-sans' },
   ];
@@ -98,8 +93,7 @@ export default function AppearanceSettingsPage() {
         {/* Primary Color */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5" />
+            <CardTitle className="text-lg">
               Primary Color
             </CardTitle>
             <CardDescription>
@@ -126,42 +120,129 @@ export default function AppearanceSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Font Family */}
+        {/* Header Background Color */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Type className="h-5 w-5" />
-              Font Family
+            <CardTitle className="text-lg">
+              Header Background Color
             </CardTitle>
             <CardDescription>
-              Select the font family for your application text.
+              Choose the background color for the application header.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Select
-              value={appearanceSettings.fontFamily}
-              onValueChange={(value) => handleAppearanceChange('fontFamily', value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {fontFamilies.map((font) => (
-                  <SelectItem key={font.value} value={font.value}>
-                    <div className="flex items-center gap-2">
-                      <span className={font.preview}>{font.label}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div 
+                    className="w-12 h-12 rounded-lg border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                    style={{ backgroundColor: appearanceSettings.headerBackgroundColor }}
+                    onClick={() => document.getElementById('header-color-picker')?.click()}
+                  />
+                  <Input
+                    id="header-color-picker"
+                    type="color"
+                    value={appearanceSettings.headerBackgroundColor}
+                    onChange={(e) => handleAppearanceChange('headerBackgroundColor', e.target.value)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {appearanceSettings.headerBackgroundColor}
+                </div>
+              </div>
+              
+              {/* Quick color presets */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Quick presets:</p>
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { name: 'Black', value: '#000000' },
+                    { name: 'Dark Gray', value: '#1f2937' },
+                    { name: 'Blue', value: '#1e40af' },
+                    { name: 'Green', value: '#059669' },
+                    { name: 'Purple', value: '#7c3aed' },
+                    { name: 'Red', value: '#dc2626' },
+                  ].map((preset) => (
+                    <button
+                      key={preset.value}
+                      onClick={() => handleAppearanceChange('headerBackgroundColor', preset.value)}
+                      className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                        appearanceSettings.headerBackgroundColor === preset.value
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      }`}
+                    >
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Font Families */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              Font Families
+            </CardTitle>
+            <CardDescription>
+              Select font families for headings and body text.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Header Font</label>
+                <Select
+                  value={appearanceSettings.headerFontFamily}
+                  onValueChange={(value) => handleAppearanceChange('headerFontFamily', value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fontFamilies.map((font) => (
+                      <SelectItem key={font.value} value={font.value}>
+                        <div className="flex items-center gap-2">
+                          <span className={font.preview}>{font.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Body Font</label>
+                <Select
+                  value={appearanceSettings.bodyFontFamily}
+                  onValueChange={(value) => handleAppearanceChange('bodyFontFamily', value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fontFamilies.map((font) => (
+                      <SelectItem key={font.value} value={font.value}>
+                        <div className="flex items-center gap-2">
+                          <span className={font.preview}>{font.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Font Size */}
         <Card>
           <CardHeader>
-            <CardTitle>Font Size</CardTitle>
+            <CardTitle className="text-lg">Font Size</CardTitle>
             <CardDescription>
               Adjust the base font size for better readability.
             </CardDescription>
@@ -189,7 +270,7 @@ export default function AppearanceSettingsPage() {
         {/* Border Radius */}
         <Card>
           <CardHeader>
-            <CardTitle>Border Radius</CardTitle>
+            <CardTitle className="text-lg">Border Radius</CardTitle>
             <CardDescription>
               Choose the corner rounding style for UI elements.
             </CardDescription>
@@ -217,8 +298,7 @@ export default function AppearanceSettingsPage() {
         {/* Logo Upload */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
+            <CardTitle className="text-lg">
               Logo
             </CardTitle>
             <CardDescription>
@@ -260,126 +340,23 @@ export default function AppearanceSettingsPage() {
                   />
                 </div>
               )}
-              
-              {!appearanceSettings.logoUrl && (
-                <div className="text-center">
-                  <Input
-                    type="file"
-                    accept=".png,.svg,image/png,image/svg+xml"
-                    onChange={handleLogoUpload}
-                    className="max-w-xs mx-auto"
-                  />
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Header Background Color */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5" />
-              Header Background Color
-            </CardTitle>
-            <CardDescription>
-              Choose the background color for the application header.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div 
-                  className="w-12 h-12 rounded-lg border-2 border-muted"
-                  style={{ backgroundColor: appearanceSettings.headerBackgroundColor }}
-                />
-                <div className="flex-1">
-                  <Input
-                    type="color"
-                    value={appearanceSettings.headerBackgroundColor}
-                    onChange={(e) => handleAppearanceChange('headerBackgroundColor', e.target.value)}
-                    className="w-20 h-10 p-1 border rounded"
-                  />
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {appearanceSettings.headerBackgroundColor}
-                </div>
-              </div>
-              
-              {/* Quick color presets */}
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Quick presets:</p>
-                <div className="flex gap-2 flex-wrap">
-                  {[
-                    { name: 'Black', value: '#000000' },
-                    { name: 'Dark Gray', value: '#1f2937' },
-                    { name: 'Blue', value: '#1e40af' },
-                    { name: 'Green', value: '#059669' },
-                    { name: 'Purple', value: '#7c3aed' },
-                    { name: 'Red', value: '#dc2626' },
-                  ].map((preset) => (
-                    <button
-                      key={preset.value}
-                      onClick={() => handleAppearanceChange('headerBackgroundColor', preset.value)}
-                      className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                        appearanceSettings.headerBackgroundColor === preset.value
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                      }`}
-                    >
-                      {preset.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-      {hasChanges && (
-        <div className="mt-6 flex justify-end">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            className="flex items-center gap-2"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Reset to Defaults
-          </Button>
-        </div>
-      )}
+      <div className="mt-6 flex justify-end">
+        <Button
+          variant="outline"
+          onClick={handleReset}
+          className="flex items-center gap-2"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Reset All to Default
+        </Button>
+      </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="text-lg">About Appearance Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <p>
-                • <strong>Primary Color:</strong> Changes the main accent color used throughout the application.
-              </p>
-              <p>
-                • <strong>Font Family:</strong> Select from popular Google Fonts for better readability and personal preference.
-              </p>
-              <p>
-                • <strong>Font Size:</strong> Adjust text size for better accessibility and comfort.
-              </p>
-              <p>
-                • <strong>Border Radius:</strong> Control the corner rounding of buttons, cards, and other UI elements.
-              </p>
-              <p>
-                • <strong>Logo:</strong> Upload a custom logo (PNG/SVG, max 2MB) to replace the default branding.
-              </p>
-              <p>
-                • <strong>Header Background:</strong> Customize the header background color with a color picker or presets.
-              </p>
-              <p className="pt-2 text-xs">
-                All appearance changes are applied globally and saved automatically.
-              </p>
-            </div>
-        </CardContent>
-      </Card>
     </>
   );
 }

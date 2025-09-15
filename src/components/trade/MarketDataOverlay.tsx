@@ -101,9 +101,9 @@ export function MarketDataOverlay({
 
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* 25% black overlay background */}
           <div 
-            className="fixed inset-0 z-40" 
+            className="fixed inset-0 z-40 bg-black/25" 
             onClick={() => setIsOpen(false)}
           />
           

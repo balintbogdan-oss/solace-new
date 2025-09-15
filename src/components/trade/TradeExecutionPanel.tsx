@@ -12,6 +12,7 @@ import { cn, formatAccountType } from '@/lib/utils'
 import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
 import { MarketDataOverlay } from './MarketDataOverlay'
 import { OptionsMarketDataOverlay } from './OptionsMarketDataOverlay'
+import { MutualFundMarketDataOverlay } from './MutualFundMarketDataOverlay'
 
 // Mock data (Should ideally be fetched or passed as props)
 // TODO: Replace with actual data fetching logic for price & account details
@@ -47,7 +48,7 @@ const MOCK_ACCOUNTS: Record<string, { name: string; type: MockAccountType; buyin
 };
 
 type OrderState = 'entry' | 'review' | 'confirmation'
-type TradeMode = 'buy' | 'sell' | null
+type TradeMode = 'buy' | 'sell' | 'full-liquidation' | 'full-exchange' | 'partial-exchange' | null
 type OrderType = 'market' | 'limit' | 'stop' | 'stop-limit'
 type CommissionType = 'regular' | 'flatRate' | 'centsPerShare' | 'percentDiscount'
 type TimeInForce = 'day' | 'gtc' | 'ioc' | 'gtd'
@@ -140,6 +141,8 @@ export function TradeExecutionPanel({
   const [distributionLongGains, setDistributionLongGains] = useState<string>('-');
   const [distributionShortGains, setDistributionShortGains] = useState<string>('-');
   const [network, setNetwork] = useState<boolean>(false);
+  const [transactionType, setTransactionType] = useState<'even-dollar' | 'shares'>('shares');
+  const [dollarAmount, setDollarAmount] = useState<number>(0);
   
   // Special Instructions state
   const [allOrNone, setAllOrNone] = useState<boolean>(false);
@@ -243,6 +246,16 @@ export function TradeExecutionPanel({
   // Use database holdings if available, otherwise fall back to mock data
   const availableQuantity = currentHolding?.quantity || (symbol ? MOCK_HOLDINGS[symbol.toUpperCase()]?.quantity || 0 : 0);
   const marketPrice = currentStock.price;
+
+  // Auto-calculate quantity for mutual fund even-dollar transactions
+  useEffect(() => {
+    if (isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0 && marketPrice > 0) {
+      const calculatedQuantity = Math.floor(dollarAmount / marketPrice);
+      setQuantity(calculatedQuantity);
+    } else if (isMutualFund && transactionType === 'even-dollar' && dollarAmount === 0) {
+      setQuantity(0);
+    }
+  }, [isMutualFund, transactionType, dollarAmount, marketPrice]);
   const commission = useMemo(() => {
       if (quantity === 0) return 0;
       
@@ -263,9 +276,17 @@ export function TradeExecutionPanel({
   }, [quantity, marketPrice, commissionType, commissionAmount, isOptionTrade, currentLimitPrice, orderType]);
   const estimatedCost = useMemo(() => {
       const priceToUse = orderType === 'limit' ? currentLimitPrice : marketPrice;
+      
+      // For mutual fund even-dollar transactions, use dollarAmount instead of calculated quantity
+      if (isMutualFund && transactionType === 'even-dollar') {
+        const baseCost = tradeMode === 'buy' ? dollarAmount : dollarAmount;
+        return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
+      }
+      
+      // For all other cases, use the standard calculation
       const baseCost = isOptionTrade ? quantity * currentLimitPrice * 100 : quantity * priceToUse;
       return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
-  }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType]);
+  }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType, isMutualFund, transactionType, dollarAmount]);
 
   // Calculate maximum quantity based on buying power
   const maxQuantity = useMemo(() => {
@@ -337,6 +358,8 @@ export function TradeExecutionPanel({
     setIsAdvancedOpen(false);
     setIsReviewAdvancedOpen(false);
     setTradeMode(initialTradeMode);
+    setTransactionType('shares');
+    setDollarAmount(0);
     
     // Reset special instructions
     setAllOrNone(false);
@@ -364,8 +387,15 @@ export function TradeExecutionPanel({
     
     const errors: string[] = [];
     
-    if (quantity <= 0) {
-      errors.push('Quantity must be greater than 0');
+    // For mutual fund even-dollar transactions, validate dollar amount instead of quantity
+    if (isMutualFund && transactionType === 'even-dollar') {
+      if (dollarAmount <= 0) {
+        errors.push('Dollar amount must be greater than 0');
+      }
+    } else {
+      if (quantity <= 0) {
+        errors.push('Quantity must be greater than 0');
+      }
     }
     
     if (tradeMode === 'sell' && quantity > availableQuantity) {
@@ -381,9 +411,12 @@ export function TradeExecutionPanel({
     }
     
     return errors;
-  }, [showValidation, quantity, tradeMode, availableQuantity, estimatedCost, buyingPower, maxQuantity]);
+  }, [showValidation, quantity, tradeMode, availableQuantity, estimatedCost, buyingPower, maxQuantity, isMutualFund, transactionType, dollarAmount]);
 
-  const canSubmit = validationErrors.length === 0 && quantity > 0;
+  const canSubmit = validationErrors.length === 0 && (
+    (isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0) || 
+    (!isMutualFund || transactionType === 'shares') && quantity > 0
+  );
 
   // --- Trading Functions ---
   const executeTradeOrder = async () => {
@@ -553,7 +586,9 @@ export function TradeExecutionPanel({
     setOrderState('entry');
     setQuantity(0);
     setNotes('');
-    setTradeMode(initialTradeMode); 
+    setTradeMode(initialTradeMode);
+    setTransactionType('shares');
+    setDollarAmount(0);
   };
   const handleQuantityChange = (amount: number) => {
     setQuantity(prev => {
@@ -678,13 +713,58 @@ export function TradeExecutionPanel({
        </div>
        {renderFormRow('Account Type', (
          <Select value={accountType} onValueChange={(v) => setAccountType(v as 'Cash' | 'Margin')} >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
                 <SelectItem value="Cash">Cash</SelectItem>
                 <SelectItem value="Margin">Margin</SelectItem>
             </SelectContent>
          </Select>
        ))}
+
+       {isMutualFund && (
+         renderFormRow('Action', (
+           <Select value={tradeMode || ''} onValueChange={(v) => setTradeMode(v as TradeMode)}>
+             <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
+             <SelectContent>
+               <SelectItem value="buy">Buy</SelectItem>
+               <SelectItem value="sell">Sell</SelectItem>
+               <SelectItem value="full-liquidation">Full Liquidation</SelectItem>
+               <SelectItem value="full-exchange">Full Exchange</SelectItem>
+               <SelectItem value="partial-exchange">Partial Exchange</SelectItem>
+             </SelectContent>
+           </Select>
+         ))
+       )}
+
+       {isMutualFund && (
+         renderFormRow('Transaction Type', (
+           <Select value={transactionType} onValueChange={(value) => setTransactionType(value as 'even-dollar' | 'shares')}>
+             <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
+             <SelectContent>
+               <SelectItem value="even-dollar">Even Dollar</SelectItem>
+               <SelectItem value="shares">Shares</SelectItem>
+             </SelectContent>
+           </Select>
+         ))
+       )}
+
+       {isMutualFund && transactionType === 'even-dollar' && (
+         renderFormRow('Dollar Amount', (
+           <div className="relative flex items-center">
+             <span className="absolute left-2 text-xs text-muted-foreground">$</span>
+             <Input
+               type="number"
+               value={dollarAmount || ''}
+               onChange={(e) => setDollarAmount(Number(e.target.value))}
+               placeholder="0"
+               step="1"
+               min="0"
+               className="w-[140px] h-8 text-xs text-right pl-6 pr-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+             />
+           </div>
+         ))
+       )}
+
 
        {!initialTradeMode && !isOptionTrade && (
          <div className="grid grid-cols-2 gap-2 pt-2 border-t">
@@ -696,9 +776,7 @@ export function TradeExecutionPanel({
        {tradeMode && (
          <div className="space-y-1">
 
-           {isMutualFund ? (
-             renderFormRow('Order Type', <span className="font-medium text-right">Market</span>)
-           ) : (
+           {!isMutualFund && (
              renderFormRow('Order Type', (
                <Select value={orderType} onValueChange={(v) => setOrderType(v as OrderType)}>
                  <SelectTrigger><SelectValue /></SelectTrigger>
@@ -811,19 +889,37 @@ export function TradeExecutionPanel({
            {orderType === 'market' && !isOptionTrade && (
              <div className="flex items-center justify-between py-2 text-sm">
                <div className="flex items-center gap-1">
-                 <label className="text-muted-foreground whitespace-nowrap">Market Price</label>
-                 <MarketDataOverlay
-                   currentPrice={234.35}
-                   change={-2.15}
-                   changePercent={-0.91}
-                   bid={234.33}
-                   ask={234.37}
-                   lastSize={200}
-                   bidSize={500}
-                   askSize={300}
-                   exchange="XNAS"
-                   timestamp="03:55:49 PM ET, 03/10/2025"
-                 />
+                 <label className="text-muted-foreground whitespace-nowrap">{isMutualFund ? 'NAV' : 'Market Price'}</label>
+                 {isMutualFund ? (
+                   <MutualFundMarketDataOverlay
+                     symbol="VTSAX"
+                     name="Vanguard Total Stock Market Index Fund Admiral Shares"
+                     nav={158.11}
+                     change={0.85}
+                     changePercent={0.54}
+                     previousClose={157.26}
+                     dayHigh={158.15}
+                     dayLow={157.20}
+                     yearHigh={165.40}
+                     yearLow={145.20}
+                     expenseRatio={0.0003}
+                     netAssets={2850000000000}
+                     timestamp="4:00:21 PM ET, 03/10/2025"
+                   />
+                 ) : (
+                   <MarketDataOverlay
+                     currentPrice={234.35}
+                     change={-2.15}
+                     changePercent={-0.91}
+                     bid={234.33}
+                     ask={234.37}
+                     lastSize={200}
+                     bidSize={500}
+                     askSize={300}
+                     exchange="XNAS"
+                     timestamp="03:55:49 PM ET, 03/10/2025"
+                   />
+                 )}
                </div>
                <div className="flex-grow flex justify-end text-right">
                  <span className="font-medium">${marketPrice.toFixed(2)}</span>
@@ -834,30 +930,44 @@ export function TradeExecutionPanel({
              <div className="flex items-center justify-between">
                <label className="text-muted-foreground whitespace-nowrap mr-4">{isOptionTrade ? 'Contracts' : 'Quantity'}</label>
                <div className="relative flex items-center max-w-[120px]">
-                  <Input 
-                    type="number" 
-                    value={quantity || ''} 
-                    onChange={(e) => {
-                      const newQuantity = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10) || 0;
-                      // Enforce limits based on trade mode
-                      const maxAllowed = tradeMode === 'buy' ? maxQuantity : availableQuantity;
-                      const limitedQuantity = Math.min(newQuantity, maxAllowed);
-                      setQuantity(limitedQuantity);
-                      setShowValidation(false);
-                    }}
-                    placeholder="0" 
-                    min="0" 
-                    max={tradeMode === 'buy' ? maxQuantity : availableQuantity}
-                    className="text-right pr-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex flex-col h-full justify-center">
-                     <Button variant="ghost" size="icon" className="h-4 w-4 p-0 text-muted-foreground hover:text-foreground" onClick={() => handleQuantityChange(1)} aria-label="Increase quantity">
-                        <ChevronUp className="h-3 w-3" />
-                     </Button>
-                     <Button variant="ghost" size="icon" className="h-4 w-4 p-0 text-muted-foreground hover:text-foreground" onClick={() => handleQuantityChange(-1)} aria-label="Decrease quantity" disabled={quantity <= 0}>
-                        <ChevronDown className="h-3 w-3" />
-                     </Button>
-                  </div>
+                  {isMutualFund && transactionType === 'even-dollar' ? (
+                    // Read-only quantity for even dollar mutual fund transactions
+                    <Input 
+                      type="number" 
+                      value={dollarAmount > 0 ? (dollarAmount / marketPrice).toFixed(4) : '0'} 
+                      readOnly
+                      placeholder="0" 
+                      className="text-right pr-7 bg-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  ) : (
+                    // Editable quantity for all other cases
+                    <>
+                      <Input 
+                        type="number" 
+                        value={quantity || ''} 
+                        onChange={(e) => {
+                          const newQuantity = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10) || 0;
+                          // Enforce limits based on trade mode
+                          const maxAllowed = tradeMode === 'buy' ? maxQuantity : availableQuantity;
+                          const limitedQuantity = Math.min(newQuantity, maxAllowed);
+                          setQuantity(limitedQuantity);
+                          setShowValidation(false);
+                        }}
+                        placeholder="0" 
+                        min="0" 
+                        max={tradeMode === 'buy' ? maxQuantity : availableQuantity}
+                        className="text-right pr-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex flex-col h-full justify-center">
+                         <Button variant="ghost" size="icon" className="h-4 w-4 p-0 text-muted-foreground hover:text-foreground" onClick={() => handleQuantityChange(1)} aria-label="Increase quantity">
+                            <ChevronUp className="h-3 w-3" />
+                         </Button>
+                         <Button variant="ghost" size="icon" className="h-4 w-4 p-0 text-muted-foreground hover:text-foreground" onClick={() => handleQuantityChange(-1)} aria-label="Decrease quantity" disabled={quantity <= 0}>
+                            <ChevronDown className="h-3 w-3" />
+                         </Button>
+                      </div>
+                    </>
+                  )}
                </div>
              </div>
              
@@ -1403,7 +1513,7 @@ export function TradeExecutionPanel({
              {renderFormRow('Limit Price', <span className="font-medium text-right">${stopLimitPrice.toFixed(2)}</span>)}
            </>
          )}
-         {orderType === 'market' && !isOptionTrade && renderFormRow('Market Price', <span className="font-medium text-right">~${marketPrice.toFixed(2)}</span>)}
+         {orderType === 'market' && !isOptionTrade && renderFormRow(isMutualFund ? 'NAV' : 'Market Price', <span className="font-medium text-right">~${marketPrice.toFixed(2)}</span>)}
          {renderFormRow('Commission Type', <span className="font-medium capitalize text-right">{commissionType}</span>)}
          {renderFormRow('Commission Est.', <span className="font-medium text-right">${commission.toFixed(2)}</span>)}
          {/* Show tax allocation method only for stock sells with Cash or Margin accounts */}

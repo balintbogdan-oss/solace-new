@@ -9,20 +9,70 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (!isHydrated) return;
 
-    // Apply font family
-    const fontFamily = appearanceSettings.fontFamily;
-    if (fontFamily && fontFamily !== 'Inter') {
-      // Load Google Font
-      const link = document.createElement('link');
-      link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap`;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
+    // Apply font families
+    const headerFontFamily = appearanceSettings.headerFontFamily || 'Inter';
+    const bodyFontFamily = appearanceSettings.bodyFontFamily || 'Inter';
+    
+    // Load Google Fonts for both header and body (skip fonts already loaded by Next.js)
+    const fontsToLoad = new Set([headerFontFamily, bodyFontFamily]);
+    
+    fontsToLoad.forEach(fontFamily => {
+      // Skip fonts that are already loaded by Next.js
+      if (fontFamily && fontFamily !== 'Inter' && fontFamily !== 'Source Serif 4') {
+        // Check if font is already loaded to avoid duplicates
+        const fontName = fontFamily.replace(/\s+/g, '+');
+        const existingLink = document.querySelector(`link[href*="${fontName}"]`);
+        if (!existingLink) {
+          const link = document.createElement('link');
+          link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;500;600;700&display=swap`;
+          link.rel = 'stylesheet';
+          link.crossOrigin = 'anonymous';
+          
+          // Wait for font to load before applying
+          link.onload = () => {
+            // Force a re-render to apply the new font
+            const event = new Event('fontloaded');
+            window.dispatchEvent(event);
+          };
+          
+          link.onerror = () => {
+            console.error('Failed to load font:', fontFamily);
+          };
+          
+          document.head.appendChild(link);
+        }
+      }
+    });
 
-      // Apply font to document
-      document.documentElement.style.setProperty('--font-family', fontFamily);
-    } else {
-      document.documentElement.style.setProperty('--font-family', 'Inter, sans-serif');
-    }
+    // Apply fonts to document with fallbacks
+    const applyFonts = () => {
+      // Use Next.js font variables when available, otherwise fall back to dynamic loading
+      if (headerFontFamily === 'Source Serif 4' || headerFontFamily === 'Source Serif Pro') {
+        document.documentElement.style.setProperty('--font-family-headers', 'var(--font-source-serif-4), Inter, sans-serif');
+      } else {
+        document.documentElement.style.setProperty('--font-family-headers', `"${headerFontFamily}", Inter, sans-serif`);
+      }
+      
+      if (bodyFontFamily === 'Inter') {
+        document.documentElement.style.setProperty('--font-family', 'var(--font-inter), Inter, sans-serif');
+      } else {
+        document.documentElement.style.setProperty('--font-family', `"${bodyFontFamily}", Inter, sans-serif`);
+      }
+    };
+    
+    applyFonts();
+    
+    // Listen for font loaded events to reapply fonts
+    const handleFontLoaded = () => {
+      applyFonts();
+    };
+    
+    window.addEventListener('fontloaded', handleFontLoaded);
+    
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener('fontloaded', handleFontLoaded);
+    };
 
     // Apply font size
     const fontSizeMap = {
