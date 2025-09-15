@@ -89,12 +89,22 @@ export function TradeExecutionPanel({
   const notesTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [isReviewAdvancedOpen, setIsReviewAdvancedOpen] = useState(false);
+  const [mutualFundTab, setMutualFundTab] = useState<'exchange' | 'optional'>('exchange');
   const isOptionTrade = useMemo(() => {
     if (typeof isOptionTradeOverride === 'boolean') {
       return isOptionTradeOverride;
     }
     return strikePrice !== undefined && optionType !== undefined;
   }, [isOptionTradeOverride, strikePrice, optionType]);
+
+  // Function to detect if a symbol is a mutual fund
+  const isMutualFund = useMemo(() => {
+    const upperSymbol = symbol?.toUpperCase();
+    return upperSymbol === 'VTSAX' || 
+           upperSymbol === 'VFIAX' ||
+           upperSymbol === 'VTSMX' ||
+           false;
+  }, [symbol]);
 
   // --- Form Field States ---
   const [accountType, setAccountType] = useState<'Cash' | 'Margin'>('Cash');
@@ -112,11 +122,23 @@ export function TradeExecutionPanel({
   const [ttoRep, setTtoRep] = useState<string>('');
   const [sellerCode, setSellerCode] = useState<string>('Long-Stock');
   const [goodTillDate, setGoodTillDate] = useState<string>('');
-  const [solicited, setSolicited] = useState<boolean>(false);
+  const [solicited, setSolicited] = useState<string>('-');
   const [discretion, setDiscretion] = useState<boolean>(false);
   const [notes, setNotes] = useState('');
   const [showValidation, setShowValidation] = useState(false);
   const [taxAllocationMethod, setTaxAllocationMethod] = useState<TaxAllocationMethod>('FirstInFirstOut');
+
+  // Mutual Fund specific settings
+  const [customerStatus, setCustomerStatus] = useState<string>('Existing');
+  const [shareProcessing, setShareProcessing] = useState<string>('Regular');
+  const [nav, setNav] = useState<string>('-');
+  const [mutualFundDiscretion, setMutualFundDiscretion] = useState<string>('-');
+  const [noCdsc, setNoCdsc] = useState<string>('-');
+  const [loiRoaBreakpoint, setLoiRoaBreakpoint] = useState<string>('-');
+  const [relatedAccountType, setRelatedAccountType] = useState<string>('-');
+  const [distributionLongGains, setDistributionLongGains] = useState<string>('-');
+  const [distributionShortGains, setDistributionShortGains] = useState<string>('-');
+  const [network, setNetwork] = useState<boolean>(false);
   
   // Special Instructions state
   const [allOrNone, setAllOrNone] = useState<boolean>(false);
@@ -182,6 +204,13 @@ export function TradeExecutionPanel({
       }
     }
   }, [isOptionTrade, tradeMode, skipSegmentedControl]);
+
+  // Set order type to market for mutual funds
+  useEffect(() => {
+    if (isMutualFund && orderType !== 'market') {
+      setOrderType('market');
+    }
+  }, [isMutualFund, orderType]);
   
   const accountDetails = useMemo(() => {
     if (accountData) {
@@ -217,7 +246,7 @@ export function TradeExecutionPanel({
       if (quantity === 0) return 0;
       
       if (commissionType === 'regular') {
-        return 75.00; // Hardcoded $75 commission
+        return 10.00; // Hardcoded $10 commission
       } else if (commissionType === 'flatRate') {
         return commissionAmount;
       } else if (commissionType === 'centsPerShare') {
@@ -261,7 +290,7 @@ export function TradeExecutionPanel({
     setTtoRep('');
     setSellerCode('Long-Stock');
     setGoodTillDate('');
-    setSolicited(false);
+    setSolicited('-');
     setDiscretion(false);
     setIsAdvancedOpen(false);
     setIsReviewAdvancedOpen(false);
@@ -402,46 +431,46 @@ export function TradeExecutionPanel({
           // Update holding (reduce quantity)
           const newQuantity = currentHolding.quantity - quantity;
         
-        if (newQuantity <= 0) {
-          console.log('🗑️ Removing holding completely');
-          // Remove holding completely
-          await removeHolding(symbol.toUpperCase());
-          
-          // Update cash balance and add trade record separately
-          await updateBalances({
-            cash: availableCash + tradeValue - commission
-          });
-          
-          await addTrade({
-            symbol: symbol.toUpperCase(),
-            cusip: symbol.toUpperCase(),
-            description: `${symbol.toUpperCase()} Stock`,
-            action: 'SELL',
-            quantity: quantity,
-            price: priceToUse,
-            totalValue: tradeValue,
-            commission: commission,
-            date: new Date().toISOString().split('T')[0],
-            time: new Date().toTimeString().split(' ')[0],
-            longShort: 'Long'
-          });
-        } else {
-          // Update quantity using combined function
-          await executeTrade({
-            symbol: symbol.toUpperCase(),
-            action: 'SELL',
-            quantity: quantity,
-            price: priceToUse,
-            totalValue: tradeValue,
-            commission: commission,
-            holdingUpdates: {
-              quantity: newQuantity
-            },
-            balanceUpdates: {
+          if (newQuantity <= 0) {
+            console.log('🗑️ Removing holding completely');
+            // Remove holding completely
+            await removeHolding(symbol.toUpperCase());
+            
+            // Update cash balance and add trade record separately
+            await updateBalances({
               cash: availableCash + tradeValue - commission
-            }
-          });
-        }
+            });
+            
+            await addTrade({
+              symbol: symbol.toUpperCase(),
+              cusip: symbol.toUpperCase(),
+              description: `${symbol.toUpperCase()} Stock`,
+              action: 'SELL',
+              quantity: quantity,
+              price: priceToUse,
+              totalValue: tradeValue,
+              commission: commission,
+              date: new Date().toISOString().split('T')[0],
+              time: new Date().toTimeString().split(' ')[0],
+              longShort: 'Long'
+            });
+          } else {
+            // Update quantity using combined function
+            await executeTrade({
+              symbol: symbol.toUpperCase(),
+              action: 'SELL',
+              quantity: quantity,
+              price: priceToUse,
+              totalValue: tradeValue,
+              commission: commission,
+              holdingUpdates: {
+                quantity: newQuantity
+              },
+              balanceUpdates: {
+                cash: availableCash + tradeValue - commission
+              }
+            });
+          }
         }
       }
       
@@ -624,17 +653,21 @@ export function TradeExecutionPanel({
        {tradeMode && (
          <div className="space-y-1">
 
-           {renderFormRow('Order Type', (
-             <Select value={orderType} onValueChange={(v) => setOrderType(v as OrderType)}>
-               <SelectTrigger><SelectValue /></SelectTrigger>
-               <SelectContent>
-                 <SelectItem value="market">Market</SelectItem>
-                 <SelectItem value="limit">Limit</SelectItem>
-                 {!isOptionTrade && <SelectItem value="stop">Stop</SelectItem>}
-                 {!isOptionTrade && <SelectItem value="stop-limit">Stop-Limit</SelectItem>}
-               </SelectContent>
-             </Select>
-           ))}
+           {isMutualFund ? (
+             renderFormRow('Order Type', <span className="font-medium text-right">Market</span>)
+           ) : (
+             renderFormRow('Order Type', (
+               <Select value={orderType} onValueChange={(v) => setOrderType(v as OrderType)}>
+                 <SelectTrigger><SelectValue /></SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="market">Market</SelectItem>
+                   <SelectItem value="limit">Limit</SelectItem>
+                   {!isOptionTrade && <SelectItem value="stop">Stop</SelectItem>}
+                   {!isOptionTrade && <SelectItem value="stop-limit">Stop-Limit</SelectItem>}
+                 </SelectContent>
+               </Select>
+             ))
+           )}
            {orderType === 'limit' && renderFormRow('Limit Price', (
               <div className="relative flex items-center max-w-[120px]">
                  <Input 
@@ -864,14 +897,245 @@ export function TradeExecutionPanel({
              </Select>
            ))}
 
+           {/* Mutual Fund specific non-advanced settings */}
+           {isMutualFund && (
+             <>
+               {renderFormRow('Customer Status', (
+                 <Select value={customerStatus} onValueChange={setCustomerStatus}>
+                   <SelectTrigger className="w-[140px] h-8 text-xs">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="-">-</SelectItem>
+                     <SelectItem value="Existing">Existing</SelectItem>
+                     <SelectItem value="New">New</SelectItem>
+                   </SelectContent>
+                 </Select>
+               ))}
+               {renderFormRow('Reinvest Divs', (
+                 <Select value={shareProcessing} onValueChange={setShareProcessing}>
+                   <SelectTrigger className="w-[140px] h-8 text-xs">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="-">-</SelectItem>
+                     <SelectItem value="Regular">Regular</SelectItem>
+                     <SelectItem value="Pay in Cash">Pay in Cash</SelectItem>
+                     <SelectItem value="Reinvest">Reinvest</SelectItem>
+                   </SelectContent>
+                 </Select>
+               ))}
+               {renderFormRow('Distribution Long Gains', (
+                 <Select value={distributionLongGains} onValueChange={setDistributionLongGains}>
+                   <SelectTrigger className="w-[140px] h-8 text-xs">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="-">-</SelectItem>
+                     <SelectItem value="Day">Day</SelectItem>
+                     <SelectItem value="Pay in Cash">Pay in Cash</SelectItem>
+                     <SelectItem value="Reinvest">Reinvest</SelectItem>
+                   </SelectContent>
+                 </Select>
+               ))}
+               {renderFormRow('Distribution Short Gains', (
+                 <Select value={distributionShortGains} onValueChange={setDistributionShortGains}>
+                   <SelectTrigger className="w-[140px] h-8 text-xs">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="-">-</SelectItem>
+                     <SelectItem value="Day">Day</SelectItem>
+                     <SelectItem value="Pay in Cash">Pay in Cash</SelectItem>
+                     <SelectItem value="Reinvest">Reinvest</SelectItem>
+                   </SelectContent>
+                 </Select>
+               ))}
+               {renderFormRow('Network', (
+                 <div className="flex gap-4">
+                   <label className="flex items-center gap-2">
+                     <input 
+                       type="radio" 
+                       name="network" 
+                       value="yes" 
+                       checked={network} 
+                       onChange={(e) => setNetwork(e.target.value === 'yes')}
+                       className="form-radio"
+                     />
+                     <span className="text-sm">Yes</span>
+                   </label>
+                   <label className="flex items-center gap-2">
+                     <input 
+                       type="radio" 
+                       name="network" 
+                       value="no" 
+                       checked={!network} 
+                       onChange={(e) => setNetwork(e.target.value === 'yes')}
+                       className="form-radio"
+                     />
+                     <span className="text-sm">No</span>
+                   </label>
+                 </div>
+               ))}
+               {renderFormRow('Solicited', (
+                 <Select value={solicited} onValueChange={setSolicited}>
+                   <SelectTrigger className="w-[140px] h-8 text-xs">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="-">-</SelectItem>
+                     <SelectItem value="Yes">Yes</SelectItem>
+                     <SelectItem value="No">No</SelectItem>
+                   </SelectContent>
+                 </Select>
+               ))}
+             </>
+           )}
+
            <details className="pt-2 group" open={isAdvancedOpen} onToggle={(e) => setIsAdvancedOpen(e.currentTarget.open)}>
              <summary className="list-none flex items-center justify-center text-sm text-primary hover:underline cursor-pointer py-2">
                {isAdvancedOpen ? 'Hide' : 'Show'} Advanced Options
                <ChevronDown className={cn("w-4 h-4 ml-1 transition-transform", isAdvancedOpen && "rotate-180")} />
              </summary>
              <div className="mt-2 rounded-md bg-background/50 space-y-2">
-               {/* Special Instructions - Only available for non-Market Orders and non-option trades */}
-               {orderType !== 'market' && !isOptionTrade && (
+               {/* Mutual Fund specific advanced options */}
+               {isMutualFund ? (
+                 <div className="space-y-4">
+                   {/* Tab Navigation */}
+                   <div className="flex border-b border-gray-200 dark:border-gray-700">
+                     <button
+                       onClick={() => setMutualFundTab('exchange')}
+                       className={cn(
+                         "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                         mutualFundTab === 'exchange'
+                           ? "border-primary text-primary"
+                           : "border-transparent text-gray-500 hover:text-gray-700"
+                       )}
+                     >
+                       Exchange for
+                     </button>
+                     <button
+                       onClick={() => setMutualFundTab('optional')}
+                       className={cn(
+                         "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                         mutualFundTab === 'optional'
+                           ? "border-primary text-primary"
+                           : "border-transparent text-gray-500 hover:text-gray-700"
+                       )}
+                     >
+                       Optional settings
+                     </button>
+                   </div>
+
+                   {/* Exchange for Tab */}
+                   {mutualFundTab === 'exchange' && (
+                     <div className="space-y-2 p-2">
+                       {renderFormRow('Customer status', (
+                         <Select value={customerStatus} onValueChange={setCustomerStatus}>
+                           <SelectTrigger className="w-[140px] h-8 text-xs">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="-">-</SelectItem>
+                             <SelectItem value="Existing">Existing</SelectItem>
+                             <SelectItem value="New">New</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       ))}
+                       {renderFormRow('Share Processing', (
+                         <Select value={shareProcessing} onValueChange={setShareProcessing}>
+                           <SelectTrigger className="w-[140px] h-8 text-xs">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="Regular">Regular</SelectItem>
+                             <SelectItem value="Same Day">Same Day</SelectItem>
+                             <SelectItem value="Next Day">Next Day</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       ))}
+                     </div>
+                   )}
+
+                   {/* Optional settings Tab */}
+                   {mutualFundTab === 'optional' && (
+                     <div className="space-y-2 p-2">
+                       {renderFormRow('NAV', (
+                         <Select value={nav} onValueChange={setNav}>
+                           <SelectTrigger className="w-[140px] h-8 text-xs">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="-">-</SelectItem>
+                             <SelectItem value="Current NAV">Current NAV</SelectItem>
+                             <SelectItem value="Next NAV">Next NAV</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       ))}
+                       {renderFormRow('Discretion', (
+                         <Select value={mutualFundDiscretion} onValueChange={setMutualFundDiscretion}>
+                           <SelectTrigger className="w-[140px] h-8 text-xs">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="-">-</SelectItem>
+                             <SelectItem value="Yes">Yes</SelectItem>
+                             <SelectItem value="No">No</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       ))}
+                       {renderFormRow('No CDSC', (
+                         <Select value={noCdsc} onValueChange={setNoCdsc}>
+                           <SelectTrigger className="w-[140px] h-8 text-xs">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="-">-</SelectItem>
+                             <SelectItem value="Yes">Yes</SelectItem>
+                             <SelectItem value="No">No</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       ))}
+                       {renderFormRow('LOI/ROA Breakpoint', (
+                         <Select value={loiRoaBreakpoint} onValueChange={setLoiRoaBreakpoint}>
+                           <SelectTrigger className="w-[140px] h-8 text-xs">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="-">-</SelectItem>
+                             <SelectItem value="Yes">Yes</SelectItem>
+                             <SelectItem value="No">No</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       ))}
+                       {renderFormRow('Related Account Type', (
+                         <Select value={relatedAccountType} onValueChange={setRelatedAccountType}>
+                           <SelectTrigger className="w-[140px] h-8 text-xs">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="-">-</SelectItem>
+                             <SelectItem value="Individual">Individual</SelectItem>
+                             <SelectItem value="Joint">Joint</SelectItem>
+                             <SelectItem value="IRA">IRA</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       ))}
+                       {renderFormRow('TTO Rep', (
+                         <Input
+                           value={ttoRep}
+                           onChange={(e) => setTtoRep(e.target.value)}
+                           placeholder="Type code"
+                           className="w-[140px] h-8 text-xs"
+                         />
+                       ))}
+                     </div>
+                   )}
+                 </div>
+               ) : (
+                 <>
+                   {/* Special Instructions - Only available for non-Market Orders and non-option trades */}
+                   {orderType !== 'market' && !isOptionTrade && (
                  <div className="space-y-2">
                    <div className="text-sm font-medium text-muted-foreground">Special Instructions</div>
                    <div className="space-y-2 pl-2">
@@ -992,14 +1256,6 @@ export function TradeExecutionPanel({
                    </SelectContent>
                  </Select>
                ))}
-               {renderFormRow('Solicited', (
-                 <div className="flex justify-end">
-                   <Switch 
-                     checked={solicited} 
-                     onCheckedChange={setSolicited}
-                   />
-                 </div>
-               ))}
                {renderFormRow('Discretion', (
                  <div className="flex justify-end">
                    <Switch 
@@ -1008,6 +1264,8 @@ export function TradeExecutionPanel({
                    />
                  </div>
                ))}
+                 </>
+               )}
              </div>
            </details>
 
@@ -1015,16 +1273,6 @@ export function TradeExecutionPanel({
              <span>Estimated {tradeMode === 'buy' ? 'Cost' : 'Proceeds'}</span>
              <span>${estimatedCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {isOptionTrade && <span className='text-xs text-muted-foreground'>({quantity} x ${currentLimitPrice.toFixed(2)} x 100)</span>}</span>
            </div>
-
-           {/* Display Buying Power below Estimated Cost, centered, for equities only */}
-           {!isOptionTrade && (
-             <div className="text-center text-xs text-muted-foreground pt-1">
-               Buying power: 
-               {buyingPower !== undefined 
-                 ? ` $${buyingPower.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
-                 : ' N/A'}
-             </div>
-           )}
 
            <div className="pt-4">
               <Button
@@ -1097,7 +1345,7 @@ export function TradeExecutionPanel({
                 </div>
               )}
               {!isOptionTrade && tradeMode === 'sell' && renderFormRow('Seller Code', <span className="font-medium text-right">{sellerCode}</span>)}
-              {renderFormRow('Solicited', <span className="font-medium text-right">{solicited ? 'Yes' : 'No'}</span>)}
+              {renderFormRow('Solicited', <span className="font-medium text-right">{solicited}</span>)}
               {renderFormRow('Discretion', <span className="font-medium text-right">{discretion ? 'Yes' : 'No'}</span>)}
               {ttoRep && renderFormRow('TTO Rep', <span className="font-medium text-right">{ttoRep}</span>)}
            </div>
