@@ -265,7 +265,7 @@ export function FullSizePageTitle({
             </DropdownMenu>
             
             {/* View details link - only show on account pages */}
-            <Link href={`/account/${accountId}`} className="ml-auto text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-medium">
+            <Link href={`/account/${accountId}`} className="ml-auto text-primary hover:text-primary/80 font-medium">
               View details
             </Link>
           </>

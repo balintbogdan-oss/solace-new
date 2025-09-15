@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from '@/components/ui/switch'
-import { ArrowLeft, Check, ChevronDown, ChevronUp, X, CheckCircle, Info } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react'
 import { AccountSelectionModal } from './AccountSelectionModal'
 import { cn, formatAccountType } from '@/lib/utils'
 import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { MarketDataOverlay } from './MarketDataOverlay'
+import { OptionsMarketDataOverlay } from './OptionsMarketDataOverlay'
 
 // Mock data (Should ideally be fetched or passed as props)
 // TODO: Replace with actual data fetching logic for price & account details
@@ -282,7 +283,7 @@ export function TradeExecutionPanel({
     setOrderState('entry');
     setQuantity(0);
     setNotes('');
-    setOrderType(isOptionTrade ? 'limit' : 'market');
+    setOrderType('market');
     setCurrentLimitPrice(limitPrice || marketPrice || 0);
     setCommissionType('regular');
     setSettlementType('regular');
@@ -553,15 +554,6 @@ export function TradeExecutionPanel({
                 )}
             </h3>
             
-            {/* Option Market Data */}
-            {isOptionTrade && (
-              <div className="text-sm text-muted-foreground mt-2 space-y-1">
-                <div>Bid: $5.10 (20 contracts)</div>
-                <div>Ask: $5.20 (15 contracts)</div>
-                <div>Last: $5.15 (10 contracts, CBOE) @ 10:36:05 ET</div>
-                <div>Underlying Last: $234.35</div>
-              </div>
-            )}
             
             {/* Option Trade Type - Show segmented control only when NOT skipping */}
             {isOptionTrade && skipSegmentedControl && (
@@ -668,19 +660,60 @@ export function TradeExecutionPanel({
                </Select>
              ))
            )}
-           {orderType === 'limit' && renderFormRow('Limit Price', (
-              <div className="relative flex items-center max-w-[120px]">
-                 <Input 
-                   type="number" 
-                   value={currentLimitPrice || ''} 
-                   onChange={(e) => setCurrentLimitPrice(parseFloat(e.target.value.replace(/[^0-9.]/g, '')) || 0)}
-                   placeholder="0.00" 
-                   min="0" 
-                   step="0.01"
-                   className="text-right pr-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+           {isOptionTrade && orderType === 'market' && (
+             <div className="flex items-center justify-between py-2 text-sm">
+               <div className="flex items-center gap-1">
+                 <label className="text-muted-foreground whitespace-nowrap">Price</label>
+                 <OptionsMarketDataOverlay
+                   bid={5.10}
+                   bidContracts={20}
+                   ask={5.20}
+                   askContracts={15}
+                   last={5.15}
+                   lastContracts={10}
+                   exchange="CBOE"
+                   lastTime="10:36:05 ET"
+                   underlyingLast={234.35}
                  />
-              </div>
-           ))}
+               </div>
+               <div className="flex-grow flex justify-end text-right">
+                 <span className="font-medium">${marketPrice.toFixed(2)}</span>
+               </div>
+             </div>
+           )}
+           {orderType === 'limit' && (
+             <div className="flex items-center justify-between py-2 text-sm">
+               <div className="flex items-center gap-1">
+                 <label className="text-muted-foreground whitespace-nowrap">Limit Price</label>
+                 {isOptionTrade && (
+                   <OptionsMarketDataOverlay
+                     bid={5.10}
+                     bidContracts={20}
+                     ask={5.20}
+                     askContracts={15}
+                     last={5.15}
+                     lastContracts={10}
+                     exchange="CBOE"
+                     lastTime="10:36:05 ET"
+                     underlyingLast={234.35}
+                   />
+                 )}
+               </div>
+               <div className="flex-grow flex justify-end text-right">
+                 <div className="relative flex items-center max-w-[120px]">
+                    <Input 
+                      type="number" 
+                      value={currentLimitPrice || ''} 
+                      onChange={(e) => setCurrentLimitPrice(parseFloat(e.target.value.replace(/[^0-9.]/g, '')) || 0)}
+                      placeholder="0.00" 
+                      min="0" 
+                      step="0.01"
+                      className="text-right pr-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                 </div>
+               </div>
+             </div>
+           )}
            {orderType === 'stop' && renderFormRow('Stop Price', (
               <div className="relative flex items-center max-w-[120px]">
                  <Input 
@@ -728,20 +761,18 @@ export function TradeExecutionPanel({
              <div className="flex items-center justify-between py-2 text-sm">
                <div className="flex items-center gap-1">
                  <label className="text-muted-foreground whitespace-nowrap">Market Price</label>
-                 <TooltipProvider>
-                   <Tooltip>
-                     <TooltipTrigger asChild>
-                       <Info className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help" />
-                     </TooltipTrigger>
-                     <TooltipContent side="right" className="text-sm">
-                       <div className="space-y-1">
-                         <div>NBBO Bid: $234.33 (500 shares) – from NYSE</div>
-                         <div>NBBO Ask: $234.37 (300 shares) – from NASDAQ</div>
-                         <div>Last sale price: $234.35 (200 shares)</div>
-                       </div>
-                     </TooltipContent>
-                   </Tooltip>
-                 </TooltipProvider>
+                 <MarketDataOverlay
+                   currentPrice={234.35}
+                   change={-2.15}
+                   changePercent={-0.91}
+                   bid={234.33}
+                   ask={234.37}
+                   lastSize={200}
+                   bidSize={500}
+                   askSize={300}
+                   exchange="XNAS"
+                   timestamp="03:55:49 PM ET, 03/10/2025"
+                 />
                </div>
                <div className="flex-grow flex justify-end text-right">
                  <span className="font-medium">${marketPrice.toFixed(2)}</span>
@@ -780,7 +811,7 @@ export function TradeExecutionPanel({
              </div>
              
              {/* Account holdings info - positioned below Quantity label on the left, only show for sell orders */}
-             {tradeMode === 'sell' && availableQuantity > 0 && (
+             {tradeMode === 'sell' && availableQuantity > 0 && !isOptionTrade && (
                <div className="text-xs text-muted-foreground mt-0.5">
                  <span className="text-muted-foreground">
                    Holding {availableQuantity} {symbol?.toUpperCase()}
@@ -1308,11 +1339,11 @@ export function TradeExecutionPanel({
         <h3 className="text-2xl font-normal">Review Order</h3>
       </div>
        <div className=" text-sm rounded-md">
-         {renderFormRow('Action', <span className="font-medium capitalize text-right">{tradeMode} {quantity} {symbol?.toUpperCase()} {isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} {isOptionTrade ? (quantity === 1 ? 'Contract' : 'Contracts') : (quantity === 1 ? 'Share' : 'Shares')}</span>)}
-         {isOptionTrade && tradeMode === 'sell' && renderFormRow('Action', <span className="font-medium text-right">{optionSellType === 'sellToClose' ? 'Sell to Close' : optionSellType === 'sellToOpen' ? 'Sell to Open' : 'Sell Naked'}</span>)}
+         {renderFormRow(isOptionTrade ? 'Contract' : 'Action', <span className="font-medium capitalize text-right">{isOptionTrade ? `${quantity}x ${symbol?.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} ${quantity === 1 ? 'Contract' : 'Contracts'}` : `${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${quantity === 1 ? 'Share' : 'Shares'}`}</span>)}
+         {isOptionTrade && tradeMode === 'sell' && renderFormRow('Action', <span className="font-medium text-right">{selectedOptionAction === 'sellToOpen' ? 'Sell to Open' : optionSellType === 'sellToClose' ? 'Sell to Close' : 'Sell Naked'}</span>)}
          {renderFormRow('Account', <span className="font-medium text-right">{accountDetails.name} ({accountId})</span>)}
          {renderFormRow('Account Type', <span className="font-medium text-right">{accountType}</span>)}
-         {renderFormRow('Order Type', <span className="font-medium capitalize text-right">{orderType === 'stop-limit' ? 'Stop-Limit' : orderType} Order</span>)}
+         {!isMutualFund && renderFormRow('Order Type', <span className="font-medium capitalize text-right">{orderType === 'stop-limit' ? 'Stop-Limit' : orderType} Order</span>)}
          {orderType === 'limit' && renderFormRow('Limit Price', <span className="font-medium text-right">${currentLimitPrice.toFixed(2)}</span>)}
          {orderType === 'stop' && renderFormRow('Stop Price', <span className="font-medium text-right">${stopPrice.toFixed(2)}</span>)}
          {orderType === 'stop-limit' && (
@@ -1415,10 +1446,10 @@ export function TradeExecutionPanel({
       </div>
        <div className="text-sm">
           {renderFormRow('Order ID', <span className="font-medium text-right">ORD-{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>)}
-          {renderFormRow('Action', <span className="font-medium capitalize text-right">{tradeMode} {quantity} {symbol?.toUpperCase()} {isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} {isOptionTrade ? (quantity === 1 ? 'Contract' : 'Contracts') : (quantity === 1 ? 'Share' : 'Shares')}</span>)}
+          {renderFormRow(isOptionTrade ? 'Contract' : 'Action', <span className="font-medium capitalize text-right">{isOptionTrade ? `${quantity}x ${symbol?.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} ${quantity === 1 ? 'Contract' : 'Contracts'}` : `${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${quantity === 1 ? 'Share' : 'Shares'}`}</span>)}
           {renderFormRow('Account', <span className="font-medium text-right">{accountDetails.name} ({accountId})</span>)}
-          {renderFormRow('Quantity', <span className="font-medium text-right">{quantity} shares</span>)}
-          {renderFormRow('Order Type', <span className="font-medium capitalize text-right">{orderType === 'stop-limit' ? 'Stop-Limit' : orderType} Order</span>)}
+          {renderFormRow(isOptionTrade ? 'Contracts' : 'Quantity', <span className="font-medium text-right">{quantity} {isOptionTrade ? (quantity === 1 ? 'contract' : 'contracts') : (quantity === 1 ? 'share' : 'shares')}</span>)}
+          {!isMutualFund && renderFormRow('Order Type', <span className="font-medium capitalize text-right">{orderType === 'stop-limit' ? 'Stop-Limit' : orderType} Order</span>)}
           {orderType === 'limit' && renderFormRow('Limit Price', <span className="font-medium text-right">${currentLimitPrice.toFixed(2)}</span>)}
           {orderType === 'stop' && renderFormRow('Stop Price', <span className="font-medium text-right">${stopPrice.toFixed(2)}</span>)}
           {orderType === 'stop-limit' && (

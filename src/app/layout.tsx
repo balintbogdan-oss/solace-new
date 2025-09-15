@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header'
 import { GeistMono } from 'geist/font/mono'
 import { NavigationProvider } from '@/contexts/NavigationContext'
 import { SettingsProvider } from '@/contexts/SettingsContext'
+import { AppearanceProvider } from '@/components/AppearanceProvider'
 import { Inter } from 'next/font/google'
 import { Source_Serif_4 } from 'next/font/google'
 import { validateEnvironment } from '@/lib/env-validation'
@@ -95,12 +96,14 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SettingsProvider>
-            <NavigationProvider>
-              <Header />
-              <div className="w-full">
-              {children}
-              </div>
-            </NavigationProvider>
+            <AppearanceProvider>
+              <NavigationProvider>
+                <Header />
+                <div className="w-full">
+                {children}
+                </div>
+              </NavigationProvider>
+            </AppearanceProvider>
           </SettingsProvider>
         </ThemeProvider>
       </body>

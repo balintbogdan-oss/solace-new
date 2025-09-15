@@ -110,6 +110,7 @@
     /* Use reverted hex values directly */
     @apply bg-[var(--background)] text-[var(--foreground)];
     @apply min-h-screen font-sans font-medium antialiased;
+    cursor: default;
   }
 
   h1 {
@@ -122,11 +123,12 @@
   }
 
   h3 {
-    @apply text-base font-medium font-serif;
+    @apply text-base font-medium;
   }
 
   *::selection {
-    @apply bg-primary text-primary-foreground;
+    background-color: rgb(59 130 246 / 0.3);
+    color: inherit;
   }
 
   /* Define the gradient effect using CSS variables (still requires rgb() format) */
@@ -155,4 +157,5 @@
   .info-icon {
     @apply cursor-pointer hover:text-foreground transition-colors;
   }
+  
 }

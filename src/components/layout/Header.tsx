@@ -30,7 +30,7 @@ export function Header() {
   const { theme, setTheme } = useTheme();
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchFilter, setSearchFilter] = useState<'all' | 'clients' | 'accounts'>('all');
-  const { navigationSettings } = useSettings();
+  const { navigationSettings, appearanceSettings } = useSettings();
   
   // Use the search hook
   const {
@@ -117,13 +117,24 @@ export function Header() {
   };
 
   return (
-    <header className="dark:border-b sticky top-0 z-50 h-14 px-6 bg-black dark:bg-black/30 dark:backdrop-blur-xl">
+    <header 
+      className="dark:border-b sticky top-0 z-50 h-14 px-6 dark:backdrop-blur-xl"
+      style={{ backgroundColor: appearanceSettings.headerBackgroundColor || '#000000' }}
+    >
       <div className="grid grid-cols-3 items-center h-full">
         {/* Column 1: Logo and Menu */}
         <div className="flex items-center gap-2 z-10">
-          <svg width="28" height="17" viewBox="0 0 28 17" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-            <path fillRule="evenodd" clipRule="evenodd" d="M19.2158 1.93618C19.7433 0 21.326 0 21.326 0H27.3634L22.9672 14.492C22.4397 16.4282 20.857 16.4282 20.857 16.4282H14.8196L19.2158 1.93618ZM13.0025 1.64266C13.0025 1.64266 11.5957 1.64266 11.0682 3.40282L7.08228 16.428H12.4749C12.4749 16.428 13.8817 16.428 14.4093 14.6679L18.3952 1.58398L13.0025 1.64266ZM5.441 3.75516C5.441 3.75516 4.21006 3.75516 3.79975 5.28063L0.400024 16.4283H5.03069C5.03069 16.4283 6.26162 16.4283 6.67194 14.9028L10.0717 3.69649L5.441 3.75516Z" fill="currentColor"/>
-          </svg>
+          {appearanceSettings.logoUrl ? (
+            <img 
+              src={appearanceSettings.logoUrl} 
+              alt="Custom logo" 
+              className="max-w-[120px] max-h-[40px] object-contain"
+            />
+          ) : (
+            <svg width="28" height="17" viewBox="0 0 28 17" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+              <path fillRule="evenodd" clipRule="evenodd" d="M19.2158 1.93618C19.7433 0 21.326 0 21.326 0H27.3634L22.9672 14.492C22.4397 16.4282 20.857 16.4282 20.857 16.4282H14.8196L19.2158 1.93618ZM13.0025 1.64266C13.0025 1.64266 11.5957 1.64266 11.0682 3.40282L7.08228 16.428H12.4749C12.4749 16.428 13.8817 16.428 14.4093 14.6679L18.3952 1.58398L13.0025 1.64266ZM5.441 3.75516C5.441 3.75516 4.21006 3.75516 3.79975 5.28063L0.400024 16.4283H5.03069C5.03069 16.4283 6.26162 16.4283 6.67194 14.9028L10.0717 3.69649L5.441 3.75516Z" fill="currentColor"/>
+            </svg>
+          )}
           <nav className="hidden md:flex items-center text-white">
             {filteredNavItems.map((item) => (
               <Link key={item.href} href={item.href}>
@@ -229,7 +240,8 @@ export function Header() {
                                 <Link
                                   href={item.href}
                                   onClick={() => handleSearchItemClick(item)}
-                                  className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-neutral-800 rounded-lg transition-colors group"
+                                  className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-neutral-800 rounded-lg transition-colors group cursor-pointer"
+                                  style={{ cursor: 'pointer' }}
                                 >
                                   <div className="flex items-center gap-3 flex-1">
                                     {getIcon()}
@@ -354,7 +366,8 @@ export function Header() {
                               key={`${item.type}-${item.id}`}
                               href={item.href}
                               onClick={() => handleSearchItemClick(item)}
-                              className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                              className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                              style={{ cursor: 'pointer' }}
                             >
                               <div className="flex items-center gap-3 flex-1">
                                 {getIcon()}

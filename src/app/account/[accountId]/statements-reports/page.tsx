@@ -608,12 +608,6 @@ export default function StatementsReportsPage() {
                     </th>
                     <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Action</span>
-                        <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                      </button>
-                    </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
-                      <button className="flex items-center gap-1 w-full">
                         <span className="text-xs">Due date</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
@@ -645,9 +639,6 @@ export default function StatementsReportsPage() {
                       </td>
                       <td className="px-6 py-3 text-foreground">
                         {document.type}
-                      </td>
-                      <td className="px-6 py-3 text-foreground">
-                        Placeholder
                       </td>
                       <td className="px-6 py-3 text-foreground">
                         {document.dueDate || ''}
@@ -748,7 +739,7 @@ export default function StatementsReportsPage() {
 
         {/* Tabs */}
         <div className="flex space-x-8 border-b">
-          {tabs.map((tab) => (
+          {tabs.filter(tab => tab.id !== 'quickdirect').map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
