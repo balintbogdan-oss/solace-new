@@ -278,6 +278,47 @@ export function TradeExecutionPanel({
     return Math.max(0, maxShares);
   }, [buyingPower, tradeMode, orderType, currentLimitPrice, marketPrice]);
 
+  // Helper function to get the correct action text for options
+  const getOptionActionText = () => {
+    if (!isOptionTrade) return '';
+    
+    // For close actions (when skipSegmentedControl is true), check optionSellType first
+    if (skipSegmentedControl) {
+      if (optionSellType === 'buyToClose') {
+        return 'Buy to Close';
+      } else if (optionSellType === 'sellToClose') {
+        return 'Sell to Close';
+      } else if (optionSellType === 'sellNaked') {
+        return 'Sell Naked';
+      }
+    }
+    
+    // For regular open actions, check selectedOptionAction first
+    if (selectedOptionAction === 'buyToOpen') {
+      return 'Buy to Open';
+    } else if (selectedOptionAction === 'sellToOpen') {
+      return 'Sell to Open';
+    }
+    
+    // Fallback to optionSellType for close actions when not in skipSegmentedControl mode
+    if (optionSellType === 'buyToClose') {
+      return 'Buy to Close';
+    } else if (optionSellType === 'sellToClose') {
+      return 'Sell to Close';
+    } else if (optionSellType === 'sellNaked') {
+      return 'Sell Naked';
+    }
+    
+    // Final fallback based on trade mode
+    if (tradeMode === 'buy') {
+      return 'Buy to Open';
+    } else if (tradeMode === 'sell') {
+      return 'Sell to Open';
+    }
+    
+    return '';
+  };
+
   // --- Effects ---
   useEffect(() => {
     setOrderState('entry');
@@ -304,7 +345,11 @@ export function TradeExecutionPanel({
     setDoNotReduce(false);
     setTimeWeightedAveragePrice(false);
     setVolumeWeightedAveragePrice(false);
-    setOptionSellType('sellToClose'); 
+    // Only reset optionSellType if not in a close action scenario
+    // For close actions (skipSegmentedControl = true), optionSellType is set by the skipSegmentedControl useEffect
+    if (!skipSegmentedControl) {
+      setOptionSellType('sellToClose');
+    } 
   }, [symbol, accountId, initialTradeMode, strikePrice, optionType, limitPrice, isOptionTrade, marketPrice]);
 
   useEffect(() => {
@@ -578,7 +623,10 @@ export function TradeExecutionPanel({
               <div className="mt-3">
                 <div className="flex bg-accent rounded-md p-1">
                   <button
-                    onClick={() => setSelectedOptionAction('buyToOpen')}
+                    onClick={() => {
+                      setSelectedOptionAction('buyToOpen');
+                      setOptionSellType('buyToClose'); // Set appropriate close action
+                    }}
                     className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       selectedOptionAction === 'buyToOpen'
                         ? 'bg-lime-500 hover:bg-lime-600 dark:bg-lime-800 dark:hover:bg-lime-700 dark:border dark:border-lime-200 text-white dark:text-white font-semibold'
@@ -588,7 +636,10 @@ export function TradeExecutionPanel({
                     Buy to Open
                   </button>
                   <button
-                    onClick={() => setSelectedOptionAction('sellToOpen')}
+                    onClick={() => {
+                      setSelectedOptionAction('sellToOpen');
+                      setOptionSellType('sellToClose'); // Set appropriate close action
+                    }}
                     className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       selectedOptionAction === 'sellToOpen'
                         ? 'bg-red-600 hover:bg-red-600 dark:bg-red-900 dark:hover:bg-red-700 dark:border dark:border-red-400 text-white dark:text-white font-semibold'
@@ -1340,7 +1391,7 @@ export function TradeExecutionPanel({
       </div>
        <div className=" text-sm rounded-md">
          {renderFormRow(isOptionTrade ? 'Contract' : 'Action', <span className="font-medium capitalize text-right">{isOptionTrade ? `${quantity}x ${symbol?.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} ${quantity === 1 ? 'Contract' : 'Contracts'}` : `${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${quantity === 1 ? 'Share' : 'Shares'}`}</span>)}
-         {isOptionTrade && tradeMode === 'sell' && renderFormRow('Action', <span className="font-medium text-right">{selectedOptionAction === 'sellToOpen' ? 'Sell to Open' : optionSellType === 'sellToClose' ? 'Sell to Close' : 'Sell Naked'}</span>)}
+         {isOptionTrade && renderFormRow('Action', <span className="font-medium text-right">{getOptionActionText()}</span>)}
          {renderFormRow('Account', <span className="font-medium text-right">{accountDetails.name} ({accountId})</span>)}
          {renderFormRow('Account Type', <span className="font-medium text-right">{accountType}</span>)}
          {!isMutualFund && renderFormRow('Order Type', <span className="font-medium capitalize text-right">{orderType === 'stop-limit' ? 'Stop-Limit' : orderType} Order</span>)}
@@ -1447,6 +1498,7 @@ export function TradeExecutionPanel({
        <div className="text-sm">
           {renderFormRow('Order ID', <span className="font-medium text-right">ORD-{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>)}
           {renderFormRow(isOptionTrade ? 'Contract' : 'Action', <span className="font-medium capitalize text-right">{isOptionTrade ? `${quantity}x ${symbol?.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} ${quantity === 1 ? 'Contract' : 'Contracts'}` : `${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${quantity === 1 ? 'Share' : 'Shares'}`}</span>)}
+          {isOptionTrade && renderFormRow('Action', <span className="font-medium text-right">{getOptionActionText()}</span>)}
           {renderFormRow('Account', <span className="font-medium text-right">{accountDetails.name} ({accountId})</span>)}
           {renderFormRow(isOptionTrade ? 'Contracts' : 'Quantity', <span className="font-medium text-right">{quantity} {isOptionTrade ? (quantity === 1 ? 'contract' : 'contracts') : (quantity === 1 ? 'share' : 'shares')}</span>)}
           {!isMutualFund && renderFormRow('Order Type', <span className="font-medium capitalize text-right">{orderType === 'stop-limit' ? 'Stop-Limit' : orderType} Order</span>)}
