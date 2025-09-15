@@ -104,25 +104,12 @@ export default function StatementsReportsPage() {
 
   // Mock data for open order confirmations
   const openOrderConfirmations = [
-    { date: '8/15/2025', symbol: 'ORDER', cusip: '037833100', description: 'Order Confirmation Display - General order confirmation document', pdfKey: '2025-order-confirm' },
-    { date: '3/10/2025', symbol: 'MSFT', cusip: '037833100', description: 'Apple Inc. - Technology company specializing in consumer electronics' },
-    { date: '2/28/2025', symbol: 'GOOGL', cusip: '037833100', description: 'Amazon.com Inc. - E-commerce and cloud computing company...' },
-    { date: '2/25/2025', symbol: 'NVDA', cusip: '037833100', description: 'Vanguard Total Stock Market ETF - Broad market index fund...' },
+    { date: '6/9/2023', symbol: 'FXE', cusip: '037833100', description: 'INVESCO CURRENCYSHARES EURO TRUST ETF', pdfKey: '2025-order-confirm' },
   ]
 
   // Mock data for shareholder documents
   const shareholderDocuments = [
-    { date: '12/15/2023', symbol: 'AAPL', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '12/15/2023' },
-    { date: '11/28/2023', symbol: 'TLT', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Regulatory', dueDate: '' },
-    { date: '10/15/2023', symbol: 'AMD', cusip: '037833100', issuer: 'Proxy Statement', issuerName: 'ABRDN GLOBAL INFRASTRUCTURE INC FD', type: 'Regulatory', dueDate: '10/15/2023' },
-    { date: '9/22/2023', symbol: 'META', cusip: '037833100', issuer: 'Section 19a', issuerName: 'CASH RESERVES FEDERAL MONEY MARKET -ADM', type: 'Regulatory', dueDate: '' },
-    { date: '8/30/2023', symbol: 'AMZN', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '' },
-    { date: '7/15/2023', symbol: 'ADBE', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Annual Meeting', dueDate: '' },
-    { date: '8/30/2023', symbol: 'INTC', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Regulatory', dueDate: '8/30/2023' },
-    { date: '7/15/2023', symbol: 'VNQ', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Annual Meeting', dueDate: '' },
-    { date: '8/30/2023', symbol: 'CRM', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Annual Meeting', dueDate: '' },
-    { date: '7/15/2023', symbol: 'ORCL', cusip: '037833100', issuer: 'Section 19a', issuerName: 'NUVEEN VARIABLE RATE PREFERRED & INCOME', type: 'Regulatory', dueDate: '' },
-    { date: '8/30/2023', symbol: 'MSFT', cusip: '037833100', issuer: 'Section 19a', issuerName: 'DOUBLELINE YIELD OPPORTUNITIES FUND', type: 'Regulatory', dueDate: '8/30/2023' },
+    { date: '09/03/25', symbol: 'ABALX', cusip: '026349502', issuer: 'Semi-Annual Report', issuerName: 'AMERICAN BALANCED FUND - CLASS A', type: 'Regulatory', dueDate: '', pdfUrl: 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/shareholder-documents/Prospectus%20Semi-Annual%20Shareholder%20Report.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvc2hhcmVob2xkZXItZG9jdW1lbnRzL1Byb3NwZWN0dXMgU2VtaS1Bbm51YWwgU2hhcmVob2xkZXIgUmVwb3J0LnBkZiIsImlhdCI6MTc1Nzk2MzYyMywiZXhwIjoxNzU4NTY4NDIzfQ.XYlhB3GLmR8_oL_CAMxverSjkObnKm-oA68-8_8eY7s' },
   ]
 
   const tabs = [
@@ -629,7 +616,16 @@ export default function StatementsReportsPage() {
                       <td className="px-6 py-3 text-foreground">
                         <div>
                           <div className="flex items-center gap-1">
-                            <a href="#" className="text-primary hover:underline flex items-center gap-1">
+                            <a 
+                              href={document.pdfUrl || "#"} 
+                              className="text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                              onClick={(e) => {
+                                if (document.pdfUrl) {
+                                  e.preventDefault();
+                                  openPDFViewer(document.pdfUrl, `${document.issuer} - ${document.issuerName}`);
+                                }
+                              }}
+                            >
                               {document.issuer}
                               <ExternalLink className="h-3 w-3" />
                             </a>
