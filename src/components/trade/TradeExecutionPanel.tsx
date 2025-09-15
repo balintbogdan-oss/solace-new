@@ -370,15 +370,37 @@ export function TradeExecutionPanel({
           });
         }
       } else if (tradeMode === 'sell') {
-        console.log('🔄 Executing SELL trade:', {
-          symbol: symbol.toUpperCase(),
-          currentQuantity: currentHolding!.quantity,
-          sellQuantity: quantity,
-          newQuantity: currentHolding!.quantity - quantity
-        });
-        
-        // Update holding (reduce quantity)
-        const newQuantity = currentHolding!.quantity - quantity;
+        // For options trades, we don't have holdings, so just add the trade record
+        if (isOptionTrade) {
+          await addTrade({
+            symbol: symbol.toUpperCase(),
+            cusip: symbol.toUpperCase(),
+            description: `${symbol.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} Option`,
+            action: 'SELL',
+            quantity: quantity,
+            price: priceToUse,
+            totalValue: tradeValue,
+            commission: commission,
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toTimeString().split(' ')[0],
+            longShort: 'Long'
+          });
+        } else {
+          // For stock trades, handle holdings
+          if (!currentHolding) {
+            console.error('Cannot sell: No holding found for', symbol);
+            return;
+          }
+          
+          console.log('🔄 Executing SELL trade:', {
+            symbol: symbol.toUpperCase(),
+            currentQuantity: currentHolding.quantity,
+            sellQuantity: quantity,
+            newQuantity: currentHolding.quantity - quantity
+          });
+          
+          // Update holding (reduce quantity)
+          const newQuantity = currentHolding.quantity - quantity;
         
         if (newQuantity <= 0) {
           console.log('🗑️ Removing holding completely');
@@ -419,6 +441,7 @@ export function TradeExecutionPanel({
               cash: availableCash + tradeValue - commission
             }
           });
+        }
         }
       }
       
@@ -1034,11 +1057,11 @@ export function TradeExecutionPanel({
         <button onClick={handleBackToEntry} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
           <ArrowLeft className="w-4 h-4 text-muted-foreground" />
         </button>
-        <h3 className="text-lg font-semibold">Review Order</h3>
+        <h3 className="text-2xl font-normal">Review Order</h3>
       </div>
        <div className=" text-sm rounded-md">
          {renderFormRow('Action', <span className="font-medium capitalize text-right">{tradeMode} {quantity} {symbol?.toUpperCase()} {isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} {isOptionTrade ? (quantity === 1 ? 'Contract' : 'Contracts') : (quantity === 1 ? 'Share' : 'Shares')}</span>)}
-         {isOptionTrade && tradeMode === 'sell' && renderFormRow('Sell Type', <span className="font-medium text-right">{optionSellType === 'sellToClose' ? 'Sell to Close' : optionSellType === 'sellToOpen' ? 'Sell to Open' : 'Sell Naked'}</span>)}
+         {isOptionTrade && tradeMode === 'sell' && renderFormRow('Action', <span className="font-medium text-right">{optionSellType === 'sellToClose' ? 'Sell to Close' : optionSellType === 'sellToOpen' ? 'Sell to Open' : 'Sell Naked'}</span>)}
          {renderFormRow('Account', <span className="font-medium text-right">{accountDetails.name} ({accountId})</span>)}
          {renderFormRow('Account Type', <span className="font-medium text-right">{accountType}</span>)}
          {renderFormRow('Order Type', <span className="font-medium capitalize text-right">{orderType === 'stop-limit' ? 'Stop-Limit' : orderType} Order</span>)}
@@ -1119,7 +1142,7 @@ export function TradeExecutionPanel({
 
   const renderOrderConfirmation = () => (
      <div className="space-y-6 ">
-      <h3 className="text-lg font-semibold">Order Confirmation</h3>
+      <h3 className="text-sm font-sans">Order Confirmation</h3>
       <div className="flex flex-col items-center justify-center py-2 space-y-3">
          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
            orderStatus === 'filled' 
@@ -1132,7 +1155,7 @@ export function TradeExecutionPanel({
               : 'text-lime-700 dark:text-lime-400'
           }`} />
         </div>
-        <h4 className="font-medium">
+        <h4 className="text-2xl font-serif">
           {orderStatus === 'filled' ? 'Order Filled' : 'Order Submitted'}
         </h4>
         <p className="text-sm text-muted-foreground text-center">
@@ -1142,7 +1165,7 @@ export function TradeExecutionPanel({
           }
         </p>
       </div>
-       <div className="text-sm border p-3 rounded-md bg-background/50">
+       <div className="text-sm">
           {renderFormRow('Order ID', <span className="font-medium text-right">ORD-{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>)}
           {renderFormRow('Action', <span className="font-medium capitalize text-right">{tradeMode} {quantity} {symbol?.toUpperCase()} {isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} {isOptionTrade ? (quantity === 1 ? 'Contract' : 'Contracts') : (quantity === 1 ? 'Share' : 'Shares')}</span>)}
           {renderFormRow('Account', <span className="font-medium text-right">{accountDetails.name} ({accountId})</span>)}
