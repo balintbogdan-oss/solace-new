@@ -42,6 +42,7 @@ export function AccountSelectionModal({
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
   const [recentSearches, setRecentSearches] = useState<SearchResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [relatedAccounts, setRelatedAccounts] = useState<AccountDisplayItem[]>([]);
 
@@ -90,6 +91,7 @@ export function AccountSelectionModal({
   // Load related accounts and recent searches on mount
   useEffect(() => {
     const loadRelatedAccounts = async () => {
+      setIsInitialLoading(true);
       try {
         // For now, we'll use recent searches as a proxy for related accounts
         // In a real implementation, this would fetch accounts from the current client's household
@@ -100,6 +102,8 @@ export function AccountSelectionModal({
       } catch (error) {
         console.error('Error loading related accounts:', error);
         setRelatedAccounts([]);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -114,6 +118,9 @@ export function AccountSelectionModal({
     };
     
     if (isOpen) {
+      // Reset states when modal opens
+      setIsInitialLoading(true);
+      setRelatedAccounts([]);
       loadRelatedAccounts();
       loadRecentSearches();
     }
@@ -166,12 +173,12 @@ export function AccountSelectionModal({
   const showHouseholdTitle = !isSearchMode && householdAccounts.length > 0;
   const showNonHouseholdTitle = !isSearchMode && nonHouseholdAccounts.length > 0;
   
-  // Get the primary client name from the first account being displayed
-  const primaryClientName = displayItems.length > 0 ? displayItems[0].clientName : null;
+  // Get the primary client name from related accounts (available even during loading)
+  const primaryClientName = relatedAccounts.length > 0 ? relatedAccounts[0].clientName : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[60vh] overflow-y-auto bg-white dark:bg-neutral-900 border">
+      <DialogContent className="sm:max-w-3xl max-h-[60vh] min-h-[400px] overflow-y-auto bg-white dark:bg-neutral-900 border">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex-1">
@@ -188,7 +195,7 @@ export function AccountSelectionModal({
             {!isSearchMode && (
               <button
                 onClick={() => setIsSearchMode(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:text-primary/80 hover:bg-primary/10 rounded-md transition-colors"
               >
                 <Search className="h-4 w-4" />
                 Search all accounts
@@ -205,9 +212,9 @@ export function AccountSelectionModal({
                 placeholder="Search accounts by name, ID, or type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full border border-gray-200 dark:border-gray-700 rounded-md pl-10 pr-4 py-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none"
+                className="w-full border border-gray-200 dark:border-gray-700 rounded-md pl-10 pr-4 py-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent focus:outline-none"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
             </div>
             <div className="px-3 pt-2">
               <button
@@ -222,29 +229,41 @@ export function AccountSelectionModal({
             </div>
           </div>
         )}
-        <div className="space-y-1 py-4">
-          {isLoading ? (
-            <div className="px-3 py-4 text-center text-sm text-gray-500">
-              Searching accounts...
+        <div className="space-y-1 py-4 min-h-[300px] flex flex-col">
+          {/* Client Name Header - Always show when not in search mode */}
+          {primaryClientName && !isSearchMode && (
+            <div className="px-3 py-2">
+              <h2 className="text-2xl font-serif text-gray-900 dark:text-gray-100">
+                {primaryClientName}
+              </h2>
+            </div>
+          )}
+
+          {isInitialLoading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="text-sm text-gray-500">Loading accounts...</div>
+              </div>
+            </div>
+          ) : isLoading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <div className="text-sm text-gray-500">Searching accounts...</div>
+              </div>
             </div>
           ) : displayItems.length === 0 ? (
-            <div className="px-3 py-4 text-center text-sm text-gray-500">
-              {isSearchMode 
-                ? (searchTerm ? 'No accounts found' : 'No recent accounts')
-                : 'No related accounts found'
-              }
+            <div className="flex-1 flex items-center justify-center">
+              <div className="px-3 py-4 text-center text-sm text-gray-500">
+                {isSearchMode 
+                  ? (searchTerm ? 'No accounts found' : 'No recent accounts')
+                  : 'No related accounts found'
+                }
+              </div>
             </div>
           ) : (
             <>
-              {/* Client Name Header */}
-              {primaryClientName && !isSearchMode && (
-                <div className="px-3 py-2">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {primaryClientName}
-                  </h2>
-                </div>
-              )}
-              
               {/* Household Accounts Section */}
               {showHouseholdTitle && (
                 <h4 className="px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">

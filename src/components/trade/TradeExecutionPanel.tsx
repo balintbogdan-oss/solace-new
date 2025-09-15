@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from '@/components/ui/switch'
 import { ArrowLeft, Check, ChevronDown, ChevronUp, X, CheckCircle, Info } from 'lucide-react'
 import { AccountSelectionModal } from './AccountSelectionModal'
-import { cn } from '@/lib/utils'
+import { cn, formatAccountType } from '@/lib/utils'
 import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
@@ -22,6 +22,14 @@ const STOCK_DATA: Record<string, { price: number; }> = {
   VTSAX: { price: 125.60 },
   AMZN: { price: 165.45 },
   VFIAX: { price: 503.56 },
+}
+
+// Mock holdings data for demonstration
+const MOCK_HOLDINGS: Record<string, { quantity: number; avgPrice: number; }> = {
+  'AAPL': { quantity: 150, avgPrice: 185.50 },
+  'MSFT': { quantity: 75, avgPrice: 380.25 },
+  'GOOGL': { quantity: 50, avgPrice: 135.80 },
+  'NVDA': { quantity: 25, avgPrice: 420.75 },
 }
 
 // Define a specific type for account types used in mock data
@@ -76,6 +84,7 @@ export function TradeExecutionPanel({
   const [orderState, setOrderState] = useState<OrderState>('entry')
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [tradeMode, setTradeMode] = useState<TradeMode>(initialTradeMode)
+  const [orderStatus, setOrderStatus] = useState<'filled' | 'pending'>('pending')
   
   const notesTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -200,7 +209,9 @@ export function TradeExecutionPanel({
   // Get available cash and buying power
   const availableCash = accountData?.balances?.cash || 0;
   const buyingPower = accountData?.balances?.buyingPower || 0;
-  const availableQuantity = currentHolding?.quantity || 0;
+  
+  // Use database holdings if available, otherwise fall back to mock data
+  const availableQuantity = currentHolding?.quantity || (symbol ? MOCK_HOLDINGS[symbol.toUpperCase()]?.quantity || 0 : 0);
   const marketPrice = currentStock.price;
   const commission = useMemo(() => {
       if (quantity === 0) return 0;
@@ -412,6 +423,12 @@ export function TradeExecutionPanel({
       }
       
       console.log('Trade executed successfully');
+      
+      // Set order status based on order type
+      // Market orders are filled immediately, others are pending
+      const isMarketOrder = orderType === 'market';
+      setOrderStatus(isMarketOrder ? 'filled' : 'pending');
+      
       setOrderState('confirmation');
     } catch (error) {
       console.error('Error executing trade:', error);
@@ -458,7 +475,7 @@ export function TradeExecutionPanel({
 
   // --- Render Helper Function for Form Rows ---
   const renderFormRow = (label: string, children: React.ReactNode) => (
-    <div className="flex items-center justify-between py-2 text-sm">
+    <div className="flex items-center justify-between py-1 text-sm">
       <label className="text-muted-foreground whitespace-nowrap mr-4">{label}</label>
       <div className="flex-grow flex justify-end text-right">{children}</div>
     </div>
@@ -546,8 +563,8 @@ export function TradeExecutionPanel({
           </div>
        )}
 
-       <div className="py-2 text-sm">
-         <label className="text-muted-foreground text-sm font-medium block mb-2">Trading for</label>
+       <div className="py-1 text-sm">
+         <label className="text-muted-foreground text-sm font-medium block mb-1">Trading for</label>
          <Button
            variant="outline" 
            onClick={() => setIsAccountModalOpen(true)} 
@@ -555,7 +572,7 @@ export function TradeExecutionPanel({
          >
            <div className="flex flex-col items-start">
              <span className="font-medium text-sm">
-               {accountId} - <span className="text-foreground">{accountDetails.type}</span>
+               {accountId} - <span className="text-foreground">{formatAccountType(accountDetails.type)}</span>
              </span>
              <span className="text-xs text-muted-foreground mt-1">
                {accountDetails.clientName}
@@ -575,14 +592,14 @@ export function TradeExecutionPanel({
        ))}
 
        {!initialTradeMode && !isOptionTrade && (
-         <div className="grid grid-cols-2 gap-2 pt-3 border-t">
+         <div className="grid grid-cols-2 gap-2 pt-2 border-t">
            <Button variant={tradeMode === 'buy' ? 'default' : 'outline'} onClick={() => setTradeMode('buy')} className={cn("w-full font-semibold", tradeMode === 'buy' && "bg-green-600 hover:bg-green-700 text-white dark:text-white")} >Buy</Button>
            <Button variant={tradeMode === 'sell' ? 'default' : 'outline'} onClick={() => setTradeMode('sell')} className={cn("w-full font-semibold", tradeMode === 'sell' && "bg-red-600 hover:bg-red-700 text-white dark:text-white")} >Sell</Button>
          </div>
        )}
 
        {tradeMode && (
-         <div className="space-y-2 ">
+         <div className="space-y-1">
 
            {renderFormRow('Order Type', (
              <Select value={orderType} onValueChange={(v) => setOrderType(v as OrderType)}>
@@ -675,7 +692,7 @@ export function TradeExecutionPanel({
                </div>
              </div>
            )}
-           <div className="py-2 text-sm">
+           <div className="py-1 text-sm">
              <div className="flex items-center justify-between">
                <label className="text-muted-foreground whitespace-nowrap mr-4">{isOptionTrade ? 'Contracts' : 'Quantity'}</label>
                <div className="relative flex items-center max-w-[120px]">
@@ -708,8 +725,10 @@ export function TradeExecutionPanel({
              
              {/* Account holdings info - positioned below Quantity label on the left, only show for sell orders */}
              {tradeMode === 'sell' && availableQuantity > 0 && (
-               <div className="text-xs text-muted-foreground mt-1">
-                 Account holds {availableQuantity} shares
+               <div className="text-xs text-muted-foreground mt-0.5">
+                 <span className="text-muted-foreground">
+                   Holding {availableQuantity} {symbol?.toUpperCase()}
+                 </span>
                </div>
              )}
              
@@ -1102,12 +1121,25 @@ export function TradeExecutionPanel({
      <div className="space-y-6 ">
       <h3 className="text-lg font-semibold">Order Confirmation</h3>
       <div className="flex flex-col items-center justify-center py-2 space-y-3">
-         <div className="w-12 h-12 bg-lime-300 dark:bg-lime-900 rounded-full flex items-center justify-center">
-          <Check className="w-6 h-6 text-lime-700 dark:text-lime-400" />
+         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+           orderStatus === 'filled' 
+             ? 'bg-green-300 dark:bg-green-900' 
+             : 'bg-lime-300 dark:bg-lime-900'
+         }`}>
+          <Check className={`w-6 h-6 ${
+            orderStatus === 'filled' 
+              ? 'text-green-700 dark:text-green-400' 
+              : 'text-lime-700 dark:text-lime-400'
+          }`} />
         </div>
-        <h4 className="font-medium">Order Submitted</h4>
+        <h4 className="font-medium">
+          {orderStatus === 'filled' ? 'Order Filled' : 'Order Submitted'}
+        </h4>
         <p className="text-sm text-muted-foreground text-center">
-          Your order to {tradeMode} {quantity} {symbol?.toUpperCase()} {isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} {isOptionTrade ? (quantity === 1 ? 'contract' : 'contracts') : (quantity === 1 ? 'share' : 'shares')} has been submitted.
+          {orderStatus === 'filled' 
+            ? `Your ${orderType} order to ${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} ${isOptionTrade ? (quantity === 1 ? 'contract' : 'contracts') : (quantity === 1 ? 'share' : 'shares')} has been filled.`
+            : `Your order to ${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} ${isOptionTrade ? (quantity === 1 ? 'contract' : 'contracts') : (quantity === 1 ? 'share' : 'shares')} has been submitted and is pending.`
+          }
         </p>
       </div>
        <div className="text-sm border p-3 rounded-md bg-background/50">
@@ -1128,8 +1160,14 @@ export function TradeExecutionPanel({
           {renderFormRow('Est. Cost/Proceeds', <span className="font-medium text-right">${estimatedCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>)}
           {renderFormRow('Status', 
              <div className="flex items-center justify-end gap-1.5">
-                 <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span> 
-                 <span className="font-medium">Pending</span>
+                 <span className={`w-2 h-2 rounded-full ${
+                   orderStatus === 'filled' 
+                     ? 'bg-green-500' 
+                     : 'bg-yellow-400 animate-pulse'
+                 }`}></span> 
+                 <span className="font-medium">
+                   {orderStatus === 'filled' ? 'Filled' : 'Pending'}
+                 </span>
               </div>
           )}
           {notes && renderFormRow('Notes', <span className="font-medium whitespace-pre-wrap text-right">{notes}</span>)}
