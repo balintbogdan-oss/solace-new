@@ -605,8 +605,10 @@ export function StockDetailPanel({
   
   // Chart color calculation based on day change
   
-  // Use colors from globals.css
-  const strokeColor = isPositive ? '#bbf451' : '#fca5a5'; // Using the defined chart colors
+  // Use theme-aware colors from globals.css
+  const strokeColor = isPositive 
+    ? (theme === 'dark' ? '#84cc16' : '#65a30d') // One notch brighter warmer green
+    : '#fca5a5'; // Red color remains the same
   const dataKey = 'price'; // Default to price data
 
   const formatYAxisTick = (value: number) => {

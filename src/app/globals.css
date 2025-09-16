@@ -51,7 +51,7 @@
     --positive: 101 23% 48%; /* lime-600 */
     --negative: 0 84% 60%; /* red-500 */
     --chart-primary: 40 64% 60%; /* Bright Golden - Light */
-    --chart-positive: 101 51% 48%; /* Bright Golden - Light */
+    --chart-positive: 84 81% 60%; /* One notch brighter warmer green for light mode */
     --chart-secondary: 50 66% 33%; /* Teal/Cyan - Light */
   }
 
@@ -90,7 +90,7 @@
 
     /* Keeping existing chart/gradient/positive/negative */
     /* --chart-positive: #bbf7d0; */ 
-    --chart-positive: #bbf451; /* New: green-400 (darker) */
+    --chart-positive: #84cc16; /* One notch brighter warmer green for dark mode */
     --chart-negative: #fca5a5; /* Original: red-300 */
 
     /* Keep gradient variables in RGB format */

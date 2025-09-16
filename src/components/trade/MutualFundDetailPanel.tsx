@@ -13,6 +13,7 @@ import { RefreshCw } from 'lucide-react'
 import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
 import { MarketData } from '@/types/account'
 import { MutualFundInfo } from '@/types/account'
+import { useTheme } from 'next-themes'
 
 // Generate mock chart data for mutual funds
 const generateMockChartData = (symbol: string, basePrice: number) => ({
@@ -148,6 +149,7 @@ export function MutualFundDetailPanel({
   className,
   dataSource = 'live'
 }: MutualFundDetailPanelProps) {
+  const { theme } = useTheme();
   const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1D');
   const [mutedColor, setMutedColor] = useState('#9ca3af');
   const [mutualFund, setMutualFund] = useState<MutualFundInfo | null>(null);
@@ -298,7 +300,9 @@ export function MutualFundDetailPanel({
   const actualDayChange = realMarketData?.dayChange || mutualFund.change || 0;
   const isPositive = actualDayChange >= 0;
   
-  const strokeColor = isPositive ? '#bbf451' : '#fca5a5';
+  const strokeColor = isPositive 
+    ? (theme === 'dark' ? '#84cc16' : '#65a30d') // One notch brighter warmer green
+    : '#fca5a5'; // Red color remains the same
   const dataKey = 'nav'; // Use NAV instead of price
 
   const formatYAxisTick = (value: number) => {
