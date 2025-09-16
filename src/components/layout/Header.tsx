@@ -21,6 +21,7 @@ import { MobileNav } from "@/components/navigation/MobileNav";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getFilteredTopLevelNavItems } from "@/lib/navigation";
 import { useSearch } from "@/hooks/useSearch";
+import Image from "next/image";
 
 export function Header() {
   const pathname = usePathname();
@@ -125,9 +126,11 @@ export function Header() {
         {/* Column 1: Logo and Menu */}
         <div className="flex items-center gap-2 z-10">
           {appearanceSettings.logoUrl ? (
-            <img 
+            <Image 
               src={appearanceSettings.logoUrl} 
               alt="Custom logo" 
+              width={120}
+              height={40}
               className="max-w-[120px] max-h-[40px] object-contain"
             />
           ) : (

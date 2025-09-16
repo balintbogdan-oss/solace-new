@@ -437,7 +437,7 @@ export function TradeExecutionPanel({
     if (!skipSegmentedControl) {
       setOptionSellType('sellToClose');
     } 
-  }, [symbol, accountId, initialTradeMode, strikePrice, optionType, limitPrice, isOptionTrade, marketPrice]);
+  }, [symbol, accountId, initialTradeMode, strikePrice, optionType, limitPrice, isOptionTrade, marketPrice, isMutualFund, skipSegmentedControl]);
 
   useEffect(() => {
     if (orderState === 'review' && notesTextareaRef.current) {

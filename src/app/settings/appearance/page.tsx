@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { useSettings } from '@/contexts/SettingsContext';
 import { RotateCcw, Upload, X } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AppearanceSettingsPage() {
   const { 
@@ -310,9 +311,11 @@ export default function AppearanceSettingsPage() {
               {appearanceSettings.logoUrl ? (
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <img 
+                    <Image 
                       src={appearanceSettings.logoUrl} 
                       alt="Custom logo" 
+                      width={200}
+                      height={60}
                       className="max-w-[200px] max-h-[60px] object-contain"
                     />
                   </div>
