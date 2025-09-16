@@ -1689,7 +1689,16 @@ export function TradeExecutionPanel({
          {isMutualFund && (
            <>
              {/* Basic Mutual Fund Fields */}
-             {renderFormRow('Quantity', <span className="font-medium text-right">{quantity} {quantity === 1 ? 'Share' : 'Shares'}</span>)}
+             {renderFormRow('Quantity', <span className="font-medium text-right">
+               {isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0 && marketPrice > 0 
+                 ? `${(dollarAmount / marketPrice).toFixed(4)}` 
+                 : quantity} {(() => {
+                   const displayQuantity = isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0 && marketPrice > 0 
+                     ? (dollarAmount / marketPrice) 
+                     : quantity;
+                   return displayQuantity === 1 ? 'Share' : 'Shares';
+                 })()}
+             </span>)}
              
              {/* Non-Advanced Mutual Fund Fields */}
              {customerStatus !== '-' && renderFormRow('Customer Status', <span className="font-medium text-right">{customerStatus}</span>)}
