@@ -177,6 +177,12 @@ export default function TradeSymbolPage() {
 
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [currentOptionTradeDetails, setCurrentOptionTradeDetails] = useState<OptionTradeDetails | null>(null);
+  const [selectedOptionAction, setSelectedOptionAction] = useState<'buyToOpen' | 'sellToOpen' | null>(null);
+  
+  // Debug logging for selectedOptionAction changes
+  useEffect(() => {
+    console.log('🎯 selectedOptionAction changed:', selectedOptionAction);
+  }, [selectedOptionAction]);
 
   if (!stock && !mutualFund) {
     return <div>Loading data or symbol not found...</div>;
@@ -227,6 +233,10 @@ export default function TradeSymbolPage() {
     setCurrentTradeMode(null);
     setCurrentOptionTradeDetails(null);
     setSelectedAccountId(null);
+    // Only reset selectedOptionAction when switching away from options
+    if (mode === 'stock') {
+      setSelectedOptionAction(null);
+    }
     // Update URL to reflect the tab change
     const typeParam = mode === 'stock' ? 'equities' : 'options';
     router.push(`/trade/${symbol}?type=${typeParam}`);
@@ -247,9 +257,16 @@ export default function TradeSymbolPage() {
 
   // Handler for clicks within the OptionsChainTable
   const handleOptionTradeClick = (details: OptionTradeDetails) => {
- 
     setCurrentOptionTradeDetails(details);
     setCurrentTradeMode(details.action); // Set trade mode (buy/sell)
+    
+    // Set the selected option action based on the trade details
+    if (details.action === 'buy') {
+      setSelectedOptionAction('buyToOpen');
+    } else if (details.action === 'sell') {
+      setSelectedOptionAction('sellToOpen');
+    }
+    
     setShowAccountModal(true); // Prompt for account selection
   };
 
@@ -348,6 +365,7 @@ export default function TradeSymbolPage() {
                 symbol={symbol} 
                 onOptionTradeClick={handleOptionTradeClick}
                 currentOptionTrade={currentOptionTradeDetails}
+                selectedAction={selectedOptionAction}
               />
             )}
           </div>
@@ -372,6 +390,8 @@ export default function TradeSymbolPage() {
               optionType={pageViewMode === 'options' ? currentOptionTradeDetails?.optionType : undefined}
               limitPrice={pageViewMode === 'options' ? currentOptionTradeDetails?.price : undefined}
               skipSegmentedControl={pageViewMode === 'options' ? currentOptionTradeDetails?.skipSegmentedControl : undefined}
+              selectedOptionAction={selectedOptionAction || undefined}
+              onSelectedOptionActionChange={setSelectedOptionAction}
               onClose={handleCloseTradePanel}
             />
             </div>

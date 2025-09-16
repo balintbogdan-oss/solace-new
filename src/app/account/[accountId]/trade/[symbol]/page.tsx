@@ -15,6 +15,7 @@ import { MutualFundInfo } from '@/types/account'
 
 type TradeMode = 'buy' | 'sell' | null
 type PageViewMode = 'stock' | 'options'
+type OptionAction = 'buyToOpen' | 'sellToOpen'
 
 // Helper function to detect mutual funds
 const isMutualFund = (symbol: string): boolean => {
@@ -124,6 +125,7 @@ export default function AccountSymbolTradePage() {
   
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [currentOptionTradeDetails, setCurrentOptionTradeDetails] = useState<OptionTradeDetails | null>(null);
+  const [selectedOptionAction, setSelectedOptionAction] = useState<OptionAction>('buyToOpen');
 
   if (!stock) {
     return <div>Loading stock data or symbol not found...</div>; 
@@ -141,6 +143,13 @@ export default function AccountSymbolTradePage() {
     console.log("Option trade initiated:", details);
     setCurrentOptionTradeDetails(details);
     setTradeMode(details.action);
+    
+    // Update the selected option action based on the clicked pill
+    if (details.action === 'buy') {
+      setSelectedOptionAction('buyToOpen');
+    } else if (details.action === 'sell') {
+      setSelectedOptionAction('sellToOpen');
+    }
   };
 
 
@@ -275,6 +284,7 @@ export default function AccountSymbolTradePage() {
                symbol={symbol} 
                onOptionTradeClick={handleOptionTradeClick}
                currentOptionTrade={currentOptionTradeDetails}
+               selectedAction={selectedOptionAction}
             />
           )}
         </div>
@@ -294,6 +304,8 @@ export default function AccountSymbolTradePage() {
                   isOptionTradeOverride={pageViewMode === 'options'}
                   skipSegmentedControl={pageViewMode === 'options' ? currentOptionTradeDetails?.skipSegmentedControl : false}
                   onClose={handleCloseTradePanel}
+                  selectedOptionAction={selectedOptionAction}
+                  onSelectedOptionActionChange={setSelectedOptionAction}
               />
             </div>
           ) : (

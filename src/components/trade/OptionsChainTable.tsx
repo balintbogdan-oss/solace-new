@@ -25,6 +25,8 @@ interface OptionsChainTableProps {
   onOptionTradeClick?: (details: OptionTradeDetails) => void;
   // Add current option trade details for highlighting
   currentOptionTrade?: OptionTradeDetails | null;
+  // Add selected action from segmented control
+  selectedAction?: 'buyToOpen' | 'sellToOpen' | null;
 }
 
 // --- Mock Data Generation ---
@@ -129,10 +131,16 @@ const generateMockOptionData = (symbol: string, strikeBase: number, count: numbe
 
 // --- Component ---
 // export function OptionsChainTable({ symbol, onTradeEquitiesClick }: OptionsChainTableProps) { // OLD
-export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTrade }: OptionsChainTableProps) {
+export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTrade, selectedAction }: OptionsChainTableProps) {
   // Get current price from market data
   const [currentPrice, setCurrentPrice] = React.useState(235); // Default for AAPL
   const [viewMode, setViewMode] = React.useState<'list' | 'straddle'>('straddle');
+  
+  // Debug logging
+  console.log('🎯 OptionsChainTable props:', { symbol, selectedAction, currentOptionTrade });
+  console.log('🎯 selectedAction type:', typeof selectedAction, 'value:', selectedAction);
+  console.log('🎯 selectedAction === "sellToOpen":', selectedAction === 'sellToOpen');
+  console.log('🎯 selectedAction === "buyToOpen":', selectedAction === 'buyToOpen');
   
   React.useEffect(() => {
     // Get current price based on symbol
@@ -149,19 +157,50 @@ export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTra
 
   // Helper function to check if a cell is currently active
   const isCellActive = (strike: number, optionType: 'call' | 'put', action: 'buy' | 'sell') => {
-    const isActive = currentOptionTrade && 
-           currentOptionTrade.strikePrice === strike && 
-           currentOptionTrade.optionType === optionType && 
-           currentOptionTrade.action === action;
-    
-    // Debug logging
-    if (currentOptionTrade) {
-      console.log('🔍 Checking cell:', { strike, optionType, action });
-      console.log('🔍 Current trade:', currentOptionTrade);
-      console.log('🔍 Is active:', isActive);
+    // If we have both a current option trade AND a selected action from segmented control,
+    // only highlight the specific pill that matches both the trade details AND the action
+    if (currentOptionTrade && selectedAction) {
+      const isActive = currentOptionTrade.strikePrice === strike &&
+             currentOptionTrade.optionType === optionType &&
+             (
+               (selectedAction === 'buyToOpen' && action === 'buy') || // Highlight ask for buyToOpen
+               (selectedAction === 'sellToOpen' && action === 'sell')  // Highlight bid for sellToOpen
+             );
+      
+      // Debug logging
+      if (strike <= 200 && optionType === 'call') {
+        console.log('🔍 Checking cell (segmented control + current trade):', { 
+          strike, 
+          optionType, 
+          action, 
+          selectedAction,
+          currentOptionTradeStrike: currentOptionTrade.strikePrice,
+          currentOptionTradeType: currentOptionTrade.optionType,
+          isActive
+        });
+      }
+      
+      return isActive;
     }
     
-    return isActive;
+    // If only a specific option trade is selected (no segmented control action)
+    if (currentOptionTrade) {
+      const isActive = currentOptionTrade.strikePrice === strike && 
+             currentOptionTrade.optionType === optionType && 
+             currentOptionTrade.action === action;
+      
+      // Debug logging
+      console.log('🔍 Checking cell (current trade only):', { strike, optionType, action, isActive });
+      return isActive;
+    }
+    
+    // If only segmented control action is selected (no specific trade), don't highlight anything
+    // This prevents highlighting ALL pills when just switching the segmented control
+    if (selectedAction) {
+      return false;
+    }
+    
+    return false;
   };
 
   // Mock data for List view (separate calls and puts tables)
@@ -446,7 +485,7 @@ export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTra
                     <span className={cn(
                       "inline-block rounded-full text-sm font-medium px-2 py-1 border-2",
                       isCellActive(option.strike, 'call', 'sell') 
-                        ? "bg-red-400 text-black border-red-400 shadow-lg" 
+                        ? "bg-red-500 text-white border-red-500 shadow-xl ring-2 ring-red-300" 
                         : "bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-transparent"
                     )}>
                       ${option.call.bid}
@@ -466,7 +505,7 @@ export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTra
                       <span className={cn(
                         "inline-block rounded-full text-sm font-medium px-2 py-1 border-2",
                         isCellActive(option.strike, 'call', 'buy') 
-                          ? "bg-green-600 dark:bg-lime-200 text-white dark:text-black border-green-600 dark:border-lime-200 shadow-lg" 
+                          ? "bg-green-600 text-white border-green-600 shadow-xl ring-2 ring-green-300" 
                           : "bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-transparent"
                       )}>
                         ${option.call.ask}
@@ -542,7 +581,7 @@ export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTra
                     <span className={cn(
                       "inline-block rounded-full text-sm font-medium px-2 py-1 border-2",
                       isCellActive(option.strike, 'put', 'sell') 
-                        ? "bg-red-400 text-black border-red-400 shadow-lg" 
+                        ? "bg-red-500 text-white border-red-500 shadow-xl ring-2 ring-red-300" 
                         : "bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-transparent"
                     )}>
                       ${option.put.bid}
@@ -561,7 +600,7 @@ export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTra
                     <span className={cn(
                       "inline-block rounded-full text-sm font-medium px-2 py-1 border-2",
                       isCellActive(option.strike, 'put', 'buy') 
-                        ? "bg-green-600 dark:bg-lime-200 text-white dark:text-black border-green-600 dark:border-lime-200 shadow-lg" 
+                        ? "bg-green-600 text-white border-green-600 shadow-xl ring-2 ring-green-300" 
                         : "bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-transparent"
                     )}>
                       ${option.put.ask}

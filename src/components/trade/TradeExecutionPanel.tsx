@@ -67,6 +67,9 @@ interface TradeExecutionPanelProps {
   skipSegmentedControl?: boolean;
   // Explicitly indicate when we are rendering an options trade
   isOptionTradeOverride?: boolean;
+  // Add props for syncing with options chain
+  selectedOptionAction?: 'buyToOpen' | 'sellToOpen';
+  onSelectedOptionActionChange?: (action: 'buyToOpen' | 'sellToOpen') => void;
 }
 
 export function TradeExecutionPanel({ 
@@ -79,7 +82,9 @@ export function TradeExecutionPanel({
   optionType,
   limitPrice,
   skipSegmentedControl = false,
-  isOptionTradeOverride
+  isOptionTradeOverride,
+  selectedOptionAction: externalSelectedOptionAction,
+  onSelectedOptionActionChange
 }: TradeExecutionPanelProps) {
   // --- Base States ---
   const [orderState, setOrderState] = useState<OrderState>('entry')
@@ -166,7 +171,11 @@ export function TradeExecutionPanel({
   const [timeWeightedAveragePrice, setTimeWeightedAveragePrice] = useState<boolean>(false);
   const [volumeWeightedAveragePrice, setVolumeWeightedAveragePrice] = useState<boolean>(false);
   const [optionSellType, setOptionSellType] = useState<OptionSellType>('sellToClose');
-  const [selectedOptionAction, setSelectedOptionAction] = useState<'buyToOpen' | 'sellToOpen'>('buyToOpen');
+  const [internalSelectedOptionAction, setInternalSelectedOptionAction] = useState<'buyToOpen' | 'sellToOpen'>('buyToOpen');
+  
+  // Use external prop if provided, otherwise use internal state
+  const selectedOptionAction = externalSelectedOptionAction ?? internalSelectedOptionAction;
+  const setSelectedOptionAction = onSelectedOptionActionChange ?? setInternalSelectedOptionAction;
 
   const router = useRouter();
 
@@ -325,6 +334,42 @@ export function TradeExecutionPanel({
       
       return 0;
   }, [quantity, marketPrice, commissionType, commissionAmount, isOptionTrade, currentLimitPrice, orderType]);
+
+  // Helper function to get the correct price for options based on selected action
+  const getOptionPrice = () => {
+    if (!isOptionTrade || !strikePrice || !optionType) return currentLimitPrice;
+    
+    // For options, we need to determine the correct bid/ask price based on the selected action
+    // This would typically come from the options chain data, but for now we'll use mock data
+    // In a real implementation, this would be passed from the options chain component
+    
+    // Mock option prices - in reality these would come from the options chain
+    const mockOptionPrices = {
+      'call': {
+        '195': { bid: 46.58, ask: 47.52 },
+        '200': { bid: 41.63, ask: 42.47 },
+        '205': { bid: 36.68, ask: 37.42 }
+      },
+      'put': {
+        '195': { bid: 9.34, ask: 9.53 },
+        '200': { bid: 9.34, ask: 9.53 },
+        '205': { bid: 9.34, ask: 9.53 }
+      }
+    };
+    
+    const optionData = mockOptionPrices[optionType]?.[strikePrice.toString() as keyof typeof mockOptionPrices[typeof optionType]];
+    if (!optionData) return currentLimitPrice;
+    
+    // Return the appropriate price based on selected action
+    if (selectedOptionAction === 'buyToOpen') {
+      return optionData.ask; // Use ask price for buying
+    } else if (selectedOptionAction === 'sellToOpen') {
+      return optionData.bid; // Use bid price for selling
+    }
+    
+    return currentLimitPrice;
+  };
+
   const estimatedCost = useMemo(() => {
       const priceToUse = orderType === 'limit' ? currentLimitPrice : marketPrice;
       
@@ -334,10 +379,17 @@ export function TradeExecutionPanel({
         return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
       }
       
+      // For options, use the correct bid/ask price based on selected action
+      if (isOptionTrade) {
+        const optionPrice = getOptionPrice();
+        const baseCost = quantity * optionPrice * 100;
+        return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
+      }
+      
       // For all other cases, use the standard calculation
-      const baseCost = isOptionTrade ? quantity * currentLimitPrice * 100 : quantity * priceToUse;
+      const baseCost = quantity * priceToUse;
       return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
-  }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType, isMutualFund, transactionType, dollarAmount]);
+  }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType, isMutualFund, transactionType, dollarAmount, selectedOptionAction, strikePrice, optionType]);
 
   // Calculate maximum quantity based on buying power
   const maxQuantity = useMemo(() => {
@@ -744,7 +796,8 @@ export function TradeExecutionPanel({
                 <div className="flex bg-accent rounded-md p-1">
                   <button
                     onClick={() => {
-                      setSelectedOptionAction('buyToOpen');
+                      console.log('🎯 Buy to Open clicked, calling onSelectedOptionActionChange');
+                      onSelectedOptionActionChange?.('buyToOpen');
                       setOptionSellType('buyToClose'); // Set appropriate close action
                     }}
                     className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -757,7 +810,8 @@ export function TradeExecutionPanel({
                   </button>
                   <button
                     onClick={() => {
-                      setSelectedOptionAction('sellToOpen');
+                      console.log('🎯 Sell to Open clicked, calling onSelectedOptionActionChange');
+                      onSelectedOptionActionChange?.('sellToOpen');
                       setOptionSellType('sellToClose'); // Set appropriate close action
                     }}
                     className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -901,7 +955,7 @@ export function TradeExecutionPanel({
                  />
                </div>
                <div className="flex-grow flex justify-end text-right">
-                 <span className="font-medium">${marketPrice.toFixed(2)}</span>
+                 <span className="font-medium">${getOptionPrice().toFixed(2)}</span>
                </div>
              </div>
            )}
@@ -1703,7 +1757,7 @@ export function TradeExecutionPanel({
 
            <div className="flex items-center justify-between text-sm font-medium border-t pt-3 mt-2">
              <span>Estimated {tradeMode === 'buy' ? 'Cost' : 'Proceeds'}</span>
-             <span>${estimatedCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {isOptionTrade && <span className='text-xs text-muted-foreground'>({quantity} x ${currentLimitPrice.toFixed(2)} x 100)</span>}</span>
+             <span>${estimatedCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {isOptionTrade && <span className='text-xs text-muted-foreground'>({quantity} x ${getOptionPrice().toFixed(2)} x 100)</span>}</span>
            </div>
 
            <div className="pt-4">
@@ -1868,7 +1922,7 @@ export function TradeExecutionPanel({
 
          <div className="flex items-center justify-between text-sm font-medium border-t pt-3 mt-2">
              <span>Estimated {tradeMode === 'buy' ? 'Cost' : 'Proceeds'}</span>
-             <span className="font-medium">${estimatedCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {isOptionTrade && <span className='text-xs text-muted-foreground'>({quantity} x ${currentLimitPrice.toFixed(2)} x 100)</span>}</span>
+             <span className="font-medium">${estimatedCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {isOptionTrade && <span className='text-xs text-muted-foreground'>({quantity} x ${getOptionPrice().toFixed(2)} x 100)</span>}</span>
           </div>
           <div className="pt-2 space-y-1">
             <label htmlFor="notes-review" className="block text-sm font-medium text-muted-foreground">
