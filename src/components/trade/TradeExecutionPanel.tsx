@@ -131,7 +131,7 @@ export function TradeExecutionPanel({
   const [taxAllocationMethod, setTaxAllocationMethod] = useState<TaxAllocationMethod>('FirstInFirstOut');
 
   // Mutual Fund specific settings
-  const [customerStatus, setCustomerStatus] = useState<string>('Existing');
+  const [customerStatus, setCustomerStatus] = useState<string>('New');
   const [shareProcessing, setShareProcessing] = useState<string>('Deposited');
   const [reinvestDivs, setReinvestDivs] = useState<string>('Reinvest');
   const [distributionLongGains, setDistributionLongGains] = useState<string>('Reinvest');
@@ -413,7 +413,7 @@ export function TradeExecutionPanel({
     setDollarAmount(0);
     
     // Reset mutual fund specific fields to required defaults
-    setCustomerStatus('Existing');
+    setCustomerStatus('New');
     setShareProcessing('Deposited');
     setReinvestDivs('Reinvest');
     setDistributionLongGains('Reinvest');
@@ -1176,8 +1176,8 @@ export function TradeExecutionPanel({
              </div>
            )}
 
-           {/* Settlement Type - ACAPS specific - Only for equities */}
-           {!isOptionTrade && renderFormRow('Settlement Type', (
+           {/* Settlement Type - ACAPS specific - Only for equities, not mutual funds */}
+           {!isOptionTrade && !isMutualFund && renderFormRow('Settlement Type', (
              <Select value={settlementType} onValueChange={(v) => setSettlementType(v)}>
                <SelectTrigger className="w-[120px] h-8 text-xs">
                   <SelectValue />
@@ -1516,8 +1516,16 @@ export function TradeExecutionPanel({
                            </SelectTrigger>
                            <SelectContent>
                              <SelectItem value="-">-</SelectItem>
-                             <SelectItem value="Yes">Yes</SelectItem>
-                             <SelectItem value="No">No</SelectItem>
+                             <SelectItem value="Gross">Gross</SelectItem>
+                             <SelectItem value="Net">Net</SelectItem>
+                             <SelectItem value="Waiver">Waiver</SelectItem>
+                             <SelectItem value="Death">Death</SelectItem>
+                             <SelectItem value="Disability">Disability</SelectItem>
+                             <SelectItem value="Mandatory">Mandatory</SelectItem>
+                             <SelectItem value="Sys Withd">Sys Withd</SelectItem>
+                             <SelectItem value="Def Contri">Def Contri</SelectItem>
+                             <SelectItem value="Hardship">Hardship</SelectItem>
+                             <SelectItem value="No Comm">No Comm</SelectItem>
                            </SelectContent>
                          </Select>
                        ))}
