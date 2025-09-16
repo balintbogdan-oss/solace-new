@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from '@/components/ui/switch'
 import { ArrowLeft, Check, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react'
 import { AccountSelectionModal } from './AccountSelectionModal'
 import { cn, formatAccountType } from '@/lib/utils'
@@ -125,7 +124,7 @@ export function TradeExecutionPanel({
   const [ttoRep, setTtoRep] = useState<string>('');
   const [sellerCode, setSellerCode] = useState<string>('Long-Stock');
   const [goodTillDate, setGoodTillDate] = useState<string>('');
-  const [discretion, setDiscretion] = useState<boolean>(false);
+  const [equitySolicited, setEquitySolicited] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [showValidation, setShowValidation] = useState(false);
   const [taxAllocationMethod, setTaxAllocationMethod] = useState<TaxAllocationMethod>('FirstInFirstOut');
@@ -405,7 +404,7 @@ export function TradeExecutionPanel({
     setTtoRep('');
     setSellerCode('Long-Stock');
     setGoodTillDate('');
-    setDiscretion(false);
+    setEquitySolicited('');
     setIsAdvancedOpen(false);
     setIsReviewAdvancedOpen(false);
     setTradeMode(initialTradeMode);
@@ -466,6 +465,9 @@ export function TradeExecutionPanel({
       if (quantity <= 0) {
         errors.push('Quantity must be greater than 0');
       }
+      if (!equitySolicited) {
+        errors.push('Solicited is required for equity and options orders');
+      }
     }
     
     if (tradeMode === 'sell' && quantity > availableQuantity) {
@@ -481,11 +483,11 @@ export function TradeExecutionPanel({
     }
     
     return errors;
-  }, [showValidation, quantity, tradeMode, availableQuantity, estimatedCost, buyingPower, maxQuantity, isMutualFund, transactionType, dollarAmount, network, solicited]);
+  }, [showValidation, quantity, tradeMode, availableQuantity, estimatedCost, buyingPower, maxQuantity, isMutualFund, transactionType, dollarAmount, network, solicited, equitySolicited]);
 
   const canSubmit = validationErrors.length === 0 && (
     (isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0 && network && solicited) || 
-    (!isMutualFund || transactionType === 'shares') && quantity > 0
+    (!isMutualFund || transactionType === 'shares') && quantity > 0 && equitySolicited
   );
 
   // --- Trading Functions ---
@@ -796,7 +798,7 @@ export function TradeExecutionPanel({
        </div>
        {renderFormRow('Account Type', (
          <Select value={accountType} onValueChange={(v) => setAccountType(v as 'Cash' | 'Margin')} >
-            <SelectTrigger className="min-w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
                 <SelectItem value="Cash">Cash</SelectItem>
                 <SelectItem value="Margin">Margin</SelectItem>
@@ -807,7 +809,7 @@ export function TradeExecutionPanel({
        {isMutualFund && (
          renderFormRow('Action', (
            <Select value={tradeMode || ''} onValueChange={(v) => setTradeMode(v as TradeMode)}>
-             <SelectTrigger className="min-w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
+             <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
              <SelectContent>
                <SelectItem value="buy">Buy</SelectItem>
                <SelectItem value="sell">Sell</SelectItem>
@@ -822,7 +824,7 @@ export function TradeExecutionPanel({
        {isMutualFund && (
          renderFormRow('Transaction Type', (
            <Select value={transactionType} onValueChange={(value) => setTransactionType(value as 'even-dollar' | 'shares')}>
-             <SelectTrigger className="min-w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
+             <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
              <SelectContent>
                {tradeMode === 'buy' ? (
                  <SelectItem value="even-dollar">Even Dollar</SelectItem>
@@ -1180,12 +1182,25 @@ export function TradeExecutionPanel({
            {/* Settlement Type - ACAPS specific - Only for equities, not mutual funds */}
            {!isOptionTrade && !isMutualFund && renderFormRow('Settlement Type', (
              <Select value={settlementType} onValueChange={(v) => setSettlementType(v)}>
-               <SelectTrigger className="w-[120px] h-8 text-xs">
+               <SelectTrigger className="w-[140px] h-8 text-xs">
                   <SelectValue />
                </SelectTrigger>
                <SelectContent>
                  <SelectItem value="regular">Regular</SelectItem>
                  <SelectItem value="sameDay">Same Day</SelectItem>
+               </SelectContent>
+             </Select>
+           ))}
+
+           {/* Solicited - Required for equities and options */}
+           {!isMutualFund && renderFormRow('Solicited', (
+             <Select value={equitySolicited} onValueChange={setEquitySolicited}>
+               <SelectTrigger className="w-[140px] h-8 text-xs">
+                 <SelectValue placeholder="Select..." />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="Yes">Yes</SelectItem>
+                 <SelectItem value="No">No</SelectItem>
                </SelectContent>
              </Select>
            ))}
@@ -1681,14 +1696,6 @@ export function TradeExecutionPanel({
                    </SelectContent>
                  </Select>
                ))}
-               {renderFormRow('Discretion', (
-                 <div className="flex justify-end">
-                   <Switch 
-                     checked={discretion} 
-                     onCheckedChange={setDiscretion}
-                   />
-                 </div>
-               ))}
                  </>
                )}
              </div>
@@ -1762,6 +1769,7 @@ export function TradeExecutionPanel({
          {orderType === 'market' && !isOptionTrade && renderFormRow(isMutualFund ? 'NAV' : 'Market Price', <span className="font-medium text-right">~${marketPrice.toFixed(2)}</span>)}
          {!isMutualFund && renderFormRow('Commission Type', <span className="font-medium capitalize text-right">{commissionType}</span>)}
          {!isMutualFund && renderFormRow('Commission Est.', <span className="font-medium text-right">${commission.toFixed(2)}</span>)}
+         {!isMutualFund && renderFormRow('Solicited', <span className="font-medium text-right">{equitySolicited}</span>)}
          {/* Show tax allocation method only for stock sells with Cash or Margin accounts */}
          {!isOptionTrade && tradeMode === 'sell' && (accountType === 'Cash' || accountType === 'Margin') && renderFormRow('Tax Allocation', <span className="font-medium text-right">{taxAllocationMethod.replace(/([A-Z])/g, ' $1').trim()}</span>)}
 
@@ -1811,8 +1819,6 @@ export function TradeExecutionPanel({
                 </div>
               )}
               {!isOptionTrade && tradeMode === 'sell' && renderFormRow('Seller Code', <span className="font-medium text-right">{sellerCode}</span>)}
-              {!isMutualFund && renderFormRow('Solicited', <span className="font-medium text-right">{solicited}</span>)}
-              {!isMutualFund && renderFormRow('Discretion', <span className="font-medium text-right">{discretion ? 'Yes' : 'No'}</span>)}
               {!isMutualFund && ttoRep && renderFormRow('TTO Rep', <span className="font-medium text-right">{ttoRep}</span>)}
               
               {/* Mutual Fund Optional Settings Fields */}
