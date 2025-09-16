@@ -17,6 +17,11 @@ interface MutualFundMarketDataOverlayProps {
   expenseRatio: number;
   netAssets: number;
   timestamp: string;
+  ytdReturn?: number;
+  category?: string;
+  yield?: number;
+  frontLoad?: string;
+  inceptionDate?: string;
 }
 
 export function MutualFundMarketDataOverlay({
@@ -26,18 +31,20 @@ export function MutualFundMarketDataOverlay({
   change,
   changePercent,
   previousClose,
-  dayHigh,
-  dayLow,
-  yearHigh,
-  yearLow,
   expenseRatio,
   netAssets,
   timestamp,
+  ytdReturn = 12.30,
+  category = 'US Equity Large Cap Blend',
+  yield: fundYield = 1.45,
+  frontLoad = '-',
+  inceptionDate = '13 Nov 2000',
 }: MutualFundMarketDataOverlayProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
 
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -184,41 +191,42 @@ export function MutualFundMarketDataOverlay({
                 </div>
               </div>
 
-              {/* Price Data */}
+              {/* Fund Data */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="text-left">
                   <div className="text-muted-foreground">Previous Close</div>
                   <div className="font-medium">{formatCurrency(previousClose)}</div>
                 </div>
                 <div className="text-left">
-                  <div className="text-muted-foreground">Day High</div>
-                  <div className="font-medium">{formatCurrency(dayHigh)}</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-muted-foreground">Day Low</div>
-                  <div className="font-medium">{formatCurrency(dayLow)}</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-muted-foreground">52W High</div>
-                  <div className="font-medium">{formatCurrency(yearHigh)}</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-muted-foreground">52W Low</div>
-                  <div className="font-medium">{formatCurrency(yearLow)}</div>
+                  <div className="text-muted-foreground">YTD Return</div>
+                  <div className="font-medium">{ytdReturn.toFixed(2)}%</div>
                 </div>
                 <div className="text-left">
                   <div className="text-muted-foreground">Expense Ratio</div>
-                  <div className="font-medium">{(expenseRatio * 100).toFixed(2)}%</div>
+                  <div className="font-medium">{expenseRatio.toFixed(2)}%</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-muted-foreground">Category</div>
+                  <div className="font-medium">{category}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-muted-foreground">Net Assets</div>
+                  <div className="font-medium">{netAssets >= 1000 ? formatLargeNumber(netAssets) : `$${netAssets}B`}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-muted-foreground">Yield</div>
+                  <div className="font-medium">{fundYield.toFixed(2)}%</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-muted-foreground">Front Load</div>
+                  <div className="font-medium">{frontLoad}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-muted-foreground">Inception Date</div>
+                  <div className="font-medium">{inceptionDate}</div>
                 </div>
               </div>
 
-              {/* Fund Information */}
-              <div className="pt-3 border-t">
-                <div className="text-sm text-left">
-                  <div className="text-muted-foreground">Net Assets</div>
-                  <div className="font-medium">{formatLargeNumber(netAssets)}</div>
-                </div>
-              </div>
 
               {/* Timestamp */}
               <div className="text-xs text-muted-foreground pt-2 border-t">

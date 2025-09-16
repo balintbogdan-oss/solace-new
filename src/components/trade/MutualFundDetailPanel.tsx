@@ -17,13 +17,6 @@ import { useTheme } from 'next-themes'
 
 // Generate mock chart data for mutual funds
 const generateMockChartData = (symbol: string, basePrice: number) => ({
-  '1D': [
-    { time: '10:00', nav: basePrice * 0.995 },
-    { time: '11:00', nav: basePrice * 0.998 },
-    { time: '12:00', nav: basePrice * 1.001 },
-    { time: '13:00', nav: basePrice * 1.002 },
-    { time: '14:00', nav: basePrice },
-  ],
   '1W': [
     { time: 'Mon', nav: basePrice * 0.99 },
     { time: 'Tue', nav: basePrice * 0.995 },
@@ -74,73 +67,11 @@ interface MutualFundDetailPanelProps {
   dataSource?: 'live' | 'mock';
 }
 
-type TimeFrame = '1D' | '1W' | '1M' | '6M' | 'YTD' | '1Y' | 'MAX';
+type TimeFrame = '1W' | '1M' | '6M' | 'YTD' | '1Y' | 'MAX';
 
-const timeFrames: TimeFrame[] = ['1D', '1W', '1M', '6M', 'YTD', '1Y', 'MAX'];
+const timeFrames: TimeFrame[] = ['1W', '1M', '6M', 'YTD', '1Y', 'MAX'];
 
 
-// Function to generate realistic 1D NAV data for mutual funds
-const generateRealistic1DNavData = (marketData: Record<string, unknown> | MarketData) => {
-  const points = [];
-  
-  const currentNav = Number(marketData?.currentPrice) || 0;
-  const dayChange = Number(marketData?.dayChange) || 0;
-  const open = currentNav - dayChange;
-  const high = Number(marketData?.high) || Math.max(open, currentNav) + Math.abs(dayChange) * 0.3;
-  const low = Number(marketData?.low) || Math.min(open, currentNav) - Math.abs(dayChange) * 0.3;
-  
-  if (open > 0 && high > 0 && low > 0) {
-    const navRange = high - low;
-    const startTime = 9 * 60 + 30; // 9:30 AM
-    const endTime = 16 * 60; // 4:00 PM
-    const interval = 15; // 15 minutes
-    
-    for (let minutes = startTime; minutes <= endTime; minutes += interval) {
-      const hour = Math.floor(minutes / 60);
-      const minute = minutes % 60;
-      const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      
-      const progress = (minutes - startTime) / (endTime - startTime);
-      
-      // Mutual funds have less intraday volatility than stocks
-      let nav;
-      if (progress < 0.1) {
-        nav = open + (Math.random() - 0.5) * (navRange * 0.02);
-      } else if (progress < 0.3) {
-        const trendFactor = Math.min(progress * 3, 1);
-        if (dayChange > 0) {
-          nav = open + (high - open) * trendFactor + (Math.random() - 0.5) * (navRange * 0.02);
-        } else {
-          const downwardTrend = (low - open) * trendFactor;
-          nav = open + downwardTrend + (Math.random() - 0.5) * (navRange * 0.03);
-        }
-      } else if (progress < 0.7) {
-        const midNav = (high + low) / 2;
-        const volatility = navRange * 0.05; // Much lower volatility than stocks
-        const trendBias = dayChange > 0 ? 0.1 : -0.1;
-        nav = midNav + (Math.random() - 0.5 + trendBias) * volatility;
-      } else {
-        const trendFactor = (progress - 0.7) / 0.3;
-        const targetNav = currentNav;
-        const trendBias = dayChange > 0 ? 0.15 : -0.15;
-        nav = (high + low) / 2 + (targetNav - (high + low) / 2) * trendFactor + (Math.random() - 0.5 + trendBias) * (navRange * 0.02);
-      }
-      
-      if (progress >= 0.99) {
-        nav = currentNav;
-      }
-      
-      nav = Math.max(low, Math.min(high, nav));
-      
-      points.push({ 
-        time, 
-        nav: parseFloat(nav.toFixed(2))
-      });
-    }
-  }
-  
-  return points;
-};
 
 export function MutualFundDetailPanel({
   symbol,
@@ -150,7 +81,7 @@ export function MutualFundDetailPanel({
   dataSource = 'live'
 }: MutualFundDetailPanelProps) {
   const { theme } = useTheme();
-  const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1D');
+  const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1W');
   const [mutedColor, setMutedColor] = useState('#9ca3af');
   const [mutualFund, setMutualFund] = useState<MutualFundInfo | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -176,7 +107,6 @@ export function MutualFundDetailPanel({
         expenseRatio: realMarketData.fundDetails?.expenseRatio || 0.03,
         minimumInvestment: 3000, // Default minimum
         chartData: {
-          '1D': generateRealistic1DNavData(realMarketData),
           '1W': generateMockChartData(upperSymbol, realMarketData.currentPrice || 100)['1W'],
           '1M': generateMockChartData(upperSymbol, realMarketData.currentPrice || 100)['1M'],
           '6M': generateMockChartData(upperSymbol, realMarketData.currentPrice || 100)['6M'],
@@ -269,17 +199,9 @@ export function MutualFundDetailPanel({
     // If no existing data, try to generate realistic data
     const realMarketData = (Array.isArray(marketData) ? marketData : [])?.find((md: unknown) => (md as { symbol: string }).symbol === symbol?.toUpperCase());
     if (realMarketData) {
-      if (selectedTimeFrame === '1D') {
-        const data = generateRealistic1DNavData(realMarketData);
-        return data;
-      } else {
-        // For other timeframes, generate mock data based on current price
-        const mockData = generateMockChartData(symbol?.toUpperCase() || '', realMarketData.currentPrice || mutualFund.nav);
-        return mockData[selectedTimeFrame] || [];
-      }
-    } else if (selectedTimeFrame === '1D') {
-      const data = generateRealistic1DNavData({ currentPrice: mutualFund.nav });
-      return data;
+      // Generate mock data based on current price
+      const mockData = generateMockChartData(symbol?.toUpperCase() || '', realMarketData.currentPrice || mutualFund.nav);
+      return mockData[selectedTimeFrame] || [];
     }
     
     // Fallback to array data or empty array

@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react';
 import {
   Dialog, 
   DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
+  DialogHeader,
+  DialogTitle
 } from "@/components/ui/dialog"
 import { Landmark, Search } from "lucide-react"
 // import { Input } from "@/components/ui/input"
@@ -180,17 +179,20 @@ export function AccountSelectionModal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[60vh] min-h-[400px] overflow-y-auto bg-white dark:bg-neutral-900 border">
         <DialogHeader>
+          <DialogTitle className="sr-only">
+            {isSearchMode ? "Search All Accounts" : "Select Account"}
+          </DialogTitle>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <DialogTitle className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {isSearchMode ? "Search All Accounts" : "Select Account"}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {isSearchMode 
                   ? "Search all accounts in your book of business." 
                   : "Choose from your related accounts or search all accounts."
                 }
-              </DialogDescription>
+              </div>
             </div>
             {!isSearchMode && (
               <button
@@ -266,9 +268,9 @@ export function AccountSelectionModal({
             <>
               {/* Household Accounts Section */}
               {showHouseholdTitle && (
-                <h4 className="px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <div className="px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                   Household Accounts
-                </h4>
+                </div>
               )}
               {householdAccounts.map((account) => (
                 <button
@@ -300,9 +302,9 @@ export function AccountSelectionModal({
 
               {/* Non-Household Accounts Section */}
               {showNonHouseholdTitle && (
-                <h4 className="px-3 text-sm font-semibold text-gray-700 dark:text-gray-300 mt-4">
+                <div className="px-3 text-sm font-semibold text-gray-700 dark:text-gray-300 mt-4">
                   Non-Household Accounts
-                </h4>
+                </div>
               )}
               {nonHouseholdAccounts.map((account) => (
                 <button
@@ -329,9 +331,9 @@ export function AccountSelectionModal({
 
               {/* Recent Searches Section (only in search mode) */}
               {showRecentTitle && (
-                <h4 className="px-3 text-sm font-semibold text-gray-700 dark:text-gray-300 mt-4">
+                <div className="px-3 text-sm font-semibold text-gray-700 dark:text-gray-300 mt-4">
                   Recently Viewed
-                </h4>
+                </div>
               )}
             </>
           )}

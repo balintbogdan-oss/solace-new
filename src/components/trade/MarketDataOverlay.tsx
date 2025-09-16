@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Info, RefreshCw } from 'lucide-react';
+import { Info, RefreshCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MarketDataOverlayProps {
+  symbol?: string;
+  description?: string;
   currentPrice: number;
   change: number;
   changePercent: number;
@@ -19,6 +21,8 @@ interface MarketDataOverlayProps {
 }
 
 export function MarketDataOverlay({
+  symbol,
+  description,
   currentPrice,
   change,
   changePercent,
@@ -118,21 +122,27 @@ export function MarketDataOverlay({
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white">Market Data</h3>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </button>
+              <div>
+                <div className="text-md font-semibold">{symbol || 'Market Data'}</div>
+                {description && (
+                  <p className="text-sm text-muted-foreground">{description}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
-            {/* Current Price and Change */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  ${formatPrice(currentPrice)}
-                </div>
+            <div className="space-y-3">
+              {/* Current Price */}
+              <div className="pb-3 border-b">
+                <h2 className="text-2xl font-normal">${formatPrice(currentPrice)}</h2>
                 <div className={cn(
                   "text-sm font-medium",
                   change >= 0 ? "text-green-600" : "text-red-600"
@@ -140,40 +150,29 @@ export function MarketDataOverlay({
                   {formatChange(change)} ({formatPercent(changePercent)})
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Bid</div>
-                <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {formatPrice(bid)}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-1">Ask</div>
-                <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {formatPrice(ask)}
-                </div>
-              </div>
-            </div>
 
-            {/* Size Information */}
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="text-center">
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Size</div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {lastSize}
+              {/* Market Data */}
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="text-left">
+                  <div className="text-muted-foreground">Bid</div>
+                  <div className="font-medium">${formatPrice(bid)}</div>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{exchange}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Bid Size</div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {bidSize}
+                <div className="text-left">
+                  <div className="text-muted-foreground">Ask</div>
+                  <div className="font-medium">${formatPrice(ask)}</div>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{exchange}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Ask Size</div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {askSize}
+                <div className="text-left">
+                  <div className="text-muted-foreground">Last Size</div>
+                  <div className="font-medium">{lastSize} {exchange}</div>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{exchange}</div>
+                <div className="text-left">
+                  <div className="text-muted-foreground">Bid Size</div>
+                  <div className="font-medium">{bidSize} {exchange}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-muted-foreground">Ask Size</div>
+                  <div className="font-medium">{askSize} {exchange}</div>
+                </div>
               </div>
             </div>
 
