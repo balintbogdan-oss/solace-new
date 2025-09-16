@@ -1904,6 +1904,26 @@ export function TradeExecutionPanel({
     </div>
   );
 
+  // Helper function to get display quantity for mutual funds
+  const getDisplayQuantity = () => {
+    if (isMutualFund && transactionType === 'even-dollar') {
+      return (dollarAmount / marketPrice).toFixed(4);
+    }
+    return quantity;
+  };
+
+  // Helper function to get display unit (share/shares)
+  const getDisplayUnit = () => {
+    if (isOptionTrade) {
+      return quantity === 1 ? 'contract' : 'contracts';
+    }
+    if (isMutualFund && transactionType === 'even-dollar') {
+      const calculatedQuantity = (dollarAmount / marketPrice).toFixed(4);
+      return calculatedQuantity === '1.0000' ? 'share' : 'shares';
+    }
+    return quantity === 1 ? 'share' : 'shares';
+  };
+
   const renderOrderConfirmation = () => (
      <div className="space-y-6 ">
       <h3 className="text-sm font-sans">Order Confirmation</h3>
@@ -1924,17 +1944,17 @@ export function TradeExecutionPanel({
         </h4>
         <p className="text-sm text-muted-foreground text-center">
           {orderStatus === 'filled' 
-            ? `Your ${orderType} order to ${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} ${isOptionTrade ? (quantity === 1 ? 'contract' : 'contracts') : (quantity === 1 ? 'share' : 'shares')} has been filled.`
-            : `Your order to ${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} ${isOptionTrade ? (quantity === 1 ? 'contract' : 'contracts') : (quantity === 1 ? 'share' : 'shares')} has been submitted and is pending.`
+            ? `Your ${orderType} order to ${tradeMode} ${getDisplayQuantity()} ${symbol?.toUpperCase()} ${isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} ${getDisplayUnit()} has been filled.`
+            : `Your order to ${tradeMode} ${getDisplayQuantity()} ${symbol?.toUpperCase()} ${isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} ${getDisplayUnit()} has been submitted and is pending.`
           }
         </p>
       </div>
        <div className="text-sm">
           {renderFormRow('Order ID', <span className="font-medium text-right">ORD-{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>)}
-          {renderFormRow(isOptionTrade ? 'Contract' : 'Action', <span className="font-medium capitalize text-right">{isOptionTrade ? `${quantity}x ${symbol?.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} ${quantity === 1 ? 'Contract' : 'Contracts'}` : `${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${quantity === 1 ? 'Share' : 'Shares'}`}</span>)}
+          {renderFormRow(isOptionTrade ? 'Contract' : 'Action', <span className="font-medium capitalize text-right">{isOptionTrade ? `${quantity}x ${symbol?.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} ${quantity === 1 ? 'Contract' : 'Contracts'}` : `${tradeMode} ${getDisplayQuantity()} ${symbol?.toUpperCase()} ${getDisplayUnit()}`}</span>)}
           {isOptionTrade && renderFormRow('Action', <span className="font-medium text-right">{getOptionActionText()}</span>)}
           {renderFormRow('Account', <span className="font-medium text-right">{accountDetails.name} ({accountId})</span>)}
-          {renderFormRow(isOptionTrade ? 'Contracts' : 'Quantity', <span className="font-medium text-right">{quantity} {isOptionTrade ? (quantity === 1 ? 'contract' : 'contracts') : (quantity === 1 ? 'share' : 'shares')}</span>)}
+          {renderFormRow(isOptionTrade ? 'Contracts' : 'Quantity', <span className="font-medium text-right">{getDisplayQuantity()} {getDisplayUnit()}</span>)}
           {!isMutualFund && renderFormRow('Order Type', <span className="font-medium capitalize text-right">{orderType === 'stop-limit' ? 'Stop-Limit' : orderType} Order</span>)}
           {orderType === 'limit' && renderFormRow('Limit Price', <span className="font-medium text-right">${currentLimitPrice.toFixed(2)}</span>)}
           {orderType === 'stop' && renderFormRow('Stop Price', <span className="font-medium text-right">${stopPrice.toFixed(2)}</span>)}
