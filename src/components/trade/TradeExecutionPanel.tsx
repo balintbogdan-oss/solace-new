@@ -1779,35 +1779,16 @@ export function TradeExecutionPanel({
                  })()}
              </span>)}
              
-             {/* Non-Advanced Mutual Fund Fields */}
-             {customerStatus !== '-' && renderFormRow('Customer Status', <span className="font-medium text-right">{customerStatus}</span>)}
-             {shareProcessing !== '-' && renderFormRow('Share Processing', <span className="font-medium text-right">{shareProcessing}</span>)}
-             {reinvestDivs !== '-' && renderFormRow('Reinvest Divs', <span className="font-medium text-right">{reinvestDivs}</span>)}
-             {distributionLongGains !== '-' && renderFormRow('Distribution Long Gains', <span className="font-medium text-right">{distributionLongGains}</span>)}
-             {distributionShortGains !== '-' && renderFormRow('Distribution Short Gains', <span className="font-medium text-right">{distributionShortGains}</span>)}
-             {solicited !== '-' && renderFormRow('Solicited', <span className="font-medium text-right">{solicited}</span>)}
+             {/* Non-Advanced Mutual Fund Fields - Show all fields */}
+             {renderFormRow('Customer Status', <span className="font-medium text-right">{customerStatus}</span>)}
+             {renderFormRow('Share Processing', <span className="font-medium text-right">{shareProcessing}</span>)}
+             {renderFormRow('Reinvest Divs', <span className="font-medium text-right">{reinvestDivs}</span>)}
+             {renderFormRow('Distribution Long Gains', <span className="font-medium text-right">{distributionLongGains}</span>)}
+             {renderFormRow('Distribution Short Gains', <span className="font-medium text-right">{distributionShortGains}</span>)}
+             {renderFormRow('Network', <span className="font-medium text-right">{network}</span>)}
+             {renderFormRow('Solicited', <span className="font-medium text-right">{solicited}</span>)}
              
-             {/* Optional Settings Fields */}
-             {loiRoa && renderFormRow('LOI/ROA', <span className="font-medium text-right">{loiRoa}</span>)}
-             {breakpointAmount && renderFormRow('Breakpoint Amount', <span className="font-medium text-right">${breakpointAmount}</span>)}
-             {loiNumberDate && renderFormRow('LOI#/Date', <span className="font-medium text-right">{loiNumberDate}</span>)}
-             {nav && renderFormRow('NAV', <span className="font-medium text-right">{nav}</span>)}
-             {relatedAccountType !== '-' && renderFormRow('Related Acct Type', <span className="font-medium text-right">{relatedAccountType}</span>)}
-             {accountNumber && renderFormRow('Account Number', <span className="font-medium text-right">{accountNumber}</span>)}
-             {fundSymbolCusip && renderFormRow('Fund Symbol/CUSIP', <span className="font-medium text-right">{fundSymbolCusip}</span>)}
-             {mutualFundDiscretion !== '-' && renderFormRow('Discretion', <span className="font-medium text-right">{mutualFundDiscretion}</span>)}
-             {specialComm && renderFormRow('Special Comm', <span className="font-medium text-right">{specialComm}</span>)}
-             {ttoRep && renderFormRow('TTO Rep', <span className="font-medium text-right">{ttoRep}</span>)}
-             {iraTranCode && iraTranCode !== 'none' && renderFormRow('IRA Tran Code', <span className="font-medium text-right">{iraTranCode}</span>)}
-             {noCdsc !== '-' && renderFormRow('No CDSC', <span className="font-medium text-right">{noCdsc}</span>)}
-             {acceptedBy && renderFormRow('Accepted By', <span className="font-medium text-right">{acceptedBy}</span>)}
-             {date && renderFormRow('Date (MM/DD/YY)', <span className="font-medium text-right">{date}</span>)}
-             {time && renderFormRow('Time (EST HHMMSS)', <span className="font-medium text-right">{time}</span>)}
-             
-             {/* Advanced Exchange for Fields */}
-             {fund && renderFormRow('Fund', <span className="font-medium text-right">{fund}</span>)}
-             {exchangeShareProcessing !== 'Deposited' && renderFormRow('Exchange Share Processing', <span className="font-medium text-right">{exchangeShareProcessing}</span>)}
-             {fund && renderFormRow('Exchange NAV', <span className="font-medium text-right">$158.11</span>)}
+             {/* Exchange for Fields - Moved to Optional Settings */}
            </>
          )}
 
@@ -1817,9 +1798,9 @@ export function TradeExecutionPanel({
               <ChevronDown className={cn("w-3 h-3 ml-1 transition-transform", isReviewAdvancedOpen && "rotate-180")} />
             </summary>
            <div className="mt-1 space-y-1">
-              {renderFormRow('Time in Force', <span className="font-medium uppercase text-right">{timeInForce}</span>)}
-              {timeInForce === 'gtd' && goodTillDate && renderFormRow('Good Till Date', <span className="font-medium text-right">{new Date(goodTillDate).toLocaleDateString()}</span>)}
-              {!isOptionTrade && renderFormRow('Settlement Type', <span className="font-medium capitalize text-right">{settlementType}</span>)}
+              {!isMutualFund && renderFormRow('Time in Force', <span className="font-medium uppercase text-right">{timeInForce}</span>)}
+              {!isMutualFund && timeInForce === 'gtd' && goodTillDate && renderFormRow('Good Till Date', <span className="font-medium text-right">{new Date(goodTillDate).toLocaleDateString()}</span>)}
+              {!isOptionTrade && !isMutualFund && renderFormRow('Settlement Type', <span className="font-medium capitalize text-right">{settlementType}</span>)}
               {orderType !== 'market' && !isOptionTrade && (
                 <div className="flex justify-between items-start">
                   <span className="text-muted-foreground">Special Instructions</span>
@@ -1832,6 +1813,49 @@ export function TradeExecutionPanel({
               {!isMutualFund && renderFormRow('Solicited', <span className="font-medium text-right">{solicited}</span>)}
               {!isMutualFund && renderFormRow('Discretion', <span className="font-medium text-right">{discretion ? 'Yes' : 'No'}</span>)}
               {!isMutualFund && ttoRep && renderFormRow('TTO Rep', <span className="font-medium text-right">{ttoRep}</span>)}
+              
+              {/* Mutual Fund Optional Settings Fields */}
+              {isMutualFund && (
+                <>
+                  {/* Exchange for Section */}
+                  {(tradeMode === 'full-exchange' || tradeMode === 'partial-exchange') && (
+                    <>
+                      <div className="pt-2 pb-1">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Exchange for</div>
+                      </div>
+                      {renderFormRow('Fund', <span className="font-medium text-right">{fund || '-'}</span>)}
+                      {renderFormRow('Share Processing', <span className="font-medium text-right">{exchangeShareProcessing}</span>)}
+                      {renderFormRow('NAV', <span className="font-medium text-right">$158.11</span>)}
+                      {renderFormRow('Customer Status', <span className="font-medium text-right">{customerStatus}</span>)}
+                    </>
+                  )}
+                  
+                  {/* Divider between sections if both exist */}
+                  {(tradeMode === 'full-exchange' || tradeMode === 'partial-exchange') && (
+                    <div className="my-2 border-t border-gray-200 dark:border-gray-700"></div>
+                  )}
+                  
+                  {/* Optional Settings Section */}
+                  <div className="pt-2 pb-1">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Optional Settings</div>
+                  </div>
+                  {renderFormRow('LOI/ROA', <span className="font-medium text-right">{loiRoa || '-'}</span>)}
+                  {renderFormRow('Breakpoint Amount', <span className="font-medium text-right">{breakpointAmount ? `$${breakpointAmount}` : '$0'}</span>)}
+                  {renderFormRow('LOI#/Date', <span className="font-medium text-right">{loiNumberDate || '-'}</span>)}
+                  {renderFormRow('NAV', <span className="font-medium text-right">{nav || '-'}</span>)}
+                  {renderFormRow('Related Acct Type', <span className="font-medium text-right">{relatedAccountType}</span>)}
+                  {renderFormRow('Account Number', <span className="font-medium text-right">{accountNumber || '-'}</span>)}
+                  {renderFormRow('Fund Symbol/CUSIP', <span className="font-medium text-right">{fundSymbolCusip || '-'}</span>)}
+                  {renderFormRow('Discretion', <span className="font-medium text-right">{mutualFundDiscretion}</span>)}
+                  {renderFormRow('Special Comm', <span className="font-medium text-right">{specialComm || '-'}</span>)}
+                  {renderFormRow('TTO Rep', <span className="font-medium text-right">{ttoRep || '-'}</span>)}
+                  {renderFormRow('IRA Tran Code', <span className="font-medium text-right">{iraTranCode || '-'}</span>)}
+                  {renderFormRow('No CDSC', <span className="font-medium text-right">{noCdsc}</span>)}
+                  {renderFormRow('Accepted By', <span className="font-medium text-right">{acceptedBy || '-'}</span>)}
+                  {renderFormRow('Date (MM/DD/YY)', <span className="font-medium text-right">{date || '-'}</span>)}
+                  {renderFormRow('Time (EST HHMMSS)', <span className="font-medium text-right">{time || '-'}</span>)}
+                </>
+              )}
            </div>
          </details>
 
