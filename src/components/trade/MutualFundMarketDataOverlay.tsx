@@ -45,25 +45,37 @@ export function MutualFundMarketDataOverlay({
       const rect = triggerRef.current.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      const overlayWidth = 320; // Approximate overlay width
-      const overlayHeight = 400; // Approximate overlay height
+      const overlayWidth = 320; // w-80 = 320px
+      const overlayHeight = 500; // Approximate overlay height
+      const padding = 16; // 16px padding from viewport edges
 
       let left = rect.right + 10;
       let top = rect.top;
 
       // Adjust if overlay would go off the right edge
-      if (left + overlayWidth > viewportWidth) {
+      if (left + overlayWidth > viewportWidth - padding) {
         left = rect.left - overlayWidth - 10;
       }
 
+      // Adjust if overlay would go off the left edge
+      if (left < padding) {
+        left = padding;
+      }
+
       // Adjust if overlay would go off the bottom edge
-      if (top + overlayHeight > viewportHeight) {
-        top = viewportHeight - overlayHeight - 10;
+      if (top + overlayHeight > viewportHeight - padding) {
+        top = viewportHeight - overlayHeight - padding;
       }
 
       // Ensure overlay doesn't go off the top edge
-      if (top < 10) {
-        top = 10;
+      if (top < padding) {
+        top = padding;
+      }
+
+      // Final check: if overlay still doesn't fit, center it
+      if (left + overlayWidth > viewportWidth - padding || top + overlayHeight > viewportHeight - padding) {
+        left = Math.max(padding, (viewportWidth - overlayWidth) / 2);
+        top = Math.max(padding, (viewportHeight - overlayHeight) / 2);
       }
 
       setPosition({ top, left });
@@ -123,7 +135,7 @@ export function MutualFundMarketDataOverlay({
       <div
         ref={triggerRef}
         onClick={handleTriggerClick}
-        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-muted hover:bg-muted/80 cursor-pointer transition-colors"
+        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-muted hover:bg-muted/80 cursor-pointer transition-colors border"
       >
         <span className="text-xs font-medium text-muted-foreground">i</span>
       </div>
@@ -139,10 +151,12 @@ export function MutualFundMarketDataOverlay({
           <div
             ref={overlayRef}
             onClick={handleOverlayClick}
-            className="fixed z-50 bg-background border rounded-lg shadow-lg p-4 w-80"
+            className="fixed z-50 bg-background border rounded-lg shadow-lg p-4 w-80 max-h-[80vh] overflow-y-auto"
             style={{
               top: `${position.top}px`,
               left: `${position.left}px`,
+              maxWidth: 'calc(100vw - 32px)',
+              maxHeight: 'calc(100vh - 32px)',
             }}
           >
             <div className="flex items-center justify-between mb-4">
@@ -172,27 +186,27 @@ export function MutualFundMarketDataOverlay({
 
               {/* Price Data */}
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
+                <div className="text-left">
                   <div className="text-muted-foreground">Previous Close</div>
                   <div className="font-medium">{formatCurrency(previousClose)}</div>
                 </div>
-                <div>
+                <div className="text-left">
                   <div className="text-muted-foreground">Day High</div>
                   <div className="font-medium">{formatCurrency(dayHigh)}</div>
                 </div>
-                <div>
+                <div className="text-left">
                   <div className="text-muted-foreground">Day Low</div>
                   <div className="font-medium">{formatCurrency(dayLow)}</div>
                 </div>
-                <div>
+                <div className="text-left">
                   <div className="text-muted-foreground">52W High</div>
                   <div className="font-medium">{formatCurrency(yearHigh)}</div>
                 </div>
-                <div>
+                <div className="text-left">
                   <div className="text-muted-foreground">52W Low</div>
                   <div className="font-medium">{formatCurrency(yearLow)}</div>
                 </div>
-                <div>
+                <div className="text-left">
                   <div className="text-muted-foreground">Expense Ratio</div>
                   <div className="font-medium">{(expenseRatio * 100).toFixed(2)}%</div>
                 </div>
@@ -200,7 +214,7 @@ export function MutualFundMarketDataOverlay({
 
               {/* Fund Information */}
               <div className="pt-3 border-t">
-                <div className="text-sm">
+                <div className="text-sm text-left">
                   <div className="text-muted-foreground">Net Assets</div>
                   <div className="font-medium">{formatLargeNumber(netAssets)}</div>
                 </div>
