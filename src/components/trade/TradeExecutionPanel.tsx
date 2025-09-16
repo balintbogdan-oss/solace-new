@@ -1666,7 +1666,20 @@ export function TradeExecutionPanel({
         <h3 className="text-2xl font-normal">Review Order</h3>
       </div>
        <div className=" text-sm rounded-md">
-         {renderFormRow(isOptionTrade ? 'Contract' : 'Action', <span className="font-medium capitalize text-right">{isOptionTrade ? `${quantity}x ${symbol?.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} ${quantity === 1 ? 'Contract' : 'Contracts'}` : `${tradeMode} ${quantity} ${symbol?.toUpperCase()} ${quantity === 1 ? 'Share' : 'Shares'}`}</span>)}
+         {renderFormRow(isOptionTrade ? 'Contract' : 'Action', <span className="font-medium capitalize text-right">
+           {isOptionTrade 
+             ? `${quantity}x ${symbol?.toUpperCase()} ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()} ${quantity === 1 ? 'Contract' : 'Contracts'}` 
+             : (() => {
+                 const displayQuantity = isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0 && marketPrice > 0 
+                   ? (dollarAmount / marketPrice).toFixed(4)
+                   : quantity;
+                 const isSingular = isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0 && marketPrice > 0 
+                   ? (dollarAmount / marketPrice) === 1
+                   : quantity === 1;
+                 return `${tradeMode} ${displayQuantity} ${symbol?.toUpperCase()} ${isSingular ? 'Share' : 'Shares'}`;
+               })()
+           }
+         </span>)}
          {isOptionTrade && renderFormRow('Action', <span className="font-medium text-right">{getOptionActionText()}</span>)}
          {renderFormRow('Account', <span className="font-medium text-right">{accountDetails.name} ({accountId})</span>)}
          {renderFormRow('Account Type', <span className="font-medium text-right">{accountType}</span>)}
