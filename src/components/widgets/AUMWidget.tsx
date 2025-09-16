@@ -5,8 +5,8 @@ import { ComposedChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip as Rech
 import { generateMockData } from '@/lib/mockData';
 import { TooltipProps } from 'recharts';
 import { Info } from 'lucide-react';
-import { useTheme } from 'next-themes';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useSettings } from '@/contexts/SettingsContext';
 
 // Define TimePeriod type locally (or import if central)
 // const TIME_PERIODS = ['1D', '1W', '1M', '6M', 'YTD', '1Y'] as const; // Keep commented out
@@ -83,11 +83,11 @@ interface AUMWidgetProps {
 
 export function AUMWidget({ selectedPeriod = '1Y' }: AUMWidgetProps) { // Default to '1Y'
   const [hoveredTimestamp, setHoveredTimestamp] = useState<number | null>(null);
-  const { theme } = useTheme();
+  const { appearanceSettings } = useSettings();
   const [isMounted, setIsMounted] = useState(false);
-  // State to hold computed colors
-  const [aumColor, setAumColor] = useState(''); 
-  const [depositColor, setDepositColor] = useState('');
+  // State to hold computed colors - initialize with defaults
+  const [aumColor, setAumColor] = useState('#10b981'); 
+  const [depositColor, setDepositColor] = useState('#d4af37');
 
   // Filter data based on selectedPeriod
   const filteredAumData = useMemo(() => {
@@ -163,16 +163,12 @@ export function AUMWidget({ selectedPeriod = '1Y' }: AUMWidgetProps) { // Defaul
   }, []);
 
   useEffect(() => {
-    if (isMounted) { // Ensure run only after mount
-      const style = getComputedStyle(document.documentElement);
-      const positiveColor = style.getPropertyValue('--chart-positive').trim();
-      const secondaryColor = style.getPropertyValue('--chart-secondary').trim();
-      // Ensure colors are valid CSS colors (trim whitespace)
-      // HSL values need the hsl() wrapper if not already present
-      setAumColor(positiveColor.startsWith('hsl') ? positiveColor : `hsl(${positiveColor})`);
-      setDepositColor(secondaryColor.startsWith('hsl') ? secondaryColor : `hsl(${secondaryColor})`);
-    }
-  }, [isMounted, theme]); // Rerun if theme changes
+    // Set colors immediately and on changes
+    const aumColor = appearanceSettings.chartPositiveColor || '#10b981';
+    const depositColor = appearanceSettings.chartPrimaryColor || '#d4af37';
+    setAumColor(aumColor);
+    setDepositColor(depositColor);
+  }, [appearanceSettings.chartPositiveColor, appearanceSettings.chartPrimaryColor]);
 
   const handleMouseMove = (state: unknown) => {
     // Use optional chaining and type guards for safer access
@@ -199,9 +195,8 @@ export function AUMWidget({ selectedPeriod = '1Y' }: AUMWidgetProps) { // Defaul
     setHoveredTimestamp(null);
   };
 
-  // Render null or placeholder until colors are computed
-  if (!isMounted || !aumColor || !depositColor) {
-    // Optional: return a loading skeleton or null
+  // Render null or placeholder until mounted
+  if (!isMounted) {
     return <div className="h-full flex items-center justify-center text-muted-foreground">Loading...</div>; 
   }
 

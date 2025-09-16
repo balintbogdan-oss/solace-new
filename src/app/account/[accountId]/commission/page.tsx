@@ -179,12 +179,12 @@ export default function CommissionPage() {
                 <BarChart data={chartData}>
                   <defs>
                     <linearGradient id="commissionGradientLight" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#BEA36F" />
-                      <stop offset="100%" stopColor="#edeae4" />
+                      <stop offset="0%" stopColor="var(--chart-primary)" />
+                      <stop offset="100%" stopColor="var(--chart-primary)" stopOpacity="0.1" />
                     </linearGradient>
                     <linearGradient id="commissionGradientDark" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ebc786" />
-                      <stop offset="100%" stopColor="#191717" />
+                      <stop offset="0%" stopColor="var(--chart-primary)" />
+                      <stop offset="100%" stopColor="var(--chart-primary)" stopOpacity="0.1" />
                     </linearGradient>
                   </defs>
                   <XAxis 

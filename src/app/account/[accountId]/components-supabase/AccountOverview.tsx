@@ -41,7 +41,7 @@ export function AccountOverview() {
 
       <div className="grid grid-cols-3xl:grid-cols-2 gap-6">
         {/* Portfolio Card */}
-        <div className="cols-span-2 flex flex-col justify-between rounded-2xl border bg-card-blend dark:bg-card-blend-dark dark:border-[#2e323f] p-6">
+        <div className="cols-span-2 flex flex-col justify-between rounded-2xl border bg-accent dark:border-[#2e323f] p-6">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col md:flex-row justify-between gap-6">
               <div className="flex flex-col gap-2 flex-1">
@@ -114,7 +114,7 @@ export function AccountOverview() {
         </div>
 
         {/* Asset Allocation Card */}
-        <div className="rounded-xl bg-card-blend dark:bg-card-blend-dark p-6">
+        <div className="rounded-xl bg-accent p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium">Asset Allocation</h2>
             <button className="text-sm text-[#6366f1] hover:underline">Expand view</button>

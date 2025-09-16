@@ -18,7 +18,7 @@ export default function SettingsLayout({
     <div className="container mx-auto py-8 max-w-6xl">
       {/* Full-width title */}
       <div className="mb-8">
-        <h1 className="text-3xl font-serif">Settings</h1>
+        <h1 className="text-3xl">Settings</h1>
       </div>
 
       {/* Two-column layout */}

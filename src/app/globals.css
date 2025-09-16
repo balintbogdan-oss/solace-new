@@ -19,13 +19,13 @@
     --input: #d1d5db; /* Original: gray-300 */
     --border-input: #d1d5db; /* Original: gray-300 */
 
-    --primary: 142 85 4; /* Original: indigo-600, now RGB for Tailwind alpha support */
+    --primary: 142 85 4; /* Default fallback - will be overridden by AppearanceProvider */
     --primary-foreground: 255 255 255; /* Original: white */
 
     --muted: 246 245 244; /* Original: gray-100 */
     --muted-foreground: #64615a; /* Original: gray-500 */
 
-    --accent: 246 245 244; /* CORRECTED: gray-100 as RGB components */
+    --accent: 246 245 244; /* Default fallback - will be overridden by AppearanceProvider */
     --accent-foreground: #1f2937; /* Original: gray-800 */
 
     --destructive: #ef4444; /* Original: red-500 */
@@ -66,7 +66,7 @@
     --popover: 23 23 23; /* neutral-900 */
     --popover-foreground: 250 250 250; /* neutral-50 */
 
-    --primary: 217 119 6; /* amber-600 - brighter but still brownish */
+    --primary: 217 119 6; /* Default fallback for dark mode - will be overridden by AppearanceProvider */
     --primary-foreground: #000000; /* black text for better readability */ 
 
     /* Reverting secondary - using previous slate-800/400 equivalent for now */
@@ -148,15 +148,30 @@
   .dark .bg-card-blend-dark {
     background-color: rgba(38, 36, 36, 0.462);
   }
-  .light .bg-card-blend {
-    background-color: rgba(255, 255, 255, 0.609);
-  }
+}
+
+/* Force accent color to use the CSS variable */
+.bg-accent {
+  background-color: rgb(var(--accent)) !important;
 }
 
 @layer utilities {
   /* Force apply the muted-foreground color */
   .text-muted-foreground {
     color: var(--muted-foreground) !important;
+  }
+  
+  /* Override Tailwind's primary colors to use dynamic CSS variable */
+  .text-primary {
+    color: rgb(var(--primary)) !important;
+  }
+  
+  .border-primary {
+    border-color: rgb(var(--primary)) !important;
+  }
+  
+  .bg-primary {
+    background-color: rgb(var(--primary)) !important;
   }
   
   /* Info icon styling */

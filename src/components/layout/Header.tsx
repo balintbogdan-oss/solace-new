@@ -194,9 +194,9 @@ export function Header() {
                   setShowSearchResults(true);
                 }}
                 placeholder="Search by account name, account number or client name"
-                className="bg-zinc-800 w-full border-0 rounded-md pl-10 pr-4 py-3 text-sm text-white placeholder:text-zinc-400 focus:ring-0 focus:outline-none"
+                className="bg-white/20 w-full border-0 rounded-md pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/60 focus:ring-0 focus:outline-none backdrop-blur-sm"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
             </form>
 
             {showSearchResults && (

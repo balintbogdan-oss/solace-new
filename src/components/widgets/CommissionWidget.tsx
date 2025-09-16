@@ -2,7 +2,28 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Rectangle } from 'recharts';
 import { TooltipProps } from 'recharts';
 import { useTheme } from 'next-themes';
+import { useSettings } from '@/contexts/SettingsContext';
 import { WidgetHeader } from './types'; // Import WidgetHeader type
+
+// Helper function to darken a hex color by mixing with black
+const darkenColor = (hex: string, amount: number): string => {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Parse hex to RGB
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  // Mix with black (0, 0, 0) by the specified amount
+  const newR = Math.round(r * (1 - amount));
+  const newG = Math.round(g * (1 - amount));
+  const newB = Math.round(b * (1 - amount));
+  
+  // Convert back to hex
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
+};
 
 // Define commission type alias if not imported globally
 type CommissionType = 'Net' | 'Gross';
@@ -125,6 +146,7 @@ interface CommissionWidgetProps {
 
 export function CommissionWidget({ commissionViewType = 'Net' }: CommissionWidgetProps) { // Default to 'Net'
   const { theme } = useTheme();
+  const { appearanceSettings } = useSettings();
   const [isMounted, setIsMounted] = useState(false);
   const [bonusColor, setBonusColor] = useState('');
 
@@ -134,17 +156,18 @@ export function CommissionWidget({ commissionViewType = 'Net' }: CommissionWidge
 
   useEffect(() => {
     if (isMounted) {
-      const style = getComputedStyle(document.documentElement);
-      const secondaryColor = style.getPropertyValue('--chart-secondary').trim();
-      setBonusColor(secondaryColor.startsWith('hsl') ? secondaryColor : `hsl(${secondaryColor})`);
+      // Create a darker version of the primary color by mixing with black
+      const primaryColor = appearanceSettings.chartPrimaryColor || '#d4af37';
+      const darkenedColor = darkenColor(primaryColor, 0.3); // 30% darker
+      setBonusColor(darkenedColor);
     }
-  }, [isMounted, theme]);
+  }, [isMounted, theme, appearanceSettings.chartPrimaryColor]);
 
   if (!isMounted || !bonusColor) {
     return <div className="h-full flex items-center justify-center text-muted-foreground">Loading...</div>;
   }
 
-  const hardcodedCommissionColor = theme === 'dark' ? '#ebc786' : '#BEA36F';
+  const commissionColor = appearanceSettings.chartPrimaryColor || '#BEA36F';
 
   // Get the value and label based on the passed prop
   const displayValue = commissionValues[commissionViewType];
@@ -196,12 +219,12 @@ export function CommissionWidget({ commissionViewType = 'Net' }: CommissionWidge
           <BarChart data={chartData}>
             <defs>
               <linearGradient id="commissionGradientLight" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#BEA36F" />
-                <stop offset="100%" stopColor="#edeae4" />
+                <stop offset="0%" stopColor={commissionColor} />
+                <stop offset="100%" stopColor={commissionColor} stopOpacity="0.1" />
               </linearGradient>
               <linearGradient id="commissionGradientDark" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#ebc786" />
-                <stop offset="100%" stopColor="#191717" />
+                <stop offset="0%" stopColor={commissionColor} />
+                <stop offset="100%" stopColor={commissionColor} stopOpacity="0.1" />
               </linearGradient>
             </defs>
             <XAxis 
@@ -220,7 +243,7 @@ export function CommissionWidget({ commissionViewType = 'Net' }: CommissionWidge
             />
             <Tooltip
               cursor={{ fill: 'transparent' }}
-              content={<CustomCommissionTooltip commissionColor={hardcodedCommissionColor} bonusColor={bonusColor} />}
+              content={<CustomCommissionTooltip commissionColor={commissionColor} bonusColor={bonusColor} />}
             />
             <Bar 
               dataKey="value" 

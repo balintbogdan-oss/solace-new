@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
@@ -57,12 +57,12 @@ export default function NavigationSettingsPage() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Navigation Settings</CardTitle>
+          <div className="text-lg font-medium">Navigation Settings</div>
           <CardDescription>
             Control which sections appear in your main navigation. Changes are saved automatically.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           {navigationItems.map((item, index) => {
             const Icon = item.icon;
             const isEnabled = navigationSettings[item.key];
@@ -76,7 +76,7 @@ export default function NavigationSettingsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{item.label}</h3>
+                        <div className="font-medium">{item.label}</div>
                         <span className={`text-xs px-2 py-1 rounded-full ${
                           isEnabled 
                             ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
@@ -93,7 +93,7 @@ export default function NavigationSettingsPage() {
                     onCheckedChange={(checked) => handleSettingChange(item.key, checked)}
                   />
                 </div>
-                {index < navigationItems.length - 1 && <Separator className="mt-6" />}
+                {index < navigationItems.length - 1 && <Separator className="mt-4" />}
               </div>
             );
           })}

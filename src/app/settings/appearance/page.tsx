@@ -1,12 +1,14 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { useSettings } from '@/contexts/SettingsContext';
 import { RotateCcw, Upload, X } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 export default function AppearanceSettingsPage() {
   const { 
@@ -14,9 +16,13 @@ export default function AppearanceSettingsPage() {
     updateAppearanceSetting, 
     resetAppearanceSettings 
   } = useSettings();
+  
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
   const handleAppearanceChange = (key: keyof typeof appearanceSettings, value: string) => {
     updateAppearanceSetting(key, value);
+    // Clear any selected preset when manually changing colors
+    setSelectedPreset(null);
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,18 +55,139 @@ export default function AppearanceSettingsPage() {
 
   const handleReset = () => {
     resetAppearanceSettings();
+    setSelectedPreset(null);
+    toast.success('Appearance settings reset to defaults', {
+      description: 'All colors, fonts, and layout settings have been restored to their default values.',
+      duration: 4000,
+    });
   };
 
-  const primaryColors = [
-    { value: 'brown', label: 'Brown', color: 'bg-amber-700' },
-    { value: 'blue', label: 'Blue', color: 'bg-blue-500' },
-    { value: 'green', label: 'Green', color: 'bg-green-500' },
-    { value: 'purple', label: 'Purple', color: 'bg-purple-500' },
-    { value: 'red', label: 'Red', color: 'bg-red-500' },
-    { value: 'orange', label: 'Orange', color: 'bg-orange-500' },
-    { value: 'pink', label: 'Pink', color: 'bg-pink-500' },
-    { value: 'indigo', label: 'Indigo', color: 'bg-indigo-500' },
-    { value: 'teal', label: 'Teal', color: 'bg-teal-500' },
+  const handlePresetSelect = (preset: typeof colorPresets[0]) => {
+    updateAppearanceSetting('primaryColor', preset.primaryColor);
+    updateAppearanceSetting('headerBackgroundColor', preset.headerBackgroundColor);
+    updateAppearanceSetting('chartPositiveColor', preset.chartPositiveColor);
+    updateAppearanceSetting('chartNegativeColor', preset.chartNegativeColor);
+    updateAppearanceSetting('chartPrimaryColor', preset.chartPrimaryColor);
+    updateAppearanceSetting('chartSecondaryColor', preset.chartSecondaryColor);
+    updateAppearanceSetting('positiveColor', preset.positiveColor);
+    updateAppearanceSetting('negativeColor', preset.negativeColor);
+    updateAppearanceSetting('gradientStartColor', preset.gradientStartColor);
+    updateAppearanceSetting('gradientEndColor', preset.gradientEndColor);
+    updateAppearanceSetting('backgroundColor', preset.backgroundColor);
+    updateAppearanceSetting('cardColor', preset.cardColor);
+    updateAppearanceSetting('accentColor', preset.accentColor);
+    setSelectedPreset(preset.name);
+    
+    toast.success(`${preset.name} preset applied`, {
+      description: 'All appearance settings have been updated to match this preset.',
+      duration: 3000,
+    });
+  };
+
+
+  const colorPresets = [
+    { 
+      name: 'Classic', 
+      primaryColor: '#8B5504', 
+      headerBackgroundColor: '#000000',
+      chartPositiveColor: '#60a821',
+      chartNegativeColor: '#f87171',
+      chartPrimaryColor: '#B8860B', // DarkGoldenrod - muted golden color
+      chartSecondaryColor: '#20b2aa',
+      positiveColor: '#22c55e',
+      negativeColor: '#ef4444',
+      gradientStartColor: '#f3eddc',
+      gradientEndColor: '#f9f8f3',
+      backgroundColor: '#ffffff',
+      cardColor: '#ffffff',
+      accentColor: '#f3eddc',
+      description: 'Brown primary with black header'
+    },
+    { 
+      name: 'Ocean', 
+      primaryColor: '#3B82F6', 
+      headerBackgroundColor: '#1e40af',
+      chartPositiveColor: '#10b981',
+      chartNegativeColor: '#ef4444',
+      chartPrimaryColor: '#3b82f6',
+      chartSecondaryColor: '#06b6d4',
+      positiveColor: '#10b981',
+      negativeColor: '#ef4444',
+      gradientStartColor: '#dbeafe',
+      gradientEndColor: '#f0f9ff',
+      backgroundColor: '#f8fafc',
+      cardColor: '#ffffff',
+      accentColor: '#dbeafe',
+      description: 'Blue primary with blue header'
+    },
+    { 
+      name: 'Forest', 
+      primaryColor: '#22C55E', 
+      headerBackgroundColor: '#059669',
+      chartPositiveColor: '#16a34a',
+      chartNegativeColor: '#dc2626',
+      chartPrimaryColor: '#22c55e',
+      chartSecondaryColor: '#84cc16',
+      positiveColor: '#16a34a',
+      negativeColor: '#dc2626',
+      gradientStartColor: '#dcfce7',
+      gradientEndColor: '#f0fdf4',
+      backgroundColor: '#f0fdf4',
+      cardColor: '#ffffff',
+      accentColor: '#dcfce7',
+      description: 'Green primary with green header'
+    },
+    { 
+      name: 'Royal', 
+      primaryColor: '#A855F7', 
+      headerBackgroundColor: '#7c3aed',
+      chartPositiveColor: '#10b981',
+      chartNegativeColor: '#ef4444',
+      chartPrimaryColor: '#a855f7',
+      chartSecondaryColor: '#8b5cf6',
+      positiveColor: '#10b981',
+      negativeColor: '#ef4444',
+      gradientStartColor: '#f3e8ff',
+      gradientEndColor: '#faf5ff',
+      backgroundColor: '#faf5ff',
+      cardColor: '#ffffff',
+      accentColor: '#f3e8ff',
+      description: 'Purple primary with purple header'
+    },
+    { 
+      name: 'Sunset', 
+      primaryColor: '#F97316', 
+      headerBackgroundColor: '#ea580c',
+      chartPositiveColor: '#10b981',
+      chartNegativeColor: '#dc2626',
+      chartPrimaryColor: '#f97316',
+      chartSecondaryColor: '#f59e0b',
+      positiveColor: '#10b981',
+      negativeColor: '#dc2626',
+      gradientStartColor: '#fed7aa',
+      gradientEndColor: '#fff7ed',
+      backgroundColor: '#fff7ed',
+      cardColor: '#ffffff',
+      accentColor: '#fed7aa',
+      description: 'Orange primary with orange header'
+    },
+    { 
+      name: 'Minimal', 
+      primaryColor: '#3B82F6', 
+      headerBackgroundColor: '#374151',
+      chartPositiveColor: '#10b981',
+      chartNegativeColor: '#6b7280',
+      chartPrimaryColor: '#6b7280',
+      chartSecondaryColor: '#9ca3af',
+      positiveColor: '#10b981',
+      negativeColor: '#6b7280',
+      gradientStartColor: '#f8fafc',
+      gradientEndColor: '#ffffff',
+      backgroundColor: '#ffffff',
+      cardColor: '#f8fafc',
+      accentColor: '#f1f5f9',
+      description: 'Blue primary with dark gray header'
+    },
   ];
 
   const fontFamilies = [
@@ -90,93 +217,320 @@ export default function AppearanceSettingsPage() {
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Primary Color */}
+      <div className="space-y-4">
+        {/* Colors */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">
-              Primary Color
-            </CardTitle>
-            <CardDescription>
-              Choose the primary color theme for your application.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-4 gap-3">
-              {primaryColors.map((color) => (
-                <button
-                  key={color.value}
-                  onClick={() => handleAppearanceChange('primaryColor', color.value)}
-                  className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
-                    appearanceSettings.primaryColor === color.value
-                      ? 'border-primary bg-primary/5'
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                >
-                  <div className={`w-4 h-4 rounded-full ${color.color}`} />
-                  <span className="text-sm font-medium">{color.label}</span>
-                </button>
-              ))}
+            <div className="text-lg font-medium">
+              Colors
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Header Background Color */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Header Background Color
-            </CardTitle>
             <CardDescription>
-              Choose the background color for the application header.
+              Customize all colors for your application including primary colors, charts, and indicators.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div 
-                    className="w-12 h-12 rounded-lg border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
-                    style={{ backgroundColor: appearanceSettings.headerBackgroundColor }}
-                    onClick={() => document.getElementById('header-color-picker')?.click()}
-                  />
-                  <Input
-                    id="header-color-picker"
-                    type="color"
-                    value={appearanceSettings.headerBackgroundColor}
-                    onChange={(e) => handleAppearanceChange('headerBackgroundColor', e.target.value)}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {appearanceSettings.headerBackgroundColor}
+          <CardContent className="space-y-6">
+            {/* Color Presets */}
+            <div>
+              <div className="text-sm font-medium mb-3">Quick Presets</div>
+              <div className="flex flex-wrap gap-2">
+                {colorPresets.map((preset) => (
+                  <button
+                    key={preset.name}
+                    onClick={() => handlePresetSelect(preset)}
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      selectedPreset === preset.name
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      <div 
+                        className="w-3 h-3 rounded-full border border-white/20"
+                        style={{ backgroundColor: preset.primaryColor }}
+                      />
+                      <div 
+                        className="w-3 h-3 rounded border border-white/20"
+                        style={{ backgroundColor: preset.headerBackgroundColor }}
+                      />
+                    </div>
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Individual Color Controls */}
+            <div className="space-y-2">
+              {/* Primary Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Primary Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.primaryColor }}
+                      onClick={() => document.getElementById('primary-color-picker')?.click()}
+                    />
+                    <Input
+                      id="primary-color-picker"
+                      type="color"
+                  value={appearanceSettings.primaryColor}
+                      onChange={(e) => handleAppearanceChange('primaryColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                        </div>
+              </div>
+
+              {/* Header Background Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Header Background Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.headerBackgroundColor }}
+                      onClick={() => document.getElementById('header-color-picker')?.click()}
+                    />
+                    <Input
+                      id="header-color-picker"
+                      type="color"
+                      value={appearanceSettings.headerBackgroundColor}
+                      onChange={(e) => handleAppearanceChange('headerBackgroundColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
                 </div>
               </div>
-              
-              {/* Quick color presets */}
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Quick presets:</p>
-                <div className="flex gap-2 flex-wrap">
-                  {[
-                    { name: 'Black', value: '#000000' },
-                    { name: 'Dark Gray', value: '#1f2937' },
-                    { name: 'Blue', value: '#1e40af' },
-                    { name: 'Green', value: '#059669' },
-                    { name: 'Purple', value: '#7c3aed' },
-                    { name: 'Red', value: '#dc2626' },
-                  ].map((preset) => (
-                    <button
-                      key={preset.value}
-                      onClick={() => handleAppearanceChange('headerBackgroundColor', preset.value)}
-                      className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                        appearanceSettings.headerBackgroundColor === preset.value
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                      }`}
-                    >
-                      {preset.name}
-                    </button>
-                  ))}
+
+              {/* Chart Positive Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Chart Positive Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.chartPositiveColor }}
+                      onClick={() => document.getElementById('chart-positive-picker')?.click()}
+                    />
+                    <Input
+                      id="chart-positive-picker"
+                      type="color"
+                      value={appearanceSettings.chartPositiveColor}
+                      onChange={(e) => handleAppearanceChange('chartPositiveColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart Negative Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Chart Negative Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.chartNegativeColor }}
+                      onClick={() => document.getElementById('chart-negative-picker')?.click()}
+                    />
+                    <Input
+                      id="chart-negative-picker"
+                      type="color"
+                      value={appearanceSettings.chartNegativeColor}
+                      onChange={(e) => handleAppearanceChange('chartNegativeColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart Primary Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Chart Primary Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.chartPrimaryColor }}
+                      onClick={() => document.getElementById('chart-primary-picker')?.click()}
+                    />
+                    <Input
+                      id="chart-primary-picker"
+                      type="color"
+                      value={appearanceSettings.chartPrimaryColor}
+                      onChange={(e) => handleAppearanceChange('chartPrimaryColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart Secondary Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Chart Secondary Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.chartSecondaryColor }}
+                      onClick={() => document.getElementById('chart-secondary-picker')?.click()}
+                    />
+                    <Input
+                      id="chart-secondary-picker"
+                      type="color"
+                      value={appearanceSettings.chartSecondaryColor}
+                      onChange={(e) => handleAppearanceChange('chartSecondaryColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Positive Indicator Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Positive Indicator Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.positiveColor }}
+                      onClick={() => document.getElementById('positive-picker')?.click()}
+                    />
+                    <Input
+                      id="positive-picker"
+                      type="color"
+                      value={appearanceSettings.positiveColor}
+                      onChange={(e) => handleAppearanceChange('positiveColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Negative Indicator Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Negative Indicator Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.negativeColor }}
+                      onClick={() => document.getElementById('negative-picker')?.click()}
+                    />
+                    <Input
+                      id="negative-picker"
+                      type="color"
+                      value={appearanceSettings.negativeColor}
+                      onChange={(e) => handleAppearanceChange('negativeColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Gradient Start Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Gradient Start Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.gradientStartColor }}
+                      onClick={() => document.getElementById('gradient-start-picker')?.click()}
+                    />
+                    <Input
+                      id="gradient-start-picker"
+                      type="color"
+                      value={appearanceSettings.gradientStartColor}
+                      onChange={(e) => handleAppearanceChange('gradientStartColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Gradient End Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Gradient End Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.gradientEndColor }}
+                      onClick={() => document.getElementById('gradient-end-picker')?.click()}
+                    />
+                    <Input
+                      id="gradient-end-picker"
+                      type="color"
+                      value={appearanceSettings.gradientEndColor}
+                      onChange={(e) => handleAppearanceChange('gradientEndColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Background Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Background Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.backgroundColor }}
+                      onClick={() => document.getElementById('background-picker')?.click()}
+                    />
+                    <Input
+                      id="background-picker"
+                      type="color"
+                      value={appearanceSettings.backgroundColor}
+                      onChange={(e) => handleAppearanceChange('backgroundColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Card Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.cardColor }}
+                      onClick={() => document.getElementById('card-picker')?.click()}
+                    />
+                    <Input
+                      id="card-picker"
+                      type="color"
+                      value={appearanceSettings.cardColor}
+                      onChange={(e) => handleAppearanceChange('cardColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Accent Color */}
+              <div className="flex items-center justify-between py-1">
+                <div className="text-sm font-medium">Accent Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="w-8 h-8 rounded border-2 border-muted cursor-pointer hover:border-primary/50 transition-colors"
+                      style={{ backgroundColor: appearanceSettings.accentColor }}
+                      onClick={() => document.getElementById('accent-picker')?.click()}
+                    />
+                    <Input
+                      id="accent-picker"
+                      type="color"
+                      value={appearanceSettings.accentColor}
+                      onChange={(e) => handleAppearanceChange('accentColor', e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -186,15 +540,15 @@ export default function AppearanceSettingsPage() {
         {/* Font Families */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">
+            <div className="text-lg font-medium">
               Font Families
-            </CardTitle>
+            </div>
             <CardDescription>
               Select font families for headings and body text.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Header Font</label>
                 <Select
@@ -243,18 +597,18 @@ export default function AppearanceSettingsPage() {
         {/* Font Size */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Font Size</CardTitle>
+            <div className="text-lg font-medium">Font Size</div>
             <CardDescription>
               Adjust the base font size for better readability.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {fontSizes.map((size) => (
                 <button
                   key={size.value}
                   onClick={() => handleAppearanceChange('fontSize', size.value)}
-                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                  className={`p-2 rounded-lg border-2 text-left transition-all ${
                     appearanceSettings.fontSize === size.value
                       ? 'border-primary bg-primary/5'
                       : 'border-muted hover:border-primary/50'
@@ -271,18 +625,18 @@ export default function AppearanceSettingsPage() {
         {/* Border Radius */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Border Radius</CardTitle>
+            <div className="text-lg font-medium">Border Radius</div>
             <CardDescription>
               Choose the corner rounding style for UI elements.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-2">
               {borderRadiusOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => handleAppearanceChange('borderRadius', option.value)}
-                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                  className={`p-2 rounded-lg border-2 text-left transition-all ${
                     appearanceSettings.borderRadius === option.value
                       ? 'border-primary bg-primary/5'
                       : 'border-muted hover:border-primary/50'
@@ -299,15 +653,15 @@ export default function AppearanceSettingsPage() {
         {/* Logo Upload */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">
+            <div className="text-lg font-medium">
               Logo
-            </CardTitle>
+            </div>
             <CardDescription>
               Upload a custom logo for your application. Accepts PNG and SVG files (max 2MB).
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {appearanceSettings.logoUrl ? (
                 <div className="flex items-center gap-4">
                   <div className="relative">
@@ -330,7 +684,7 @@ export default function AppearanceSettingsPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                   <Upload className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground mb-4">
                     No logo uploaded. Using default branding.

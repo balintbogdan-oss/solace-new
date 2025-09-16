@@ -8,6 +8,7 @@ import { AppearanceProvider } from '@/components/AppearanceProvider'
 import { Inter } from 'next/font/google'
 import { Source_Serif_4 } from 'next/font/google'
 import { validateEnvironment } from '@/lib/env-validation'
+import { Toaster } from 'sonner'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -102,6 +103,7 @@ export default function RootLayout({
                 <div className="w-full">
                 {children}
                 </div>
+                <Toaster position="top-right" />
               </NavigationProvider>
             </AppearanceProvider>
           </SettingsProvider>

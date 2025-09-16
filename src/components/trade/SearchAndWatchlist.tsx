@@ -75,7 +75,7 @@ export function WatchlistTable({
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">My Watchlist</h2>
+        <h2 className="text-xl font-normal">My Watchlist</h2>
         <Button variant="secondary" size="sm">
           <Edit2 className="w-4 h-4 mr-2" />
           Edit watchlist
@@ -140,7 +140,7 @@ function getStatusColor(status: string) {
 function OrderTable({ orders }: { orders: typeof mockOrders }) {
   return (
     <div className="mt-6">
-      <h2 className="text-lg font-semibold mb-4">Order Status</h2>
+      <h2 className="text-lg font-normal mb-4">Order Status</h2>
       <div className="overflow-hidden">
         <Table>
           <TableHeader>

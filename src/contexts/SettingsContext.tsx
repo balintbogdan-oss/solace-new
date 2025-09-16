@@ -18,6 +18,21 @@ export interface AppearanceSettings {
   borderRadius: 'none' | 'sm' | 'md' | 'lg';
   logoUrl: string;
   headerBackgroundColor: string;
+  // Chart and data visualization colors
+  chartPositiveColor: string;
+  chartNegativeColor: string;
+  chartPrimaryColor: string;
+  chartSecondaryColor: string;
+  // Positive/negative indicators
+  positiveColor: string;
+  negativeColor: string;
+  // Background gradient colors
+  gradientStartColor: string;
+  gradientEndColor: string;
+  // Background and card colors
+  backgroundColor: string;
+  cardColor: string;
+  accentColor: string;
 }
 
 interface SettingsContextType {
@@ -38,14 +53,29 @@ const defaultSettings: NavigationSettings = {
 };
 
 const defaultAppearanceSettings: AppearanceSettings = {
-  primaryColor: 'brown', // This will map to the default 142 85 4 color
+  primaryColor: '#8B5504', // Classic brown primary
   fontFamily: 'Inter',
   headerFontFamily: 'Source Serif 4',
   bodyFontFamily: 'Inter',
   fontSize: 'base',
   borderRadius: 'md',
   logoUrl: '',
-  headerBackgroundColor: '#000000', // Default black header
+  headerBackgroundColor: '#000000', // Classic black header
+  // Chart and data visualization colors - Classic preset
+  chartPositiveColor: '#60a821', // Green for positive values
+  chartNegativeColor: '#f87171', // Red for negative values
+  chartPrimaryColor: '#B8860B', // DarkGoldenrod for primary chart color (muted golden)
+  chartSecondaryColor: '#20b2aa', // Teal for secondary chart color
+  // Positive/negative indicators
+  positiveColor: '#22c55e', // Green for positive indicators
+  negativeColor: '#ef4444', // Red for negative indicators
+  // Background gradient colors - Classic preset
+  gradientStartColor: '#f3eddc', // Light warm color
+  gradientEndColor: '#f9f8f3', // Very light warm color
+  // Background and card colors - Classic preset
+  backgroundColor: '#ffffff', // White background
+  cardColor: '#ffffff', // White cards
+  accentColor: '#f3eddc', // Light beige for accent/summary cards
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -61,9 +91,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     
     // One-time migration: clear old appearance settings to force new defaults
     const appearanceVersion = localStorage.getItem('appearance-settings-version');
-    if (!appearanceVersion || appearanceVersion !== '3') {
+    if (!appearanceVersion || appearanceVersion !== '5') {
       localStorage.removeItem('appearance-settings');
-      localStorage.setItem('appearance-settings-version', '3');
+      localStorage.setItem('appearance-settings-version', '5');
     }
     
     const savedNavigationSettings = localStorage.getItem('navigation-settings');
@@ -81,14 +111,26 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (savedAppearanceSettings) {
       try {
         const parsed = JSON.parse(savedAppearanceSettings);
-        // Handle migration from old 'blue' default to new 'brown' default
-        if (parsed.primaryColor === 'blue') {
-          parsed.primaryColor = 'brown';
-        }
-        
         // Convert old Source Serif Pro to Source Serif 4
         if (parsed.headerFontFamily === 'Source Serif Pro') {
           parsed.headerFontFamily = 'Source Serif 4';
+        }
+        
+        // Convert old string color names to hex values
+        const colorNameToHex = {
+          brown: '#8B5504',
+          blue: '#3B82F6',
+          green: '#22C55E',
+          purple: '#A855F7',
+          red: '#EF4444',
+          orange: '#F97316',
+          pink: '#EC4899',
+          indigo: '#6366F1',
+          teal: '#14B8A6',
+        };
+        
+        if (parsed.primaryColor && colorNameToHex[parsed.primaryColor as keyof typeof colorNameToHex]) {
+          parsed.primaryColor = colorNameToHex[parsed.primaryColor as keyof typeof colorNameToHex];
         }
         
         setAppearanceSettings({ ...defaultAppearanceSettings, ...parsed });
