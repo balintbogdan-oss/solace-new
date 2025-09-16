@@ -149,7 +149,6 @@ export function TradeExecutionPanel({
   const [fundSymbolCusip, setFundSymbolCusip] = useState<string>('');
   const [specialComm, setSpecialComm] = useState<string>('');
   const [iraTranCode, setIraTranCode] = useState<string>('-');
-  const [enteredBy, setEnteredBy] = useState<string>('DUAM');
   const [acceptedBy, setAcceptedBy] = useState<string>('');
   const [date, setDate] = useState<string>('');
   const [time, setTime] = useState<string>('');
@@ -1464,14 +1463,6 @@ export function TradeExecutionPanel({
                            </SelectContent>
                          </Select>
                        ))}
-                       {renderFormRow('Entered By', (
-                         <Input
-                           value={enteredBy}
-                           onChange={(e) => setEnteredBy(e.target.value)}
-                           placeholder=""
-                           className="w-[140px] h-8 text-xs"
-                         />
-                       ))}
                        {renderFormRow('Accepted By', (
                          <Input
                            value={acceptedBy}
@@ -1721,7 +1712,6 @@ export function TradeExecutionPanel({
              {ttoRep && renderFormRow('TTO Rep', <span className="font-medium text-right">{ttoRep}</span>)}
              {iraTranCode !== '-' && renderFormRow('IRA Tran Code', <span className="font-medium text-right">{iraTranCode}</span>)}
              {noCdsc !== '-' && renderFormRow('No CDSC', <span className="font-medium text-right">{noCdsc}</span>)}
-             {enteredBy && renderFormRow('Entered By', <span className="font-medium text-right">{enteredBy}</span>)}
              {acceptedBy && renderFormRow('Accepted By', <span className="font-medium text-right">{acceptedBy}</span>)}
              {date && renderFormRow('Date (MM/DD/YY)', <span className="font-medium text-right">{date}</span>)}
              {time && renderFormRow('Time (EST HHMMSS)', <span className="font-medium text-right">{time}</span>)}
