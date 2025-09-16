@@ -1089,7 +1089,8 @@ export function TradeExecutionPanel({
                </div>
              )}
            </div>
-           {renderFormRow('Commission', (
+           {/* Commission field - only for non-mutual funds */}
+           {!isMutualFund && renderFormRow('Commission', (
              <div className="flex items-center gap-2 justify-end">
                <Select value={commissionType} onValueChange={(v) => setCommissionType(v as CommissionType)}>
                  <SelectTrigger className="w-[140px] h-8 text-xs">
@@ -1759,8 +1760,8 @@ export function TradeExecutionPanel({
            </>
          )}
          {orderType === 'market' && !isOptionTrade && renderFormRow(isMutualFund ? 'NAV' : 'Market Price', <span className="font-medium text-right">~${marketPrice.toFixed(2)}</span>)}
-         {renderFormRow('Commission Type', <span className="font-medium capitalize text-right">{commissionType}</span>)}
-         {renderFormRow('Commission Est.', <span className="font-medium text-right">${commission.toFixed(2)}</span>)}
+         {!isMutualFund && renderFormRow('Commission Type', <span className="font-medium capitalize text-right">{commissionType}</span>)}
+         {!isMutualFund && renderFormRow('Commission Est.', <span className="font-medium text-right">${commission.toFixed(2)}</span>)}
          {/* Show tax allocation method only for stock sells with Cash or Margin accounts */}
          {!isOptionTrade && tradeMode === 'sell' && (accountType === 'Cash' || accountType === 'Margin') && renderFormRow('Tax Allocation', <span className="font-medium text-right">{taxAllocationMethod.replace(/([A-Z])/g, ' $1').trim()}</span>)}
 
