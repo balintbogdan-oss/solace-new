@@ -1,13 +1,14 @@
 'use client';
 
 import { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Rectangle } from 'recharts';
 import { TooltipProps } from 'recharts';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Download, RefreshCw } from 'lucide-react';
 import { LastUpdated } from '@/components/ui/last-updated';
 import { useAccountData } from '@/contexts/SupabaseAccountDataContext';
+import { useSettings } from '@/contexts/SettingsContext';
 
 // Custom Tooltip Component
 const CustomCommissionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
@@ -25,25 +26,31 @@ const CustomCommissionTooltip = ({ active, payload, label }: TooltipProps<number
   return null;
 };
 
-// Custom Bar Shape Component
-const renderCommissionBarShape = (props: unknown) => {
-  const { fill, x, y, width, height } = props as { fill: string; x: number; y: number; width: number; height: number };
-  return (
-    <rect
-      x={x}
-      y={y}
-      width={width}
-      height={height}
-      fill={fill}
-      rx={4}
-      ry={4}
-    />
-  );
+// Custom Bar Shape Component - same as CommissionWidget
+interface CommissionBarShapeProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  fill?: string;
+  payload?: { bonus?: number };
+}
+
+const renderCommissionBarShape = (props: CommissionBarShapeProps) => {
+  // Round the top corners for all bars
+  const radius: [number, number, number, number] = [4, 4, 0, 0];
+  return <Rectangle {...props} radius={radius} />;
 };
 
 export default function CommissionPage() {
   const { data: accountData, loading, error, refreshData } = useAccountData();
   const { theme } = useTheme();
+  const { appearanceSettings } = useSettings();
+  
+  // Use the same color logic as CommissionWidget
+  const chartColor = useMemo(() => {
+    return appearanceSettings.chartPrimaryColor || '#BEA36F';
+  }, [appearanceSettings.chartPrimaryColor]);
 
   // 2025 data - August to January (most recent first)
   const data2025 = [
@@ -179,12 +186,12 @@ export default function CommissionPage() {
                 <BarChart data={chartData}>
                   <defs>
                     <linearGradient id="commissionGradientLight" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--chart-primary)" />
-                      <stop offset="100%" stopColor="var(--chart-primary)" stopOpacity="0.1" />
+                      <stop offset="0%" stopColor={chartColor} />
+                      <stop offset="100%" stopColor={chartColor} stopOpacity="0.1" />
                     </linearGradient>
                     <linearGradient id="commissionGradientDark" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--chart-primary)" />
-                      <stop offset="100%" stopColor="var(--chart-primary)" stopOpacity="0.1" />
+                      <stop offset="0%" stopColor={chartColor} />
+                      <stop offset="100%" stopColor={chartColor} stopOpacity="0.1" />
                     </linearGradient>
                   </defs>
                   <XAxis 
