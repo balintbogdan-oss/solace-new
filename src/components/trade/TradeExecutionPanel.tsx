@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -231,7 +231,7 @@ export function TradeExecutionPanel({
         setSelectedOptionAction('sellToOpen');
       }
     }
-  }, [isOptionTrade, tradeMode, skipSegmentedControl]);
+  }, [isOptionTrade, tradeMode, skipSegmentedControl, setSelectedOptionAction]);
 
   // Set order type to market for mutual funds
   useEffect(() => {
@@ -336,8 +336,13 @@ export function TradeExecutionPanel({
   }, [quantity, marketPrice, commissionType, commissionAmount, isOptionTrade, currentLimitPrice, orderType]);
 
   // Helper function to get the correct price for options based on selected action
-  const getOptionPrice = () => {
+  const getOptionPrice = useCallback(() => {
     if (!isOptionTrade || !strikePrice || !optionType) return currentLimitPrice;
+    
+    // If we have a limitPrice passed from the options chain (clicked bid/ask), use that
+    if (limitPrice && limitPrice > 0) {
+      return limitPrice;
+    }
     
     // For options, we need to determine the correct bid/ask price based on the selected action
     // This would typically come from the options chain data, but for now we'll use mock data
@@ -348,12 +353,24 @@ export function TradeExecutionPanel({
       'call': {
         '195': { bid: 46.58, ask: 47.52 },
         '200': { bid: 41.63, ask: 42.47 },
-        '205': { bid: 36.68, ask: 37.42 }
+        '205': { bid: 36.68, ask: 37.42 },
+        '210': { bid: 31.73, ask: 32.37 },
+        '215': { bid: 26.78, ask: 27.32 },
+        '220': { bid: 21.83, ask: 22.27 },
+        '225': { bid: 16.88, ask: 17.22 },
+        '230': { bid: 12.17, ask: 12.45 },
+        '235': { bid: 7.95, ask: 8.15 }
       },
       'put': {
         '195': { bid: 9.34, ask: 9.53 },
         '200': { bid: 9.34, ask: 9.53 },
-        '205': { bid: 9.34, ask: 9.53 }
+        '205': { bid: 9.34, ask: 9.53 },
+        '210': { bid: 12.45, ask: 12.68 },
+        '215': { bid: 15.85, ask: 16.12 },
+        '220': { bid: 19.75, ask: 20.05 },
+        '225': { bid: 24.15, ask: 24.45 },
+        '230': { bid: 29.25, ask: 29.55 },
+        '235': { bid: 34.95, ask: 35.25 }
       }
     };
     
@@ -368,6 +385,118 @@ export function TradeExecutionPanel({
     }
     
     return currentLimitPrice;
+  }, [isOptionTrade, strikePrice, optionType, currentLimitPrice, limitPrice, selectedOptionAction]);
+
+  // Helper function to get option market data for overlay
+  const getOptionMarketData = () => {
+    // Generate timestamp: current time minus 15 minutes, no seconds
+    const now = new Date();
+    const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000);
+    const timestamp = fifteenMinutesAgo.toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/New_York'
+    }) + ' ET, ' + fifteenMinutesAgo.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
+
+    if (!isOptionTrade || !strikePrice || !optionType) {
+      return {
+        ltp: 0,
+        change: 0,
+        changePercent: 0,
+        bid: 0,
+        ask: 0,
+        lastSize: 10,
+        bidSize: 5,
+        askSize: 12,
+        exchange: "OPRA",
+        timestamp,
+      };
+    }
+
+    // If we have a limitPrice passed from the options chain (clicked bid/ask), use that for LTP
+    if (limitPrice && limitPrice > 0) {
+      const change = limitPrice * 0.1; // Mock 10% change
+      const changePercent = 10.0;
+      
+      return {
+        ltp: limitPrice,
+        change,
+        changePercent,
+        bid: limitPrice * 0.98, // Mock bid slightly lower
+        ask: limitPrice * 1.02, // Mock ask slightly higher
+        lastSize: 10,
+        bidSize: 5,
+        askSize: 12,
+        exchange: "OPRA",
+        timestamp,
+      };
+    }
+
+    const mockOptionPrices = {
+      'call': {
+        '195': { bid: 46.58, ask: 47.52 },
+        '200': { bid: 41.63, ask: 42.47 },
+        '205': { bid: 36.68, ask: 37.42 },
+        '210': { bid: 31.73, ask: 32.37 },
+        '215': { bid: 26.78, ask: 27.32 },
+        '220': { bid: 21.83, ask: 22.27 },
+        '225': { bid: 16.88, ask: 17.22 },
+        '230': { bid: 12.17, ask: 12.45 },
+        '235': { bid: 7.95, ask: 8.15 }
+      },
+      'put': {
+        '195': { bid: 9.34, ask: 9.53 },
+        '200': { bid: 9.34, ask: 9.53 },
+        '205': { bid: 9.34, ask: 9.53 },
+        '210': { bid: 12.45, ask: 12.68 },
+        '215': { bid: 15.85, ask: 16.12 },
+        '220': { bid: 19.75, ask: 20.05 },
+        '225': { bid: 24.15, ask: 24.45 },
+        '230': { bid: 29.25, ask: 29.55 },
+        '235': { bid: 34.95, ask: 35.25 }
+      }
+    };
+
+    const optionData = mockOptionPrices[optionType]?.[strikePrice.toString() as keyof typeof mockOptionPrices[typeof optionType]];
+    
+    if (!optionData) {
+      return {
+        ltp: 0,
+        change: 0,
+        changePercent: 0,
+        bid: 0,
+        ask: 0,
+        lastSize: 10,
+        bidSize: 5,
+        askSize: 12,
+        exchange: "OPRA",
+        timestamp,
+      };
+    }
+
+    // Calculate LTP (Last Traded Price) - use mid price for display
+    const ltp = (optionData.bid + optionData.ask) / 2;
+    const change = ltp * 0.1; // Mock 10% change
+    const changePercent = 10.0;
+
+    return {
+      ltp,
+      change,
+      changePercent,
+      bid: optionData.bid,
+      ask: optionData.ask,
+      lastSize: 10,
+      bidSize: 5,
+      askSize: 12,
+      exchange: "OPRA",
+      timestamp,
+      underlyingLast: 234.35
+    };
   };
 
   const estimatedCost = useMemo(() => {
@@ -395,7 +524,7 @@ export function TradeExecutionPanel({
       // For all other cases (equities), use the standard calculation with commission
       const baseCost = quantity * priceToUse;
       return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
-  }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType, isMutualFund, transactionType, dollarAmount, selectedOptionAction, strikePrice, optionType]);
+  }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType, isMutualFund, transactionType, dollarAmount, getOptionPrice]);
 
   // Calculate maximum quantity based on buying power
   const maxQuantity = useMemo(() => {
@@ -494,7 +623,7 @@ export function TradeExecutionPanel({
     if (!skipSegmentedControl) {
       setOptionSellType('sellToClose');
     } 
-  }, [symbol, accountId, initialTradeMode, strikePrice, optionType, limitPrice, isOptionTrade, marketPrice, isMutualFund, skipSegmentedControl]);
+  }, [symbol, accountId, initialTradeMode, strikePrice, optionType, limitPrice, isOptionTrade, marketPrice, isMutualFund, skipSegmentedControl, setSelectedOptionAction]);
 
   useEffect(() => {
     if (orderState === 'review' && notesTextareaRef.current) {
@@ -949,15 +1078,7 @@ export function TradeExecutionPanel({
                <div className="flex items-center gap-1">
                  <label className="text-muted-foreground whitespace-nowrap">Price</label>
                  <OptionsMarketDataOverlay
-                   bid={5.10}
-                   bidContracts={20}
-                   ask={5.20}
-                   askContracts={15}
-                   last={5.15}
-                   lastContracts={10}
-                   exchange="CBOE"
-                   lastTime="10:36:05 ET"
-                   underlyingLast={234.35}
+                   {...getOptionMarketData()}
                  />
                </div>
                <div className="flex-grow flex justify-end text-right">
@@ -971,15 +1092,7 @@ export function TradeExecutionPanel({
                  <label className="text-muted-foreground whitespace-nowrap">Limit Price</label>
                  {isOptionTrade && (
                    <OptionsMarketDataOverlay
-                     bid={5.10}
-                     bidContracts={20}
-                     ask={5.20}
-                     askContracts={15}
-                     last={5.15}
-                     lastContracts={10}
-                     exchange="CBOE"
-                     lastTime="10:36:05 ET"
-                     underlyingLast={234.35}
+                     {...getOptionMarketData()}
                    />
                  )}
                </div>
@@ -1870,6 +1983,19 @@ export function TradeExecutionPanel({
              </div>
              <div className="flex-grow flex justify-end text-right">
                <span className="font-medium">${marketPrice.toFixed(2)}</span>
+             </div>
+           </div>
+         )}
+         {isOptionTrade && orderType === 'market' && (
+           <div className="flex items-center justify-between py-2 text-sm">
+             <div className="flex items-center gap-1">
+               <label className="text-muted-foreground whitespace-nowrap">Price</label>
+               <OptionsMarketDataOverlay
+                 {...getOptionMarketData()}
+               />
+             </div>
+             <div className="flex-grow flex justify-end text-right">
+               <span className="font-medium">${getOptionPrice().toFixed(2)}</span>
              </div>
            </div>
          )}

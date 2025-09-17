@@ -5,28 +5,30 @@ import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface OptionsMarketDataOverlayProps {
+  ltp: number;
+  change: number;
+  changePercent: number;
   bid: number;
-  bidContracts: number;
   ask: number;
-  askContracts: number;
-  last: number;
-  lastContracts: number;
+  lastSize: number;
+  bidSize: number;
+  askSize: number;
   exchange: string;
-  lastTime: string;
-  underlyingLast: number;
+  timestamp: string;
   className?: string;
 }
 
 export function OptionsMarketDataOverlay({
+  ltp,
+  change,
+  changePercent,
   bid,
-  bidContracts,
   ask,
-  askContracts,
-  last,
-  lastContracts,
+  lastSize,
+  bidSize,
+  askSize,
   exchange,
-  lastTime,
-  underlyingLast,
+  timestamp,
   className
 }: OptionsMarketDataOverlayProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,6 +83,8 @@ export function OptionsMarketDataOverlay({
   }, [isOpen]);
 
   const formatPrice = (price: number) => price.toFixed(2);
+  const formatChange = (change: number) => change >= 0 ? `+${change.toFixed(2)}` : change.toFixed(2);
+  const formatPercent = (percent: number) => percent >= 0 ? `+${percent.toFixed(2)}%` : `${percent.toFixed(2)}%`;
 
   return (
     <>
@@ -106,41 +110,67 @@ export function OptionsMarketDataOverlay({
           {/* Overlay */}
           <div
             ref={overlayRef}
-            className="fixed z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 min-w-[300px]"
+            className="fixed z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 min-w-[320px]"
             style={{
               top: `${position.top}px`,
               left: `${position.left}px`,
             }}
           >
-            {/* Market Data */}
-            <div className="space-y-3">
+            {/* LTP with Change */}
+            <div className="pb-3 border-b border-gray-200 dark:border-gray-700">
+              <div className="text-sm font-semibold">LTP ${formatPrice(ltp)}</div>
+              <div className={cn(
+                "text-xs font-medium",
+                change >= 0 ? "text-green-600" : "text-red-600"
+              )}>
+                {formatChange(change)} ({formatPercent(changePercent)})
+              </div>
+            </div>
+
+            {/* Bid/Ask */}
+            <div className="py-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Bid:</span>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  ${formatPrice(bid)} ({bidContracts} contracts)
+                  {formatPrice(bid)}
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Ask:</span>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  ${formatPrice(ask)} ({askContracts} contracts)
+                  {formatPrice(ask)}
+                </span>
+              </div>
+            </div>
+
+            {/* Sizes */}
+            <div className="py-3 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Last Size:</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {lastSize} ({exchange})
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Last:</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Bid Size:</span>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  ${formatPrice(last)} ({lastContracts} contracts, {exchange}) @ {lastTime}
+                  {bidSize} ({exchange})
                 </span>
               </div>
               
-              <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-3">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Underlying Last:</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Ask Size:</span>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  ${formatPrice(underlyingLast)}
+                  {askSize} ({exchange})
                 </span>
               </div>
+            </div>
+
+            {/* Timestamp */}
+            <div className="text-xs text-gray-500 dark:text-gray-400 pt-3">
+              <span>{timestamp}</span>
             </div>
           </div>
         </>
