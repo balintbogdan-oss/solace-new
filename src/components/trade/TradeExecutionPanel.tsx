@@ -387,6 +387,21 @@ export function TradeExecutionPanel({
     return currentLimitPrice;
   }, [isOptionTrade, strikePrice, optionType, currentLimitPrice, limitPrice, selectedOptionAction]);
 
+  // Helper function to generate current timestamp for market data overlays
+  const getCurrentTimestamp = () => {
+    const now = new Date();
+    return now.toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/New_York'
+    }) + ' ET, ' + now.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   // Helper function to get option market data for overlay
   const getOptionMarketData = () => {
     // Generate timestamp: current time minus 15 minutes, no seconds
@@ -1192,7 +1207,7 @@ export function TradeExecutionPanel({
                      bidSize={500}
                      askSize={300}
                      exchange="XNAS"
-                     timestamp="03:55:49 PM ET, 03/10/2025"
+                     timestamp={getCurrentTimestamp()}
                    />
                  )}
                </div>
@@ -1977,7 +1992,7 @@ export function TradeExecutionPanel({
                    bidSize={500}
                    askSize={300}
                    exchange="XNAS"
-                   timestamp="03:55:49 PM ET, 03/10/2025"
+                   timestamp={getCurrentTimestamp()}
                  />
                )}
              </div>
