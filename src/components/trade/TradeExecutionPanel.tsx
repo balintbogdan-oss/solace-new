@@ -376,7 +376,13 @@ export function TradeExecutionPanel({
       // For mutual fund even-dollar transactions, use dollarAmount instead of calculated quantity
       if (isMutualFund && transactionType === 'even-dollar') {
         const baseCost = tradeMode === 'buy' ? dollarAmount : dollarAmount;
-        return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
+        return baseCost; // No commission for mutual funds
+      }
+      
+      // For mutual fund share-based transactions, no commission
+      if (isMutualFund) {
+        const baseCost = quantity * priceToUse;
+        return baseCost; // No commission for mutual funds
       }
       
       // For options, use the correct bid/ask price based on selected action
@@ -386,7 +392,7 @@ export function TradeExecutionPanel({
         return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
       }
       
-      // For all other cases, use the standard calculation
+      // For all other cases (equities), use the standard calculation with commission
       const baseCost = quantity * priceToUse;
       return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
   }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType, isMutualFund, transactionType, dollarAmount, selectedOptionAction, strikePrice, optionType]);
@@ -569,7 +575,7 @@ export function TradeExecutionPanel({
               avgPrice: newAvgPrice
             },
             balanceUpdates: {
-              cash: availableCash - tradeValue - commission
+              cash: availableCash - tradeValue - (isMutualFund ? 0 : commission)
             }
           });
         } else {
@@ -583,7 +589,7 @@ export function TradeExecutionPanel({
           
           // Update cash balance separately for new holdings
           await updateBalances({
-            cash: availableCash - tradeValue - commission
+            cash: availableCash - tradeValue - (isMutualFund ? 0 : commission)
           });
           
           // Add trade record separately for new holdings
@@ -641,7 +647,7 @@ export function TradeExecutionPanel({
             
             // Update cash balance and add trade record separately
             await updateBalances({
-              cash: availableCash + tradeValue - commission
+              cash: availableCash + tradeValue - (isMutualFund ? 0 : commission)
             });
             
             await addTrade({
@@ -670,7 +676,7 @@ export function TradeExecutionPanel({
                 quantity: newQuantity
               },
               balanceUpdates: {
-                cash: availableCash + tradeValue - commission
+                cash: availableCash + tradeValue - (isMutualFund ? 0 : commission)
               }
             });
           }
@@ -1820,7 +1826,53 @@ export function TradeExecutionPanel({
              {renderFormRow('Limit Price', <span className="font-medium text-right">${stopLimitPrice.toFixed(2)}</span>)}
            </>
          )}
-         {orderType === 'market' && !isOptionTrade && renderFormRow(isMutualFund ? 'NAV' : 'Market Price', <span className="font-medium text-right">~${marketPrice.toFixed(2)}</span>)}
+         {orderType === 'market' && !isOptionTrade && (
+           <div className="flex items-center justify-between py-2 text-sm">
+             <div className="flex items-center gap-1">
+               <label className="text-muted-foreground whitespace-nowrap">{isMutualFund ? 'NAV' : 'Market Price'}</label>
+               {isMutualFund ? (
+                  <MutualFundMarketDataOverlay
+                    symbol={symbol}
+                   name={getStockString('description', `${symbol} Fund`)}
+                   nav={getStockNumber('currentPrice', marketPrice)}
+                   change={getStockNumber('dayChange', 0)}
+                   changePercent={getStockNumber('dayChangePercent', 0)}
+                   previousClose={getStockNumber('previousClose', marketPrice)}
+                   dayHigh={getStockNumber('high', marketPrice)}
+                   dayLow={getStockNumber('low', marketPrice)}
+                   yearHigh={getStockNumber('fiftyTwoWeekHigh', marketPrice)}
+                   yearLow={getStockNumber('fiftyTwoWeekLow', marketPrice)}
+                   expenseRatio={0.04}
+                   netAssets={435.01}
+                   timestamp="4:00:21 PM ET, 03/10/2025"
+                   ytdReturn={12.30}
+                   category="US Equity Large Cap Blend"
+                   yield={1.45}
+                   frontLoad="-"
+                   inceptionDate="13 Nov 2000"
+                 />
+               ) : (
+                 <MarketDataOverlay
+                   symbol={symbol}
+                   description={getStockString('description', `${symbol} Inc.`)}
+                   currentPrice={234.35}
+                   change={-2.15}
+                   changePercent={-0.91}
+                   bid={234.33}
+                   ask={234.37}
+                   lastSize={200}
+                   bidSize={500}
+                   askSize={300}
+                   exchange="XNAS"
+                   timestamp="03:55:49 PM ET, 03/10/2025"
+                 />
+               )}
+             </div>
+             <div className="flex-grow flex justify-end text-right">
+               <span className="font-medium">${marketPrice.toFixed(2)}</span>
+             </div>
+           </div>
+         )}
          {!isMutualFund && renderFormRow('Commission Type', <span className="font-medium capitalize text-right">{commissionType}</span>)}
          {!isMutualFund && renderFormRow('Commission Est.', <span className="font-medium text-right">${commission.toFixed(2)}</span>)}
          {!isMutualFund && renderFormRow('Solicited', <span className="font-medium text-right">{equitySolicited}</span>)}

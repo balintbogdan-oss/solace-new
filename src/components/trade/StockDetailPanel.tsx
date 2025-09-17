@@ -59,14 +59,43 @@ export const STOCK_DATA: Record<string, StockInfo> = {
         { time: '15:30', price: 234.50, volume: 2000000, pe: 30.0 },
         { time: '16:00', price: 234.35, volume: 2500000, pe: 30.0 },
       ],
-      '1W': [
-        { time: 'Mon', price: 185.50, volume: 500000, pe: 29.8 },
-        { time: 'Tue', price: 186.80, volume: 550000, pe: 30.0 },
-        { time: 'Wed', price: 188.00, volume: 600000, pe: 30.1 },
-        { time: 'Thu', price: 187.50, volume: 580000, pe: 30.0 },
-        { time: 'Fri', price: 188.45, volume: 620000, pe: 30.2 },
-      ],
-      '1M': Array.from({ length: 30 }, (_, i) => ({ time: `Day ${i+1}`, price: 180 + i * 0.5 + Math.random() * 3, volume: 400000 + Math.random() * 100000, pe: 28 + Math.random() * 2 })),
+      '1W': (() => {
+        const today = new Date();
+        const oneWeekAgo = new Date(today);
+        oneWeekAgo.setDate(today.getDate() - 7);
+        
+        // Generate 5 trading days (Monday to Friday) with actual dates
+        return Array.from({ length: 5 }, (_, i) => {
+          const date = new Date(oneWeekAgo);
+          date.setDate(oneWeekAgo.getDate() + i);
+          return {
+            time: date.toLocaleDateString('en-US', { 
+              month: 'numeric', 
+              day: 'numeric' 
+            }),
+            price: 185.50 + i * 0.75 + Math.random() * 0.5,
+            volume: 500000 + i * 30000 + Math.random() * 100000,
+            pe: 29.8 + Math.random() * 0.4
+          };
+        });
+      })(),
+      '1M': (() => {
+        const today = new Date();
+        const oneMonthAgo = new Date(today);
+        oneMonthAgo.setMonth(today.getMonth() - 1);
+        
+        // Generate 15 data points with 2-day intervals to reduce density
+        return Array.from({ length: 15 }, (_, i) => {
+          const date = new Date(oneMonthAgo);
+          date.setDate(oneMonthAgo.getDate() + (i * 2));
+          return {
+            time: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: 180 + i * 0.5 + Math.random() * 3,
+            volume: 400000 + Math.random() * 100000,
+            pe: 28 + Math.random() * 2
+          };
+        });
+      })(),
       '6M': Array.from({ length: 26 }, (_, i) => ({ time: `W ${i+1}`, price: 170 + i * 1.5 + Math.random() * 5, volume: 2000000 + Math.random() * 500000, pe: 27 + Math.random() * 3 })),
       'YTD': Array.from({ length: 9 }, (_, i) => ({ time: `M ${i+1}`, price: 175 + i * 2 + Math.random() * 6, volume: 8000000 + Math.random() * 1000000, pe: 27.5 + Math.random() * 2.5 })),
       '1Y': Array.from({ length: 12 }, (_, i) => ({
@@ -235,10 +264,25 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
       displayValue = value.toFixed(1);
     }
 
+    // Format time label - add date for 1D charts, enhance 1W charts
+    let timeLabel = label;
+    if (label && label.includes(':')) {
+      // This is a time format (HH:MM), add today's date
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      timeLabel = `${dateStr} ${label}`;
+    } else if (label && (label.includes('Mon') || label.includes('Tue') || label.includes('Wed') || label.includes('Thu') || label.includes('Fri'))) {
+      // This is a 1W format (e.g., "Mon Sep 10"), add time for more precision
+      timeLabel = `${label} 4:00 PM`;
+    }
+
     return (
       <div className="backdrop-blur-xl border p-2 rounded-lg shadow-lg">
         {/* Ensure text-sm is used */}
-        <p className="text-sm text-muted-foreground">{`Time: ${label}`}</p>
+        <p className="text-sm text-muted-foreground">{timeLabel}</p>
         <p className="text-sm font-medium">{`${dataType}: ${displayValue}`}</p>
       </div>
     );
@@ -294,7 +338,7 @@ const generateRealistic1DData = (marketData: Record<string, unknown> | MarketDat
     const priceRange = high - low;
     const startTime = 9 * 60 + 30; // 9:30 AM in minutes
     const endTime = 16 * 60; // 4:00 PM in minutes
-    const interval = 15; // 15 minutes
+    const interval = 30; // 30 minutes for better readability
     
     // Create a realistic intraday pattern that respects OHLC
     for (let minutes = startTime; minutes <= endTime; minutes += interval) {
@@ -359,7 +403,7 @@ const generateRealistic1DData = (marketData: Record<string, unknown> | MarketDat
     let price = currentPrice;
     const startTime = 9 * 60 + 30;
     const endTime = 16 * 60;
-    const interval = 15;
+    const interval = 30; // 30 minutes for better readability
     
     for (let minutes = startTime; minutes <= endTime; minutes += interval) {
       const hour = Math.floor(minutes / 60);
@@ -373,7 +417,7 @@ const generateRealistic1DData = (marketData: Record<string, unknown> | MarketDat
       points.push({ 
         time, 
         price: parseFloat(price.toFixed(2)), 
-        volume: Math.round(volume / 26),
+        volume: Math.round(volume / 13),
         pe: 30.5
       });
     }
@@ -392,8 +436,11 @@ const generateMockChartData = (currentPrice: number, high: number, low: number):
     const startTime = new Date();
     startTime.setHours(9, 30, 0, 0); // Market open
     
+    // Use 30-minute intervals instead of 15-minute for better readability
+    const intervalMinutes = 30;
+    
     for (let i = 0; i < points; i++) {
-      const time = new Date(startTime.getTime() + (i * 15 * 60 * 1000)); // 15-minute intervals
+      const time = new Date(startTime.getTime() + (i * intervalMinutes * 60 * 1000));
       const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: false });
       
       // Create realistic price movement within the high/low range
@@ -414,17 +461,173 @@ const generateMockChartData = (currentPrice: number, high: number, low: number):
 
   const generateWeeklyData = (points: number) => {
     const data: ChartPoint[] = [];
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    const today = new Date();
+    const oneWeekAgo = new Date(today);
+    oneWeekAgo.setDate(today.getDate() - 7);
     
     for (let i = 0; i < points; i++) {
-      const day = days[i % days.length];
+      const date = new Date(oneWeekAgo);
+      date.setDate(oneWeekAgo.getDate() + i);
+      const time = date.toLocaleDateString('en-US', { 
+        month: 'numeric', 
+        day: 'numeric' 
+      });
+      
       const progress = i / (points - 1);
       const baseMovement = (high - low) * progress + low;
       const randomVariation = (Math.random() - 0.5) * volatility * 2;
       const price = Math.max(low, Math.min(high, baseMovement + randomVariation));
       
       data.push({
-        time: day,
+        time,
+        price: parseFloat(price.toFixed(2)),
+        volume: Math.floor(Math.random() * 5000000) + 1000000,
+        pe: 30.5
+      });
+    }
+    return data;
+  };
+
+  const generateMonthlyData = (points: number) => {
+    const data: ChartPoint[] = [];
+    const today = new Date();
+    const oneMonthAgo = new Date(today);
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+    
+    // Generate data points every 2-3 days to reduce density
+    const step = Math.ceil(30 / points); // Calculate step size to get approximately the right number of points
+    
+    for (let i = 0; i < points; i++) {
+      const date = new Date(oneMonthAgo);
+      date.setDate(oneMonthAgo.getDate() + (i * step));
+      const time = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const progress = i / (points - 1);
+      const baseMovement = (high - low) * progress + low;
+      const randomVariation = (Math.random() - 0.5) * volatility * 2;
+      const price = Math.max(low, Math.min(high, baseMovement + randomVariation));
+      
+      data.push({
+        time,
+        price: parseFloat(price.toFixed(2)),
+        volume: Math.floor(Math.random() * 5000000) + 1000000,
+        pe: 30.5
+      });
+    }
+    return data;
+  };
+
+  const generateSixMonthData = (points: number) => {
+    const data: ChartPoint[] = [];
+    const today = new Date();
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    
+    // Generate data points every 2 weeks to reduce density
+    const step = Math.ceil(180 / points); // Calculate step size for 6 months (180 days)
+    
+    for (let i = 0; i < points; i++) {
+      const date = new Date(sixMonthsAgo);
+      date.setDate(sixMonthsAgo.getDate() + (i * step));
+      const time = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const progress = i / (points - 1);
+      const baseMovement = (high - low) * progress + low;
+      const randomVariation = (Math.random() - 0.5) * volatility * 2;
+      const price = Math.max(low, Math.min(high, baseMovement + randomVariation));
+      
+      data.push({
+        time,
+        price: parseFloat(price.toFixed(2)),
+        volume: Math.floor(Math.random() * 5000000) + 1000000,
+        pe: 30.5
+      });
+    }
+    return data;
+  };
+
+  const generateYTDData = (points: number) => {
+    const data: ChartPoint[] = [];
+    const today = new Date();
+    const yearStart = new Date(today.getFullYear(), 0, 1); // January 1st of current year
+    
+    // Generate data points monthly for YTD
+    const step = Math.ceil((today.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24) / points);
+    
+    for (let i = 0; i < points; i++) {
+      const date = new Date(yearStart);
+      date.setDate(yearStart.getDate() + (i * step));
+      const time = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const progress = i / (points - 1);
+      const baseMovement = (high - low) * progress + low;
+      const randomVariation = (Math.random() - 0.5) * volatility * 2;
+      const price = Math.max(low, Math.min(high, baseMovement + randomVariation));
+      
+      data.push({
+        time,
+        price: parseFloat(price.toFixed(2)),
+        volume: Math.floor(Math.random() * 5000000) + 1000000,
+        pe: 30.5
+      });
+    }
+    return data;
+  };
+
+  const generateYearlyData = (points: number) => {
+    const data: ChartPoint[] = [];
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    
+    // Generate data points monthly for 1Y
+    const step = Math.ceil(365 / points); // Calculate step size for 1 year (365 days)
+    
+    for (let i = 0; i < points; i++) {
+      const date = new Date(oneYearAgo);
+      date.setDate(oneYearAgo.getDate() + (i * step));
+      const time = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const progress = i / (points - 1);
+      const baseMovement = (high - low) * progress + low;
+      const randomVariation = (Math.random() - 0.5) * volatility * 2;
+      const price = Math.max(low, Math.min(high, baseMovement + randomVariation));
+      
+      data.push({
+        time,
+        price: parseFloat(price.toFixed(2)),
+        volume: Math.floor(Math.random() * 5000000) + 1000000,
+        pe: 30.5
+      });
+    }
+    return data;
+  };
+
+  const generateMaxData = (points: number) => {
+    const data: ChartPoint[] = [];
+    const today = new Date();
+    const fiveYearsAgo = new Date(today);
+    fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+    
+    // Generate data points quarterly for MAX (5 years)
+    const step = Math.ceil(1825 / points); // Calculate step size for 5 years (1825 days)
+    
+    for (let i = 0; i < points; i++) {
+      const date = new Date(fiveYearsAgo);
+      date.setDate(fiveYearsAgo.getDate() + (i * step));
+      const time = date.toLocaleDateString('en-US', { 
+        year: '2-digit', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      
+      const progress = i / (points - 1);
+      const baseMovement = (high - low) * progress + low;
+      const randomVariation = (Math.random() - 0.5) * volatility * 2;
+      const price = Math.max(low, Math.min(high, baseMovement + randomVariation));
+      
+      data.push({
+        time,
         price: parseFloat(price.toFixed(2)),
         volume: Math.floor(Math.random() * 5000000) + 1000000,
         pe: 30.5
@@ -434,13 +637,13 @@ const generateMockChartData = (currentPrice: number, high: number, low: number):
   };
 
   return {
-    '1D': generateIntradayData(26), // 9:30 AM to 4:00 PM in 15-min intervals
+    '1D': generateIntradayData(13), // 9:30 AM to 4:00 PM in 30-min intervals
     '1W': generateWeeklyData(5),
-    '1M': generateWeeklyData(20),
-    '6M': generateWeeklyData(24),
-    'YTD': generateWeeklyData(40),
-    '1Y': generateWeeklyData(52),
-    'MAX': generateWeeklyData(100)
+    '1M': generateMonthlyData(15),
+    '6M': generateSixMonthData(12),
+    'YTD': generateYTDData(8),
+    '1Y': generateYearlyData(12),
+    'MAX': generateMaxData(20)
   };
 };
 
@@ -556,7 +759,7 @@ export function StockDetailPanel({
       }
     }
     
-    // If no existing data and timeframe is 1D, try to generate realistic data
+    // If no existing data and timeframe is 1D or 1M, try to generate realistic data
     if (selectedTimeFrame === '1D') {
       // Get the real market data for this stock
       const realMarketData = marketData?.find((md: unknown) => (md as { symbol: string }).symbol === symbol?.toUpperCase());
@@ -567,6 +770,22 @@ export function StockDetailPanel({
         // Fallback to using stock price if no market data
         const data = generateRealistic1DData({ currentPrice: stockDataForChart.price });
         return data;
+      }
+    }
+    
+    if (selectedTimeFrame === '1M') {
+      // Get the real market data for this stock
+      const realMarketData = marketData?.find((md: unknown) => (md as { symbol: string }).symbol === symbol?.toUpperCase());
+      if (realMarketData) {
+        const currentPrice = Number(realMarketData.currentPrice) || stockDataForChart.price;
+        const high = Number(realMarketData.high) || currentPrice * 1.05;
+        const low = Number(realMarketData.low) || currentPrice * 0.95;
+        const data = generateMockChartData(currentPrice, high, low);
+        return data[selectedTimeFrame] || [];
+      } else {
+        // Fallback to using stock price if no market data
+        const data = generateMockChartData(stockDataForChart.price, stockDataForChart.price * 1.05, stockDataForChart.price * 0.95);
+        return data[selectedTimeFrame] || [];
       }
     }
     
@@ -752,7 +971,7 @@ export function StockDetailPanel({
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={currentChartData} margin={{ top: 5, right: 5, bottom: 5, left: 10 }}>
+            <AreaChart data={currentChartData} margin={{ top: 5, right: 20, bottom: 5, left: 10 }}>
             <defs>
               {/* Gradient for area fill */}
               <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
@@ -767,9 +986,10 @@ export function StockDetailPanel({
             <XAxis 
                dataKey="time" 
                axisLine={false}
-               tickLine={false}
+               tickLine={true}
                tick={{ fill: mutedColor, fontSize: 14 }}
                dy={13}
+               interval={selectedTimeFrame === '1D' ? 1 : selectedTimeFrame === '1M' ? 2 : selectedTimeFrame === '6M' ? 1 : selectedTimeFrame === 'YTD' ? 1 : selectedTimeFrame === '1Y' ? 1 : selectedTimeFrame === 'MAX' ? 1 : 0}
             /> 
             <YAxis 
                axisLine={false}

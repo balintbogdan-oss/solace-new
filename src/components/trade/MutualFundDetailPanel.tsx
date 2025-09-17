@@ -24,10 +24,21 @@ const generateMockChartData = (symbol: string, basePrice: number) => ({
     { time: 'Thu', nav: basePrice * 1.001 },
     { time: 'Fri', nav: basePrice },
   ],
-  '1M': Array.from({ length: 30 }, (_, i) => ({ 
-    time: `Day ${i+1}`, 
-    nav: basePrice * (0.95 + i * 0.02 + Math.random() * 0.06) 
-  })),
+  '1M': (() => {
+    const today = new Date();
+    const oneMonthAgo = new Date(today);
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+    
+    // Generate 15 data points with 2-day intervals to reduce density
+    return Array.from({ length: 15 }, (_, i) => {
+      const date = new Date(oneMonthAgo);
+      date.setDate(oneMonthAgo.getDate() + (i * 2));
+      return {
+        time: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        nav: basePrice * (0.95 + i * 0.02 + Math.random() * 0.06)
+      };
+    });
+  })(),
   '6M': Array.from({ length: 26 }, (_, i) => ({ 
     time: `W ${i+1}`, 
     nav: basePrice * (0.9 + i * 0.04 + Math.random() * 0.12) 
@@ -329,6 +340,7 @@ export function MutualFundDetailPanel({
                tickLine={false}
                tick={{ fill: mutedColor, fontSize: 14 }}
                dy={13}
+               interval={selectedTimeFrame === '1M' ? 2 : 0}
             /> 
             <YAxis 
                axisLine={false}
