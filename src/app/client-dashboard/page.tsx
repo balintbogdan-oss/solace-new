@@ -507,18 +507,19 @@ export default function ClientDashboardPage() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="w-full relative" style={{ backgroundColor: '#041340' }}>
-        <div className="max-w-[1440px] mx-auto px-[100px] py-8">
+        <div className="max-w-[1440px] mx-auto px-[100px] py-8 relative">
           <div className="relative z-10">
             <h1 className="text-2xl font-medium text-white mb-2">
               Welcome back, {clientName}
             </h1>
           </div>
-          <div className="absolute inset-0 opacity-10 relative">
+          <div className="absolute inset-0 opacity-10">
             <Image 
               src="/images/client-hero.jpg" 
               alt="" 
               fill
               className="object-cover"
+              priority
             />
           </div>
         </div>
