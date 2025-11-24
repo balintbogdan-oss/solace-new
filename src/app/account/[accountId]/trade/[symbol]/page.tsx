@@ -12,6 +12,7 @@ import { SecurityHeader } from '@/components/trade/SecurityHeader'
 import { OptionTradeDetails } from '@/components/trade/OptionsChainTable'
 import { MutualFundDetailPanel } from '@/components/trade/MutualFundDetailPanel'
 import { MutualFundInfo } from '@/types/account'
+import { Card } from '@/components/ui/card'
 
 type TradeMode = 'buy' | 'sell' | null
 type PageViewMode = 'stock' | 'options'
@@ -172,7 +173,7 @@ export default function AccountSymbolTradePage() {
 
   return (
     <div className="flex flex-col sm:flex-row gap-8  rounded-md">
-      <div className=" relative flex-grow rounded-md">
+      <Card className="relative flex-grow p-6">
         <SecurityHeader 
             symbol={symbol}
             stock={isMutualFundSymbol ? undefined : stock}
@@ -288,7 +289,7 @@ export default function AccountSymbolTradePage() {
             />
           )}
         </div>
-      </div>
+      </Card>
 
       <div className="sm:w-[400px] h-full flex-shrink-0">
         <div className="space-y-6"> 

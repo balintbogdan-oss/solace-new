@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
 import { 
   Select,
   SelectContent,
@@ -125,28 +126,30 @@ export default function StatementsReportsPage() {
     switch (activeTab) {
       case 'monthly-statements':
         return (
-          <>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-20 h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2025">2025</SelectItem>
-                    <SelectItem value="2024">2024</SelectItem>
-                    <SelectItem value="2023">2023</SelectItem>
-                    <SelectItem value="2022">2022</SelectItem>
-                  </SelectContent>
-                </Select>
+          <Card className="p-0">
+            <div className="p-6 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger className="w-20 h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2025">2025</SelectItem>
+                      <SelectItem value="2024">2024</SelectItem>
+                      <SelectItem value="2023">2023</SelectItem>
+                      <SelectItem value="2022">2022</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button variant="outline" className="h-9">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download all {selectedYear}
+                </Button>
               </div>
-              <Button variant="outline" className="h-9">
-                <Download className="w-4 h-4 mr-2" />
-                Download all {selectedYear}
-              </Button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto px-6 pb-6">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
@@ -213,33 +216,35 @@ export default function StatementsReportsPage() {
                 </tbody>
               </table>
             </div>
-          </>
+          </Card>
         )
 
       case 'tax-statements':
         return (
-          <>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Select value={selectedTaxYear} onValueChange={setSelectedTaxYear}>
-                  <SelectTrigger className="w-20 h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2024">2024</SelectItem>
-                    <SelectItem value="2023">2023</SelectItem>
-                    <SelectItem value="2022">2022</SelectItem>
-                    <SelectItem value="2021">2021</SelectItem>
-                  </SelectContent>
-                </Select>
+          <Card className="p-0">
+            <div className="p-6 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Select value={selectedTaxYear} onValueChange={setSelectedTaxYear}>
+                    <SelectTrigger className="w-20 h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2024">2024</SelectItem>
+                      <SelectItem value="2023">2023</SelectItem>
+                      <SelectItem value="2022">2022</SelectItem>
+                      <SelectItem value="2021">2021</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button variant="outline" className="h-9">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download all {selectedTaxYear}
+                </Button>
               </div>
-              <Button variant="outline" className="h-9">
-                <Download className="w-4 h-4 mr-2" />
-                Download all {selectedTaxYear}
-              </Button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto px-6 pb-6">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
@@ -307,39 +312,41 @@ export default function StatementsReportsPage() {
                 </tbody>
               </table>
             </div>
-          </>
+          </Card>
         )
 
       case 'trade-confirmations':
         return (
-          <>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Input value={startDate ? format(startDate, 'MMM d, yyyy') : ''} readOnly className="w-32 h-9" />
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="p-0">
+            <div className="p-6 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Input value={startDate ? format(startDate, 'MMM d, yyyy') : ''} readOnly className="w-32 h-9" />
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input value={endDate ? format(endDate, 'MMM d, yyyy') : ''} readOnly className="w-32 h-9" />
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Search by Symbol or CUSIP"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 w-64 h-9"
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Input value={endDate ? format(endDate, 'MMM d, yyyy') : ''} readOnly className="w-32 h-9" />
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="Search by Symbol or CUSIP"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-64 h-9"
-                  />
-                </div>
+                <Button variant="outline" className="h-9">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download all
+                </Button>
               </div>
-              <Button variant="outline" className="h-9">
-                <Download className="w-4 h-4 mr-2" />
-                Download all
-              </Button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto px-6 pb-6">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
@@ -427,39 +434,41 @@ export default function StatementsReportsPage() {
                 </tbody>
               </table>
             </div>
-          </>
+          </Card>
         )
 
       case 'open-order-confirmations':
         return (
-          <>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Input value={startDate ? format(startDate, 'MMM d, yyyy') : ''} readOnly className="w-32 h-9" />
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="p-0">
+            <div className="p-6 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Input value={startDate ? format(startDate, 'MMM d, yyyy') : ''} readOnly className="w-32 h-9" />
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input value={endDate ? format(endDate, 'MMM d, yyyy') : ''} readOnly className="w-32 h-9" />
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Search by Symbol or CUSIP"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 w-64 h-9"
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Input value={endDate ? format(endDate, 'MMM d, yyyy') : ''} readOnly className="w-32 h-9" />
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="Search by Symbol or CUSIP"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-64 h-9"
-                  />
-                </div>
+                <Button variant="outline" className="h-9">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download all
+                </Button>
               </div>
-              <Button variant="outline" className="h-9">
-                <Download className="w-4 h-4 mr-2" />
-                Download all
-              </Button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto px-6 pb-6">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
@@ -547,25 +556,27 @@ export default function StatementsReportsPage() {
                 </tbody>
               </table>
             </div>
-          </>
+          </Card>
         )
 
       case 'shareholder-documents':
         return (
-          <>
-            <div className="flex items-center justify-between">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search by Symbol or CUSIP"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64 h-9"
-                />
+          <Card className="p-0">
+            <div className="p-6 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search by Symbol or CUSIP"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-64 h-9"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto px-6 pb-6">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
@@ -644,7 +655,7 @@ export default function StatementsReportsPage() {
                 </tbody>
               </table>
             </div>
-          </>
+          </Card>
         )
 
       case 'quickdirect':

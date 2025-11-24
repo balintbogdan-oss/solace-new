@@ -990,15 +990,15 @@ export function TradeExecutionPanel({
            onClick={() => setIsAccountModalOpen(true)} 
            className="w-full h-auto px-3 py-3 flex items-center justify-between text-left"
          >
-           <div className="flex flex-col items-start">
-             <span className="font-medium text-sm">
+           <div className="flex flex-col items-start min-w-0 flex-1">
+             <span className="font-medium text-sm truncate w-full">
                {accountId} - <span className="text-foreground">{formatAccountType(accountDetails.type)}</span>
              </span>
-             <span className="text-xs text-muted-foreground mt-1">
+             <span className="text-xs text-muted-foreground mt-1 truncate w-full">
                {accountDetails.clientName}
              </span>
            </div>
-           <ChevronDown className="h-4 w-4 text-muted-foreground" />
+           <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
          </Button>
        </div>
        {renderFormRow('Account Type', (
@@ -2279,7 +2279,7 @@ export function TradeExecutionPanel({
         </motion.div>
         </div>
         <motion.h4 
-          className="text-2xl font-serif"
+          className="text-2xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: orderStatus === 'filled' ? 0.5 : 0.2, duration: 0.4 }}
