@@ -266,9 +266,6 @@ const mockSummaryData = {
   }
 };
 
-// Enable static generation
-export const dynamic = 'force-static';
-
 function ActivityPageContent() {
   const [activeTab, setActiveTab] = useState<'all' | 'cashflow' | 'ira'>('all');
   const [searchTerm, setSearchTerm] = useState('');

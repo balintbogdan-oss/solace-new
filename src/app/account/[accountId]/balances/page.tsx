@@ -15,9 +15,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { PageLoading } from '@/components/ui/page-loading';
 
-// Enable static generation
-export const dynamic = 'force-static';
-
 function BalancesPageContent() {
   const { data: accountData, loading, error, refreshData } = useAccountData();
 
