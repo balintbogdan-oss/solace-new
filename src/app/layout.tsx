@@ -1,22 +1,25 @@
 import './globals.css'
 import { ThemeProvider } from "@/components/theme-provider"
-import { Header } from '@/components/layout/Header'
+import { HeaderWrapper } from '@/components/layout/HeaderWrapper'
 import { GeistMono } from 'geist/font/mono'
 import { NavigationProvider } from '@/contexts/NavigationContext'
 import { SettingsProvider } from '@/contexts/SettingsContext'
 import { AppearanceProvider } from '@/components/AppearanceProvider'
-import { Inter } from 'next/font/google'
-import { Source_Serif_4 } from 'next/font/google'
+import { UserRoleProvider } from '@/contexts/UserRoleContext'
+import { 
+  inter, 
+  sourceSerif4, 
+  schibstedGrotesk, 
+  funnelSans, 
+  corben, 
+  fraunces,
+  ibmPlexSerif,
+  geistSans
+} from '@/styles/fonts'
 import { validateEnvironment } from '@/lib/env-validation'
 import { Toaster } from 'sonner'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-
-const sourceSerif4 = Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-source-serif-4',
-})
+// All fonts are now imported from the fonts definitions file
 
 export const metadata = {
   // ... metadata
@@ -82,11 +85,21 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${GeistMono.variable} ${sourceSerif4.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`
+      ${inter.variable} 
+      ${sourceSerif4.variable} 
+      ${schibstedGrotesk.variable} 
+      ${funnelSans.variable} 
+      ${corben.variable} 
+      ${fraunces.variable} 
+      ${ibmPlexSerif.variable}
+      ${geistSans.variable}
+      ${GeistMono.variable}
+    `}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {/* <div className="background-gradient-effect fixed inset-0 -z-10 overflow-hidden">
         </div> */}
 
@@ -96,17 +109,19 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <SettingsProvider>
-            <AppearanceProvider>
-              <NavigationProvider>
-                <Header />
-                <div className="w-full">
-                {children}
-                </div>
-                <Toaster position="top-right" />
-              </NavigationProvider>
-            </AppearanceProvider>
-          </SettingsProvider>
+          <UserRoleProvider>
+            <SettingsProvider>
+              <AppearanceProvider>
+                <NavigationProvider>
+                  <HeaderWrapper />
+                  <div className="w-full">
+                  {children}
+                  </div>
+                  <Toaster position="top-right" />
+                </NavigationProvider>
+              </AppearanceProvider>
+            </SettingsProvider>
+          </UserRoleProvider>
         </ThemeProvider>
       </body>
     </html>

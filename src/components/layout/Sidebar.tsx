@@ -87,12 +87,13 @@ export function Sidebar() { // Removed props
                   isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
                   isActive
                     ? isMinimized 
-                      ? 'text-foreground bg-accent dark:text-white dark:bg-accent' 
-                      : 'text-gray-900 dark:text-gray-100 bg-accent dark:bg-white/10'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-gray-200/10',
+                      ? 'text-foreground dark:text-white' 
+                      : 'text-gray-900 dark:text-gray-100'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50',
                   // Keep parent expanded if child is active
                   pathname.startsWith(fullHref) && !isActive && 'text-gray-700 dark:text-gray-300' 
                 )}
+                style={isActive ? { backgroundColor: 'var(--sidebar-accent)' } : undefined}
                 title={isMinimized ? item.label : undefined}
               >
                 <div className={cn("flex items-center", isMinimized ? "gap-0" : "gap-3")}>
@@ -157,10 +158,11 @@ export function Sidebar() { // Removed props
                 isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
                 isActive
                   ? isMinimized 
-                    ? 'text-foreground bg-accent dark:text-white dark:bg-accent' 
-                    : 'text-gray-900 dark:text-gray-100 bg-accent dark:bg-white/10'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-gray-200/10'
+                    ? 'text-foreground dark:text-white' 
+                    : 'text-gray-900 dark:text-gray-100'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50'
               )}
+              style={isActive ? { backgroundColor: 'var(--sidebar-accent)' } : undefined}
               title={isMinimized ? item.label : undefined}
             >
               <div className={cn("flex items-center", isMinimized ? "gap-0" : "gap-3")}>
@@ -213,7 +215,7 @@ export function Sidebar() { // Removed props
     )}>
       <div className="flex flex-col h-full">
         {/* Sidebar Header */}
-        <div className={cn("flex items-center", isMinimized ? "justify-center" : "justify-between", "pt-2 pb-2")}>
+        <div className={cn("flex items-center", isMinimized ? "justify-center" : "justify-between", "pt-6 pb-1")}>
           {!isMinimized && currentSectionLabel && (
             <span className="text-xs text-muted-foreground uppercase tracking-wider">
               {currentSectionLabel}

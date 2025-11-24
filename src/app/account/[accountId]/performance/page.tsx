@@ -30,7 +30,7 @@ export default function PerformancePage() {
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pb-2">
-            <h1 className="text-3xl font-medium font-serif text-slate-900 dark:text-slate-100">Performance</h1>
+            <h1 className="text-2xl font-medium font-serif text-slate-900 dark:text-slate-100">Performance</h1>
           </div>
         </div>
 

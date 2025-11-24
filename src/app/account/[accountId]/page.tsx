@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { AccountClientContentHardcoded } from './components/AccountClientContentHardcoded';
+import { AccountContent } from './components/AccountContent';
 
 export async function generateMetadata({ params }: { params: Promise<{ accountId: string }> }): Promise<Metadata> {
   const { accountId } = await params;
@@ -12,7 +12,7 @@ export default async function AccountPage({ params }: { params: Promise<{ accoun
   const { accountId } = await params;
 
   return (
-    <AccountClientContentHardcoded accountId={accountId} />
+    <AccountContent accountId={accountId} />
   );
 }
 

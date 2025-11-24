@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Check, User, Users, Landmark, Home, ChevronRight, ChevronDown } from 'lucide-react'
+import { Check, User, Landmark, Home, ChevronRight, ChevronDown } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { Account } from "@/lib/mock-data";
 import { usePageHeaderContext } from '@/contexts/PageHeaderContext'; // Import the context hook
 import { cn, formatAccountType } from "@/lib/utils"; // Import cn for conditional classes and formatAccountType
+import { useUserRole } from '@/contexts/UserRoleContext';
 import React from 'react'; // Ensure React is imported for Fragment
 
 
@@ -55,37 +56,38 @@ export function FullSizePageTitle({
   setIsDropdownOpen,
 }: PageTitleProps) {
   const router = useRouter();
+  const { role } = useUserRole();
 
   const handleOpenChange = (open: boolean) => {
     setIsDropdownOpen?.(open);
   };
   
   // --- Data Structures for Two-Column Layout ---
-  const simulatedStructure = useMemo(() => [
-    {
-      id: 'individual-jim',
-      type: 'individual' as const,
-      name: "Jim Robinson",
-      accountIds: ["1PB10002", "1PB10004"],
-      icon: User
-    },
-    {
-      id: 'hh-jim-alexa',
-      type: 'household' as const,
-      name: "Jim and Alexa Robinson household",
-      members: "Jim Robinson, Alexa Robinson",
-      accountIds: ["1PB10001", "1PB10003"],
-      icon: Users
-    },
-    {
-      id: 'hh-charlie-alexa',
-      type: 'household' as const,
-      name: "Charlie and Alexa Robinson household",
-      members: "Jim Robinson, Alexa Robinson, James Robinson",
-      accountIds: ["1PB10008"],
-      icon: Users
-    },
-  ], []);
+  // const simulatedStructure = useMemo(() => [
+  //   {
+  //     id: 'individual-jim',
+  //     type: 'individual' as const,
+  //     name: "Michael Johnson",
+  //     accountIds: ["1PB10002", "1PB10004"],
+  //     icon: User
+  //   },
+  //   {
+  //     id: 'hh-jim-alexa',
+  //     type: 'household' as const,
+  //     name: "Jim and Alexa Robinson household",
+  //     members: "Michael Johnson, Alexa Johnson",
+  //     accountIds: ["1PB10001", "1PB10003"],
+  //     icon: Users
+  //   },
+  //   {
+  //     id: 'hh-charlie-alexa',
+  //     type: 'household' as const,
+  //     name: "Charlie and Alexa Robinson household",
+  //     members: "Michael Johnson, Alexa Johnson, James Johnson",
+  //     accountIds: ["1PB10008"],
+  //     icon: Users
+  //   },
+  // ], []);
 
 
   const leftPanelItems = useMemo(() => {
@@ -99,43 +101,25 @@ export function FullSizePageTitle({
   }, [clientName]);
 
   const rightPanelSections = useMemo(() => {
-    if (!clientAccounts) return [];
-
-    const createSection = (group: (typeof simulatedStructure)[0]) => ({
-      title: group.name.toUpperCase(),
-      accounts: clientAccounts.filter(acc => group.accountIds.includes(acc.id)),
-      icon: group.type === 'household' ? Users : Landmark,
-      summary: null,
-    });
+    if (!clientAccounts || clientAccounts.length === 0) return [];
     
-    const householdSections = simulatedStructure
-      .filter(g => g.type === 'household')
-      .map(createSection);
-
-    const individualSections = simulatedStructure
-      .filter(g => g.type === 'individual')
-      .map(createSection);
-
-    const allGroupedAccountIds = new Set(
-      simulatedStructure.flatMap(g => g.accountIds)
-    );
-    const nonHouseholdAccounts = clientAccounts.filter(acc => !allGroupedAccountIds.has(acc.id));
-    
-    const nonHouseholdSection = {
-      title: 'NON-HOUSEHOLD',
-      accounts: nonHouseholdAccounts,
+    // Show all accounts in a single section
+    const allAccountsSection = {
+      title: 'ACCOUNTS',
+      accounts: clientAccounts,
       icon: Landmark,
       summary: {
-        title: `All ${clientName}'s accounts`,
-        count: nonHouseholdAccounts.length,
+        title: clientName ? `All ${clientName}'s accounts` : 'All accounts',
+        count: clientAccounts.length,
       },
     };
 
-    return [...householdSections, ...individualSections, nonHouseholdSection].filter(s => s.accounts.length > 0);
-  }, [clientAccounts, clientName, simulatedStructure]);
+    return [allAccountsSection];
+  }, [clientAccounts, clientName]);
 
 
-  const showDropdown = !!clientId && !!clientName && clientAccounts.length > 0;
+  // Show dropdown if we have accounts (for both advisors and clients)
+  const showDropdown = clientAccounts.length > 0;
   
   return (
     <div className="flex px-6 items-center gap-2 text-sm h-[54px] bg-card border-b border-gray-200 dark:border-gray-700">
@@ -168,10 +152,25 @@ export function FullSizePageTitle({
                 >
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-amber-600 dark:bg-amber-700 flex items-center justify-center">
-                        <Landmark className="h-3 w-3 text-white dark:text-amber-100" />
+                      <div className={cn(
+                        "w-6 h-6 rounded-full flex items-center justify-center",
+                        role === 'client' 
+                          ? "bg-lime-300 dark:bg-lime-300" 
+                          : "bg-amber-600 dark:bg-amber-700"
+                      )}>
+                        <Landmark className={cn(
+                          "h-3 w-3",
+                          role === 'client'
+                            ? "text-black dark:text-black"
+                            : "text-white dark:text-amber-100"
+                        )} />
                       </div>
-                      <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 rounded-full text-xs font-medium">
+                      <span className={cn(
+                        "px-2 py-1 rounded-full text-xs font-medium text-foreground",
+                        role === 'client'
+                          ? "bg-lime-50 dark:bg-green-900"
+                          : "bg-amber-100 dark:bg-amber-900"
+                      )}>
                         {accountId}
                       </span>
                     </div>
@@ -234,22 +233,23 @@ export function FullSizePageTitle({
                              <DropdownMenuItem
                                key={account.id}
                                 onSelect={() => {
-                                  // Handle account selection
-                                  console.log('Selected account:', account.id);
+                                  // Navigate to the selected account
+                                  router.push(`/account/${account.id}`);
+                                  setIsDropdownOpen?.(false);
                                 }}
                                className={cn("cursor-pointer flex flex-col items-start rounded-md p-2", accountId === account.id && "bg-muted")}
                              >
                               <div className="flex w-full justify-between items-center">
-                                  <div className="flex flex-col">
-                                      <div className="text-sm text-foreground flex items-center gap-1.5 font-semibold">
-                                         <span>{account.id}</span>
-                                         <span>•</span>
-                                         <span>{formatAccountType(account.type)}</span>
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                      <div className="text-sm text-foreground flex items-center gap-1.5 font-semibold min-w-0">
+                                         <span className="flex-shrink-0">{account.id}</span>
+                                         <span className="flex-shrink-0">•</span>
+                                         <span className="truncate">{formatAccountType(account.type)}</span>
                                       </div>
-                                      <span className="font-normal text-sm text-muted-foreground">{account.name}</span>
+                                      <span className="font-normal text-sm text-muted-foreground truncate">{account.name}</span>
                                   </div>
                                   {accountId === account.id && (
-                                      <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0">
+                                      <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0 ml-2">
                                          <Check className="h-4 w-4 text-amber-800" />
                                       </div>
                                   )}

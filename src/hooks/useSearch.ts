@@ -1,18 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { searchService, SearchResultItem } from '@/services/searchService';
+import { useUserRole } from '@/contexts/UserRoleContext';
 
 export function useSearch() {
+  const { role } = useUserRole();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [recentSearches, setRecentSearches] = useState<SearchResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
+  // Get client ID if user is a client (hardcoded for now, should come from auth)
+  const clientId = role === 'client' ? 'client-1' : undefined;
+
   // Load recent searches on mount
   useEffect(() => {
     const loadRecentSearches = async () => {
       try {
-        const recent = await searchService.getRecentSearches();
+        const recent = await searchService.getRecentSearches(clientId);
         console.log('Loaded recent searches:', recent);
         setRecentSearches(recent);
       } catch (error) {
@@ -22,7 +27,7 @@ export function useSearch() {
     };
     
     loadRecentSearches();
-  }, []);
+  }, [clientId]);
 
   // Search function
   const performSearch = useCallback(async (searchQuery: string) => {
@@ -35,7 +40,7 @@ export function useSearch() {
 
     setIsLoading(true);
     try {
-      const searchResults = await searchService.search(searchQuery);
+      const searchResults = await searchService.search(searchQuery, clientId);
       console.log('Search results:', searchResults);
       const searchItems = searchService.convertToSearchItems(searchResults);
       console.log('Converted search items:', searchItems);
@@ -46,7 +51,7 @@ export function useSearch() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [clientId]);
 
   // Create debounced search function with ref to avoid dependency issues
   const debouncedSearchRef = useRef(debounce(performSearch, 300));
@@ -65,7 +70,7 @@ export function useSearch() {
   const handleSearchItemClick = async (item: SearchResultItem) => {
     searchService.saveRecentSearch(item);
     try {
-      const recent = await searchService.getRecentSearches();
+      const recent = await searchService.getRecentSearches(clientId);
       setRecentSearches(recent);
     } catch (error) {
       console.error('Error refreshing recent searches:', error);

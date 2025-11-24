@@ -44,12 +44,12 @@ export function ClientsWidget() {
       {/* Left Column: Client Count & Buttons */}
       <div className="col-span-1 flex flex-col justify-between">
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground font-sans">Total clients</h3>
-          <p 
-            className="text-5xl font-serif font-medium text-foreground mt-2"
+          <div className="text-sm font-medium text-muted-foreground">Total clients</div>
+          <h2 
+            className="text-5xl font-medium text-foreground mt-2"
           >
             {totalClients}
-          </p>
+          </h2>
         </div>
         {/* Buttons added here */}
         <div className="flex flex-col space-y-2">

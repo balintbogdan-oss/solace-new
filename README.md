@@ -1,13 +1,13 @@
 # Solace Demo - Financial Portfolio Management Platform
 
-> **Note**: This is a demo version of Solace - the advisor workstation. This implementation serves as a demonstration and development environment with mixed data sources: Supabase integration for client management, navigation, and search functionality, while financial/account pages use hardcoded data for demonstration purposes.
+> **Note**: This is a demo version of Solace - the advisor workstation. This implementation serves as a demonstration and development environment using local data sources for all functionality.
 
 ## 🏗️ Architecture Overview
 
 ### Core Technologies
 - **Frontend**: Next.js 15 (App Router), React 18, TypeScript
 - **Styling**: Tailwind CSS 3.4+ with custom design system
-- **Database**: Supabase (PostgreSQL with real-time capabilities)
+- **Data**: Local JSON files and mock data services
 - **State Management**: React Context API
 - **Charts**: Recharts for data visualization
 - **Icons**: Lucide React
@@ -56,34 +56,20 @@ src/
 
 ## 🗄️ Data Infrastructure
 
-### Database Schema (Supabase)
-The application uses a normalized PostgreSQL schema with the following key tables:
+### Data Sources
+The application uses local data services and mock data for demonstration purposes:
 
-#### Core Tables
-- **`clients`**: Client information (name, email, phone, etc.)
-- **`households`**: Household/group information for shared accounts
-- **`accounts`**: Account metadata, types, and relationships
-- **`balances`**: Account balance information (buying power, total value, etc.)
-- **`securities`**: Master list of all tradable instruments (stocks, options, etc.)
-- **`holdings`**: User's positions referencing securities
-- **`market_data`**: Real-time market prices and metrics
-- **`trades`**: Trade execution records
-- **`activities`**: Account activity log (deposits, withdrawals, etc.)
-- **`realized_gl`**: Realized gains/losses from closed positions
-- **`unrealized_gl`**: ~~Removed~~ - Now calculated dynamically from market data
-- **`commissions`**: Commission tracking and reporting
+- **Account Data**: Stored in local JSON files and managed through `localDataService`
+- **Market Data**: Mock market data service with real-time price simulation
+- **Client Data**: Local JSON files for client and household information
 
 ## 🔧 Configuration & Setup
 
 ### Environment Variables
-Create a `.env.local` file with the shared team credentials:
+Create a `.env.local` file with the following:
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ADMIN_PASSWORD=your_admin_password
-```
-
-DB informaton can be found in our 1password vault. 
+``` 
 
 ### Development Setup
 ```bash

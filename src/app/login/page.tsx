@@ -26,14 +26,20 @@ export default function LoginPage() {
         cache: 'no-store'
       });
 
-      await response.json();
+      const data = await response.json();
       // Login response received
 
       if (response.ok) {
-        // Login successful, redirecting
+        // Login successful, redirecting based on role
         // Add a small delay to ensure cookie is set
         await new Promise(resolve => setTimeout(resolve, 500));
-        router.push('/');
+        
+        // Redirect based on role
+        if (data.role === 'client') {
+          router.push('/client-dashboard');
+        } else {
+          router.push('/');
+        }
         router.refresh();
       } else {
         // Login failed

@@ -68,6 +68,12 @@ module.exports = {
         "chart-negative": "hsl(var(--chart-negative))",
         "chart-primary": "hsl(var(--chart-primary))",
         "chart-secondary": "hsl(var(--chart-secondary))",
+        "chart-1": "var(--chart-1)",
+        "chart-2": "var(--chart-2)",
+        "chart-3": "var(--chart-3)",
+        "chart-4": "var(--chart-4)",
+        "chart-5": "var(--chart-5)",
+        "chart-6": "var(--chart-6)",
       },
       borderColor: theme => ({
         ...theme('colors'),

@@ -2,8 +2,9 @@
 
 import { Sidebar } from '@/components/layout/Sidebar'
 import { NavigationProvider } from '@/contexts/NavigationContext'
-import { SupabaseAccountDataProvider } from '@/contexts/SupabaseAccountDataContext'
+import { AccountDataProvider } from '@/contexts/AccountDataContext'
 import { SidebarProvider } from '@/contexts/SidebarContext'
+import { AccountAccessGuard } from '@/components/account/AccountAccessGuard'
 import { ReactNode, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { FullSizePageHeader } from '@/components/layout/PageHeader'
@@ -35,15 +36,15 @@ function AccountLayoutContent({
           />
         </div>
       </FullSizePageHeader>
-      <div className="flex flex-1 pt-0 overflow-hidden h-[calc(100vh-3.5rem)]">
+      <div className="flex flex-1 pt-0 overflow-hidden h-[calc(100vh-3.5rem)] bg-background">
           <div 
-            className="flex flex-col bg-white dark:bg-black fixed border-r top-[110px] left-0 h-[calc(100vh-110px)] flex-shrink-0 z-10 transition-all duration-300"
+            className="flex flex-col fixed top-[110px] left-0 h-[calc(100vh-110px)] flex-shrink-0 z-10 transition-all duration-300"
             style={{ width: sidebarWidth }}
           >
             <Sidebar />
           </div>
           <main 
-            className="flex-1 min-w-0 px-8 py-8 bg-white dark:bg-black overflow-y-auto transition-all duration-300"
+            className="flex-1 min-w-0 px-8 py-8 overflow-y-auto transition-all duration-300"
             style={{ marginLeft: sidebarWidth }}
           >
             {children}
@@ -70,17 +71,19 @@ export default function AccountLayout({
 
   return (
     <NavigationProvider>
-      <SupabaseAccountDataProvider accountId={accountId || 'unknown'}>
-        <SidebarProvider>
-          <AccountLayoutContent
-            accountId={accountId}
-            isDropdownOpen={isDropdownOpen}
-            setIsDropdownOpen={setIsDropdownOpen}
-          >
-            {children}
-          </AccountLayoutContent>
-        </SidebarProvider>
-      </SupabaseAccountDataProvider>
+      <AccountAccessGuard accountId={accountId || 'unknown'}>
+        <AccountDataProvider accountId={accountId || 'unknown'}>
+          <SidebarProvider>
+            <AccountLayoutContent
+              accountId={accountId}
+              isDropdownOpen={isDropdownOpen}
+              setIsDropdownOpen={setIsDropdownOpen}
+            >
+              {children}
+            </AccountLayoutContent>
+          </SidebarProvider>
+        </AccountDataProvider>
+      </AccountAccessGuard>
     </NavigationProvider>
   )
 }

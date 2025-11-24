@@ -3,6 +3,7 @@
 import { createContext, useContext, ReactNode, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { NavItem, topLevelNavItems, sidebarSections, getClientNavigation } from '@/lib/navigation';
+import { useUserRole } from '@/contexts/UserRoleContext';
 
 interface NavigationContextType {
   topLevelItems: NavItem[];
@@ -22,6 +23,8 @@ const NavigationContext = createContext<NavigationContextType>({
 
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const { role } = useUserRole();
+  const isAdvisor = role === 'advisor';
 
   const { currentSection, currentSectionItems, currentSectionLabel, currentBaseHref } = useMemo(() => {
     let baseHref = '';
@@ -94,13 +97,28 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     // Clean up baseHref (remove trailing slash if any)
     baseHref = baseHref.replace(/\/+$/, '');
 
+    // Filter out Commission for clients
+    const filteredItems = matchedSectionData.items.map(item => {
+      if (item.subItems) {
+        const filteredSubItems = item.subItems.filter(subItem => {
+          // Hide Commission for clients
+          if (subItem.label === 'Commission' && !isAdvisor) {
+            return false;
+          }
+          return true;
+        });
+        return { ...item, subItems: filteredSubItems };
+      }
+      return item;
+    });
+
     return {
       currentSection: matchedSectionPath,
-      currentSectionItems: matchedSectionData.items,
+      currentSectionItems: filteredItems,
       currentSectionLabel: matchedSectionData.label,
       currentBaseHref: baseHref, // Provide the correctly determined base href
     };
-  }, [pathname]);
+  }, [pathname, isAdvisor]);
 
   const value = {
     topLevelItems: topLevelNavItems,

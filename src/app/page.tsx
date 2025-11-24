@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { useUserRole } from '@/contexts/UserRoleContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
@@ -89,10 +91,18 @@ function calculateLayout(items: WidgetLayoutItem[]): WidgetLayoutItem[] {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { role, isHydrated } = useUserRole();
+  
+  // All hooks must be called before any conditional returns
   const [isSimpleMode, setIsSimpleMode] = useState(true); // State for dashboard mode, default to true
   const [complianceView, setComplianceView] = useState<'action_required' | 'all_alerts'>('action_required'); // State for compliance widget
   const [layoutItems, setLayoutItems] = useState<WidgetLayoutItem[]>(() => {
     const defaultWidgets = availableWidgets.filter(w => w.defaultEnabled);
+    // Debug: Log if no widgets are found
+    if (defaultWidgets.length === 0) {
+      console.warn('No widgets with defaultEnabled=true found. Available widgets:', availableWidgets.length);
+    }
     const initialItems: WidgetLayoutItem[] = defaultWidgets.map((widget): WidgetLayoutItem => {
       // Assign specific widths
       if ([ 'compliance', 'clients', 'commission', 'aum'].includes(widget.id)) {
@@ -113,6 +123,39 @@ export default function DashboardPage() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // --- Ticker State and Logic ---
+  const [tickerIndex, setTickerIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTickerIndex((prevIndex) => (prevIndex + 3) % allTickers.length);
+    }, 5000); // Rotate every 5 seconds
+
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, []);
+
+  // Redirect clients to client dashboard (unless they're on an account page)
+  useEffect(() => {
+    if (isHydrated && role === 'client') {
+      const pathname = window.location.pathname;
+      // Don't redirect if already on client-dashboard or on an account page
+      if (!pathname.startsWith('/client-dashboard') && !pathname.startsWith('/account/')) {
+        router.push('/client-dashboard');
+      }
+    }
+  }, [role, isHydrated, router]);
+
+  // Filter items based on mode (must be before early return)
+  const itemsToRender = isSimpleMode ? layoutItems.filter(item => item.id !== 'recently-viewed') : layoutItems;
+  
+  // Recalculate layout based on filtered items (must be before early return)
+  const currentLayout = useMemo(() => calculateLayout(itemsToRender), [itemsToRender]);
+
+  // Don't render advisor dashboard for clients
+  if (isHydrated && role === 'client') {
+    return null;
+  }
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -195,16 +238,7 @@ export default function DashboardPage() {
   };
 
   // --- Ticker State and Logic ---
-  const [tickerIndex, setTickerIndex] = useState(0);
   const displayedTickers = allTickers.slice(tickerIndex, tickerIndex + 3);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setTickerIndex((prevIndex) => (prevIndex + 3) % allTickers.length);
-    }, 5000); // Rotate every 5 seconds
-
-    return () => clearInterval(intervalId); // Cleanup on unmount
-  }, []);
 
   const tickerVariants = {
     enter: {
@@ -228,21 +262,15 @@ export default function DashboardPage() {
     setIsSimpleMode(prev => !prev);
   };
 
-  // Filter items based on mode
-  const itemsToRender = isSimpleMode ? layoutItems.filter(item => item.id !== 'recently-viewed') : layoutItems;
-  
-  // Recalculate layout based on filtered items
-  const currentLayout = useMemo(() => calculateLayout(itemsToRender), [itemsToRender]);
-
   return (
-    <div className="min-h-screen p-6 bg-neutral-50 dark:bg-neutral-950">
+    <div className="min-h-screen p-6 bg-background">
       <div className="space-y-4">
         <div className="flex justify-between items-center h-10">
           <h1 
-            className="text-2xl font-serif text-gray-900 dark:text-white cursor-pointer"
+            className="text-2xl text-gray-900 dark:text-white cursor-pointer"
             onClick={toggleDashboardMode}
           >
-             Good morning, Mark
+             Good morning, David
           </h1>
           <div className="flex items-center space-x-4">
             {!isSimpleMode && (
@@ -282,48 +310,59 @@ export default function DashboardPage() {
         </div>
         
         <DashboardGrid>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={currentLayout.map(item => item.id)}
-              strategy={rectSortingStrategy}
+          {currentLayout.length === 0 ? (
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
+              <div className="text-center">
+                <p className="text-lg mb-2">No widgets enabled</p>
+                <p className="text-sm">Click &quot;+ Customize widgets&quot; to add widgets to your dashboard</p>
+              </div>
+            </div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
             >
-              {[...new Set(currentLayout.map(item => item.row))].sort((a, b) => a - b).map(row => (
-                <div key={row} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
-                  {currentLayout.filter(item => item.row === row).map(item => {
-                    const widthClass = item.width === '1/1' ? 'xl:col-span-6' : 
+              <SortableContext
+                items={currentLayout.map(item => item.id)}
+                strategy={rectSortingStrategy}
+              >
+                {[...new Set(currentLayout.map(item => item.row))].sort((a, b) => a - b).map(row => (
+                  <div key={row} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
+                    {currentLayout.filter(item => item.row === row).map(item => {
+                      const widthClass = item.width === '1/1' ? 'xl:col-span-6' : 
                                        item.width === '1/2' ? 'xl:col-span-3' : 
                                        'xl:col-span-2';
-                    const mdWidthClass = item.width === '1/1' ? 'md:col-span-2' : 'md:col-span-1';
-                    
-                    // Determine if this is the Compliance widget
-                    const isComplianceWidget = item.id === 'compliance';
+                      const mdWidthClass = item.width === '1/1' ? 'md:col-span-2' : 'md:col-span-1';
+                      
+                      // Determine if this is the Compliance widget
+                      const isComplianceWidget = item.id === 'compliance';
 
-                    return (
-                      <div key={item.id} className={`${mdWidthClass} ${widthClass}`}> 
-                        <SortableWidget
-                          id={item.id}
-                          widget={item.widget}
-                          onRemove={handleRemoveWidget}
-                          dropIndicator={dropIndicator}
-                          activeComplianceView={isComplianceWidget ? complianceView : undefined}
-                          onComplianceViewChange={isComplianceWidget ? setComplianceView : undefined}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </SortableContext>
-
+                      return (
+                        <div key={item.id} className={`${mdWidthClass} ${widthClass}`}> 
+                          <SortableWidget
+                            id={item.id}
+                            widget={item.widget}
+                            onRemove={handleRemoveWidget}
+                            dropIndicator={dropIndicator}
+                            activeComplianceView={isComplianceWidget ? complianceView : undefined}
+                            onComplianceViewChange={isComplianceWidget ? setComplianceView : undefined}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </SortableContext>
+            </DndContext>
+          )}
+          
+          {currentLayout.length > 0 && (
             <DragOverlay>
               {activeId ? (
-                <Card className="p-6 bg-card border rounded-md shadow-lg">
+                <Card className="p-6 bg-card border rounded-2xl shadow-lg">
                    {/* Correctly render the component for the overlay, passing minimal header */}
                    {(() => {
                       const widgetDefinition = layoutItems.find(item => item.id === activeId)?.widget;
@@ -340,7 +379,7 @@ export default function DashboardPage() {
                 </Card>
               ) : null}
             </DragOverlay>
-          </DndContext>
+          )}
         </DashboardGrid>
       </div>
     </div>

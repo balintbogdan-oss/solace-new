@@ -92,16 +92,36 @@ export async function POST(request: Request) {
     // Use sanitized password
     const sanitizedPassword = passwordValidation.sanitized!;
 
-    if (sanitizedPassword === CORRECT_PASSWORD) {
+    // Determine role based on password
+    let userRole: 'client' | 'advisor' | null = null;
+    if (sanitizedPassword === 'client123') {
+      userRole = 'client';
+    } else if (sanitizedPassword === 'advisor123') {
+      userRole = 'advisor';
+    } else if (sanitizedPassword === CORRECT_PASSWORD) {
+      // Fallback to advisor for admin password
+      userRole = 'advisor';
+    }
+
+    if (userRole) {
       const response = NextResponse.json(
-        { success: true, message: 'Login successful' },
+        { success: true, message: 'Login successful', role: userRole },
         { status: 200 }
       );
 
-      // Set secure cookie
+      // Set secure auth cookie
       response.cookies.set('auth', 'true', {
         path: '/',
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 // 24 hours
+      });
+
+      // Set role cookie (not httpOnly so client can read it)
+      response.cookies.set('user-role', userRole, {
+        path: '/',
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 // 24 hours

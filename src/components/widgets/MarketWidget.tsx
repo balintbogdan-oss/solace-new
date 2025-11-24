@@ -23,8 +23,8 @@ export function MarketWidget() {
         <table className="w-full text-sm text-left">
           <thead>
             <tr className="border-b">
-              <th className="pb-2 font-medium text-muted-foreground font-sans">Symbol</th>
-              <th className="pb-2 font-medium text-muted-foreground text-right font-sans">1D % change</th>
+              <th className="pb-2 font-medium text-muted-foreground">Symbol</th>
+              <th className="pb-2 font-medium text-muted-foreground text-right">1D % change</th>
             </tr>
           </thead>
           <tbody>

@@ -14,11 +14,17 @@ interface DonutChartProps {
     color: string
   }>
   portfolioValue?: number
+  size?: 'default' | 'large'
 }
 
-export function DonutChart({ data, portfolioValue }: DonutChartProps) {
-  const formatPortfolioValue = (value?: number) => {
+export function DonutChart({ data, portfolioValue, size = 'default' }: DonutChartProps) {
+  const formatPortfolioValue = (value?: number, fullFormat = false) => {
     if (!value) return '$0.0K';
+    
+    if (fullFormat) {
+      // Full format for large chart: $23,100,000.18
+      return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
     
     if (value >= 1000000) {
       return `$${(value / 1000000).toFixed(1)}M`;
@@ -29,28 +35,37 @@ export function DonutChart({ data, portfolioValue }: DonutChartProps) {
     }
   };
 
+  const isLarge = size === 'large';
+  const containerSize = isLarge ? 'w-[200px] h-[200px]' : 'w-48 h-48';
+  const innerRadius = isLarge ? 80 : 65;
+  const outerRadius = isLarge ? 100 : 90;
+  const valueTextSize = isLarge ? 'text-base' : 'text-2xl';
+  const valueLeading = isLarge ? 'leading-6' : 'leading-10';
+  const labelTextSize = isLarge ? 'text-xs' : 'text-xs';
+  const labelLeading = isLarge ? 'leading-5' : 'leading-5';
+
+  // Create a key from data to force re-animation when data changes
+  const dataKey = JSON.stringify(data.map(d => ({ name: d.name, value: d.value })));
+
   return (
-    <div className="relative w-48 h-48 sm:w-48 sm:h-48">
+    <div className={`relative ${containerSize}`}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          {/* SVG filter definition for the shadow */}
-          <defs>
-            <filter id="donut-shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="rgba(0,0,0,0.2)" />
-            </filter>
-          </defs>
-
-          {/* Base Pie with shadow */}
+          {/* Base Pie */}
           <Pie
+            key={dataKey}
             data={data}
-            innerRadius={65}
-            outerRadius={90}
-            paddingAngle={1}
+            innerRadius={innerRadius}
+            outerRadius={outerRadius}
+            paddingAngle={0}
             dataKey="value"
             stroke="none"
             startAngle={90}
             endAngle={-270}
-            filter="url(#donut-shadow)"
+            isAnimationActive={true}
+            animationBegin={0}
+            animationDuration={800}
+            animationEasing="ease-out"
           >
             {data.map((entry, index) => (
               <Cell key={`cell-base-${index}`} fill={entry.color} />
@@ -62,8 +77,17 @@ export function DonutChart({ data, portfolioValue }: DonutChartProps) {
 
       {/* Centered label */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-        <div className="text-xl font-serif sm:text-2xl">{formatPortfolioValue(portfolioValue)}</div>
-        <div className="text-xs text-muted-foreground">Portfolio Value</div>
+        {isLarge ? (
+          <>
+            <div className={`${labelTextSize} font-medium ${labelLeading} text-muted-foreground`}>Portfolio value</div>
+            <div className={`${valueTextSize} font-medium ${valueLeading} text-foreground`}>{formatPortfolioValue(portfolioValue, true)}</div>
+          </>
+        ) : (
+          <>
+            <div className={`${valueTextSize} font-medium ${valueLeading} text-foreground`}>{formatPortfolioValue(portfolioValue)}</div>
+            <div className={`${labelTextSize} font-medium ${labelLeading} text-card-foreground`}>Portfolio value</div>
+          </>
+        )}
       </div>
     </div>
   )

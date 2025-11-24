@@ -11,7 +11,7 @@ import { TooltipProps } from 'recharts'
 import { Button } from '@/components/ui/button'
 import { X, RefreshCw } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
+import { useAccountData } from '@/contexts/AccountDataContext'
 import { MarketData } from '@/types/account'
 
 // Type definition for individual chart data points

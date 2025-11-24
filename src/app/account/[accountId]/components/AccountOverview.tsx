@@ -106,7 +106,7 @@ export function AccountOverview() {
           </div>
 
           <div className="border-t mt-6 pt-3 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 dark:border-[#2e323f]">
-            <span>Updated 01/08/2025 8:05 AM ET</span>
+            <span>Updated 09/22/2025 3:35 PM ET</span>
             <button className="p-1.5 rounded-md hover:bg-gray-700 transition">
               <RefreshCcw className="w-4 h-4 text-gray-400" />
             </button>
@@ -146,7 +146,7 @@ export function AccountOverview() {
           </div>
 
           <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-700 text-xs text-gray-400">
-            <span>Updated 01/08/2025 8:05 AM ET</span>
+            <span>Updated 09/22/2025 3:35 PM ET</span>
             <button className="p-1.5 rounded-md hover:bg-gray-700 transition">
               <RefreshCcw className="w-4 h-4 text-gray-400" />
             </button>

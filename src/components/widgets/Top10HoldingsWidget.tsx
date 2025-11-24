@@ -63,11 +63,11 @@ export function Top10HoldingsWidget() {
         <table className="w-full text-left text-xs">
           <thead className="sticky top-0 bg-neutral-100 dark:bg-neutral-900">
             <tr className="border-b border-primary/10">
-              <th className="py-2 pl-3 font-medium text-muted-foreground font-sans">Symbol</th>
-              <th className="py-2 font-medium text-muted-foreground text-right font-sans">Market Value</th>
-              <th className="py-2 font-medium text-muted-foreground text-right font-sans">% of AUM</th>
-              <th className="py-2 font-medium text-muted-foreground text-right font-sans">Clients</th>
-              <th className="py-2 pr-3 font-medium text-muted-foreground text-right font-sans">Unrealized G/L</th>
+              <th className="py-2 pl-3 font-medium text-muted-foreground">Symbol</th>
+              <th className="py-2 font-medium text-muted-foreground text-right">Market Value</th>
+              <th className="py-2 font-medium text-muted-foreground text-right">% of AUM</th>
+              <th className="py-2 font-medium text-muted-foreground text-right">Clients</th>
+              <th className="py-2 pr-3 font-medium text-muted-foreground text-right">Unrealized G/L</th>
             </tr>
           </thead>
           <tbody>

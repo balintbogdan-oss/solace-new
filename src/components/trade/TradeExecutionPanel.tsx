@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Check, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react'
 import { AccountSelectionModal } from './AccountSelectionModal'
 import { cn, formatAccountType } from '@/lib/utils'
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
+import { useAccountData } from '@/contexts/AccountDataContext'
 import { MarketDataOverlay } from './MarketDataOverlay'
 import { OptionsMarketDataOverlay } from './OptionsMarketDataOverlay'
 import { MutualFundMarketDataOverlay } from './MutualFundMarketDataOverlay'
+import { motion } from 'framer-motion'
 
 // Mock data (Should ideally be fetched or passed as props)
 // TODO: Replace with actual data fetching logic for price & account details
@@ -38,12 +39,12 @@ type MockAccountType = 'Brokerage' | 'Margin' | 'Cash' | '401k' | 'Investment';
 
 // Update mock account type to include buying power
 const MOCK_ACCOUNTS: Record<string, { name: string; type: MockAccountType; buyingPower?: number; }> = {
-  '1PB10001': { name: "Jim & Alexa Brokerage", type: 'Brokerage', buyingPower: 125000.50 },
+  '1PB10001': { name: "Michael & Alexa Brokerage", type: 'Brokerage', buyingPower: 125000.50 },
   '2TR20002': { name: 'Trading Account', type: 'Margin', buyingPower: 250000.00 },
   '3RA30003': { name: 'Retirement IRA', type: 'Cash', buyingPower: 50000.75 },
-  '1PB10002': { name: "Jim's 401K BROK", type: '401k', buyingPower: 10000.00 }, // Buying power might be limited
-  '1PB10003': { name: 'Kaiya and Jim Robinson INV', type: 'Investment', buyingPower: 500000.00 },
-  '1PB10004': { name: "Jim's general investment", type: 'Investment', buyingPower: 75000.25 },
+  '1PB10002': { name: "Michael's 401K BROK", type: '401k', buyingPower: 10000.00 }, // Buying power might be limited
+  '1PB10003': { name: 'Kaiya and Michael Johnson INV', type: 'Investment', buyingPower: 500000.00 },
+  '1PB10004': { name: "Michael's general investment", type: 'Investment', buyingPower: 75000.25 },
 };
 
 type OrderState = 'entry' | 'review' | 'confirmation'
@@ -2172,36 +2173,130 @@ export function TradeExecutionPanel({
       return quantity === 1 ? 'contract' : 'contracts';
     }
     if (isMutualFund && transactionType === 'even-dollar') {
-      const calculatedQuantity = (dollarAmount / marketPrice).toFixed(4);
-      return calculatedQuantity === '1.0000' ? 'share' : 'shares';
+      const calculatedQuantity = parseFloat((dollarAmount / marketPrice).toFixed(4));
+      return calculatedQuantity === 1 ? 'share' : 'shares';
     }
     return quantity === 1 ? 'share' : 'shares';
   };
 
   const renderOrderConfirmation = () => (
      <div className="space-y-6 ">
-      <h3 className="text-sm font-sans">Order Confirmation</h3>
+      <div className="text-sm">Order Confirmation</div>
       <div className="flex flex-col items-center justify-center py-2 space-y-3">
-         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-           orderStatus === 'filled' 
-             ? 'bg-green-300 dark:bg-green-900' 
-             : 'bg-lime-300 dark:bg-lime-900'
-         }`}>
-          <Check className={`w-6 h-6 ${
-            orderStatus === 'filled' 
-              ? 'text-green-700 dark:text-green-400' 
-              : 'text-lime-700 dark:text-lime-400'
-          }`} />
+         <div className="relative">
+           {/* Ripple effects */}
+           {orderStatus === 'filled' && (
+             <>
+               <motion.div
+                 className="absolute inset-0 w-12 h-12 rounded-full border border-gray-400/40"
+                 initial={{ scale: 1, opacity: 0.8 }}
+                 animate={{ scale: 2, opacity: 0 }}
+                 transition={{ 
+                   delay: 0.3,
+                   duration: 0.6,
+                   ease: "easeOut"
+                 }}
+               />
+               <motion.div
+                 className="absolute inset-0 w-12 h-12 rounded-full border border-gray-400/40"
+                 initial={{ scale: 1, opacity: 0.6 }}
+                 animate={{ scale: 2.5, opacity: 0 }}
+                 transition={{ 
+                   delay: 0.5,
+                   duration: 0.8,
+                   ease: "easeOut"
+                 }}
+               />
+               <motion.div
+                 className="absolute inset-0 w-12 h-12 rounded-full border border-gray-400/40"
+                 initial={{ scale: 1, opacity: 0.4 }}
+                 animate={{ scale: 3, opacity: 0 }}
+                 transition={{ 
+                   delay: 0.7,
+                   duration: 1,
+                   ease: "easeOut"
+                 }}
+               />
+             </>
+           )}
+           
+           <motion.div 
+             className={`w-12 h-12 rounded-full flex items-center justify-center ${
+               orderStatus === 'filled' 
+                 ? 'bg-lime-300 dark:bg-lime-900' 
+                 : 'bg-lime-300 dark:bg-lime-900'
+             }`}
+             initial={{ scale: 0 }}
+             animate={{ 
+               scale: orderStatus === 'filled' ? [0, 1.2, 1] : 1
+             }}
+             transition={{ 
+               duration: orderStatus === 'filled' ? 0.8 : 0.3,
+               ease: orderStatus === 'filled' ? "easeOut" : "easeInOut",
+               scale: orderStatus === 'filled' ? {
+                 times: [0, 0.5, 1],
+                 duration: 0.8
+               } : undefined
+             }}
+           >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ 
+              delay: orderStatus === 'filled' ? 0.3 : 0,
+              duration: 0.3,
+              ease: "easeOut"
+            }}
+          >
+            <motion.svg
+              className={`w-6 h-6 ${
+                orderStatus === 'filled' 
+                  ? 'text-lime-700 dark:text-lime-400' 
+                  : 'text-lime-700 dark:text-lime-400'
+              }`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <motion.path
+                d="M20 6L9 17l-5-5"
+                initial={{ strokeDashoffset: -100 }}
+                animate={{ strokeDashoffset: 0 }}
+                transition={{ 
+                  delay: orderStatus === 'filled' ? 0.5 : 0.2,
+                  duration: 0.6,
+                  ease: "easeInOut"
+                }}
+                style={{
+                  strokeDasharray: "100"
+                }}
+              />
+            </motion.svg>
+          </motion.div>
+        </motion.div>
         </div>
-        <h4 className="text-2xl font-serif">
+        <motion.h4 
+          className="text-2xl font-serif"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: orderStatus === 'filled' ? 0.5 : 0.2, duration: 0.4 }}
+        >
           {orderStatus === 'filled' ? 'Order Filled' : 'Order Submitted'}
-        </h4>
-        <p className="text-sm text-muted-foreground text-center">
+        </motion.h4>
+        <motion.p 
+          className="text-sm text-muted-foreground text-center max-w-xs"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: orderStatus === 'filled' ? 0.7 : 0.4, duration: 0.4 }}
+        >
           {orderStatus === 'filled' 
-            ? `Your ${orderType} order to ${tradeMode} ${getDisplayQuantity()} ${symbol?.toUpperCase()} ${isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} ${getDisplayUnit()} has been filled.`
-            : `Your order to ${tradeMode} ${getDisplayQuantity()} ${symbol?.toUpperCase()} ${isOptionTrade && `${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}`} ${getDisplayUnit()} has been submitted and is pending.`
+            ? `Your ${orderType} order to ${tradeMode} ${getDisplayQuantity()} ${symbol?.toUpperCase()}${isOptionTrade ? ` ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}` : ''} ${getDisplayUnit()} has been filled.`
+            : `Your order to ${tradeMode} ${getDisplayQuantity()} ${symbol?.toUpperCase()}${isOptionTrade ? ` ${strikePrice?.toFixed(2)} ${optionType?.toUpperCase()}` : ''} ${getDisplayUnit()} has been submitted and is pending.`
           }
-        </p>
+        </motion.p>
       </div>
        <div className="text-sm">
           {renderFormRow('Order ID', <span className="font-medium text-right">ORD-{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>)}

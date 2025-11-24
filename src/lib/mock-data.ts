@@ -54,9 +54,9 @@ faker.seed(123); // Set a fixed seed for reproducible data
 
 // Apply Client type and add lastContact
 export const MOCK_CLIENT: Client = {
-  id: 'jim-robinson',
-  name: 'Jim Robinson',
-  email: 'jim.robinson@example.com',
+  id: 'michael-johnson',
+  name: 'Michael Johnson',
+  email: 'michael.johnson@example.com',
   lastContact: '2024-03-10', // Added mock last contact
   phone: '(555) 123-4567',
   address: '123 Main St, San Francisco, CA 94105',
@@ -69,7 +69,7 @@ export const MOCK_CLIENT: Client = {
   accounts: [
     {
       id: '1PB10001',
-      name: 'Jim Robinson & Alexa Robinson',
+      name: 'Michael Johnson & Alexa Johnson',
       type: 'Joint',
       investedValue: '$23,932.45',
       marketValue: '$133,155.01',
@@ -78,7 +78,7 @@ export const MOCK_CLIENT: Client = {
     },
     {
       id: '1PB10002',
-      name: "Jim's 401K BROK",
+      name: "Michael's 401K BROK",
       type: 'Single',
       investedValue: '$3,091.05',
       marketValue: '$3,091.05',
@@ -87,7 +87,7 @@ export const MOCK_CLIENT: Client = {
     },
     {
       id: '1PB10003',
-      name: 'Kaiya and Jim Robinson INV LONG',
+      name: 'Kaiya and Michael Johnson INV LONG',
       type: 'Investment objectives',
       investedValue: '$1,422.04',
       marketValue: '$1,422.04',
@@ -96,7 +96,7 @@ export const MOCK_CLIENT: Client = {
     },
     {
       id: '1PB10004',
-      name: "Jim's general investment",
+      name: "Michael's general investment",
       type: 'Investment objectives',
       investedValue: '$7,063.79',
       marketValue: '$7,063.79',
@@ -109,13 +109,13 @@ export const MOCK_CLIENT: Client = {
 export const MOCK_HOUSEHOLDS = [
   {
     id: 'jim-alexa',
-    name: 'Jim and Alexa Robinson household',
-    members: ['Jim Robinson', 'Alexa Robinson'],
+    name: 'Michael and Alexa Johnson household',
+    members: ['Michael Johnson', 'Alexa Johnson'],
     portfolioValue: '$2,103,300.04',
     accounts: [
     {
         id: '1PB10001',
-        name: 'Jim & Alexa Kids Fund',
+        name: 'Michael & Alexa Kids Fund',
         type: 'Joint',
         investedValue: '$23,932.45',
         marketValue: '$133,155.01',
@@ -124,7 +124,7 @@ export const MOCK_HOUSEHOLDS = [
       },
       {
         id: '1PB10002',
-        name: "Jim's 401K BROK",
+        name: "Michael's 401K BROK",
         type: 'Single',
         investedValue: '$3,091.05',
         marketValue: '$3,091.05',
@@ -133,7 +133,7 @@ export const MOCK_HOUSEHOLDS = [
     },
     {
         id: '1PB10003',
-        name: 'Kaiya and Jim Robinson INV LONG',
+        name: 'Kaiya and Michael Johnson INV LONG',
         type: 'Investment objectives',
         investedValue: '$1,422.04',
         marketValue: '$1,422.04',
@@ -145,12 +145,12 @@ export const MOCK_HOUSEHOLDS = [
   {
     id: 'charlie-alexa',
     name: 'Charlie and Alexa Robinson household',
-    members: ['Jim Robinson', 'Alexa Robinson', 'James Robinson'],
+    members: ['Michael Johnson', 'Alexa Johnson', 'James Johnson'],
     portfolioValue: '$980,840.04',
     accounts: [
       {
         id: '1PB10001',
-        name: 'Jim & Alexa account',
+        name: 'Michael & Alexa account',
         type: 'Joint',
         investedValue: '$23,932.45',
         marketValue: '$133,155.01',
@@ -159,7 +159,7 @@ export const MOCK_HOUSEHOLDS = [
       },
       {
         id: '1PB10002',
-        name: "Jim's 401K BROK",
+        name: "Michael's 401K BROK",
         type: 'Single',
         investedValue: '$3,091.05',
         marketValue: '$3,091.05',

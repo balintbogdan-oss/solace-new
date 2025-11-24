@@ -218,7 +218,7 @@ function ClientContent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4  ">
           {/* Left Column - Chart and Accounts */}
           {/* Portfolio Chart Card */}
-          <Card className="lg:col-span-2 space-y-4 rounded-lg bg-card p-6 border">
+          <Card className="lg:col-span-2 space-y-4 rounded-2xl bg-card p-6 border">
               
               {/* Top row container */} 
               <div className="flex justify-between items-start mb-4"> 

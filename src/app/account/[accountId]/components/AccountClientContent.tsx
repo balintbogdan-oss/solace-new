@@ -9,7 +9,7 @@ import { StockDetailPanel } from '@/components/trade/StockDetailPanel'
 import { TradeExecutionPanel } from '@/components/trade/TradeExecutionPanel'
 // Re-import DonutChart
 import { DonutChart } from '@/components/charts/DonutChart'; 
-import { Info, X, FileText, History } from 'lucide-react' // Added FileText, History
+import { Info, X, FileText, History, RefreshCw } from 'lucide-react' // Added FileText, History, RefreshCw
 // import { AccountSelectionModal } from '@/components/trade/AccountSelectionModal' // Removed unused import
 import {
   Tooltip,
@@ -29,18 +29,18 @@ import { OptionTradeDetails } from '@/components/trade/OptionsChainTable'
 // import { OptionsChainTable } from '@/components/trade/OptionsChainTable' // Removed unused import
 import { STOCK_DATA } from '@/components/trade/StockDetailPanel' // Keep STOCK_DATA if needed
 import { SecurityHeader } from '@/components/trade/SecurityHeader'
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
-import { LastUpdated } from '@/components/ui/last-updated'
+import { useAccountData } from '@/contexts/AccountDataContext'
+import { getChartColorByIndex } from '@/lib/chartColors'
 
 
 type TradeMode = 'buy' | 'sell' | null
 type DrawerOptionTradeDetails = Omit<OptionTradeDetails, 'symbol'>;
 
-interface AccountClientContentProps {
+interface AccountContentProps {
   accountId: string;
 }
 
-export function AccountClientContent({ accountId }: AccountClientContentProps) {
+export function AccountContent({ accountId }: AccountContentProps) {
   const accountIdFromParams = accountId;
   const { data: accountData, loading, error, getHoldingsWithDetails } = useAccountData();
 
@@ -115,26 +115,40 @@ export function AccountClientContent({ accountId }: AccountClientContentProps) {
     // TODO: Implement actual API call
   };
 
-  // Helper function to get sector colors
+  // Helper function to get sector colors using chart color system
   const getSectorColor = (sector: string) => {
-    const colors = {
-      'Technology': '#A16207',
-      'Financial Services': '#881337',
-      'Consumer Discretionary': '#D97706',
-      'Automotive': '#57534E',
-      'Healthcare': '#7C2D12',
-      'Energy': '#1E40AF',
-      'Utilities': '#059669',
-      'Real Estate': '#7C3AED'
+    // Map sectors to chart color indices (cycling through 1-6)
+    const sectorMap: Record<string, number> = {
+      'Technology': 1,
+      'Financial Services': 2,
+      'Consumer Discretionary': 3,
+      'Automotive': 4,
+      'Healthcare': 5,
+      'Energy': 6,
+      'Utilities': 1,
+      'Real Estate': 2
     };
-    return colors[sector as keyof typeof colors] || '#6B7280';
+    
+    const colorIndex = sectorMap[sector] || 1;
+    return getChartColorByIndex(colorIndex);
   };
 
   // Calculate dynamic data from accountData
   const portfolioData = useMemo(() => {
-    if (!accountData || !accountData.balances) {
+    if (!accountData) {
       return null;
     }
+    
+    // If no balances, create default balances
+    const balances = accountData.balances || {
+      cash: 0,
+      margin: 0,
+      buyingPower: 0,
+      totalValue: 0,
+      investedValue: 0,
+      realizedGL: 0,
+      lastUpdated: new Date().toISOString()
+    };
 
     // Get holdings with full details first
     const holdingsWithDetails = getHoldingsWithDetails();
@@ -144,7 +158,7 @@ export function AccountClientContent({ accountId }: AccountClientContentProps) {
     const totalInvestedValue = holdingsWithDetails.reduce((sum, holding) => sum + (holding.quantity * holding.avgPrice), 0);
     
     // Use calculated values or fall back to account data
-    const totalValue = totalMarketValue + (accountData.balances.cash || 0);
+    const totalValue = totalMarketValue + (balances.cash || 0);
     const investedValue = totalInvestedValue;
     
     // Calculate unrealized G/L from holdings
@@ -188,10 +202,10 @@ export function AccountClientContent({ accountId }: AccountClientContentProps) {
         long: { amount: `$${safeTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}` }, 
         short: { amount: '$0.00' } 
       },
-      availableCash: `$${(accountData.balances.cash || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      availableCash: `$${(balances.cash || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       fdicSweep: '$250,000.00',
-      marginBalance: `$${(accountData.balances.margin || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-      fundsAvailable: `$${(accountData.balances.buyingPower || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      marginBalance: `$${(balances.margin || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      fundsAvailable: `$${(balances.buyingPower || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       totalAccountValue: `$${safeTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       assetAllocation: assetAllocation.map(item => ({
         ...item,
@@ -201,7 +215,25 @@ export function AccountClientContent({ accountId }: AccountClientContentProps) {
   }, [accountData, getHoldingsWithDetails]);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen rounded-md space-y-4 md:space-y-4">
+        {/* Holdings Title Skeleton */}
+        <div className="w-full flex justify-between items-center mb-8">
+          <div className="h-8 w-32 bg-muted rounded animate-pulse"></div>
+          <div className="flex items-center space-x-2">
+            <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
+            <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+          </div>
+        </div>
+        {/* Cards Skeleton */}
+        <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-4">
+          <div className="md:col-span-2 h-64 bg-muted rounded animate-pulse"></div>
+          <div className="h-64 bg-muted rounded animate-pulse"></div>
+        </div>
+        {/* Table Skeleton */}
+        <div className="h-96 bg-muted rounded animate-pulse"></div>
+      </div>
+    );
   }
 
   if (error || !accountData) {
@@ -212,7 +244,7 @@ export function AccountClientContent({ accountId }: AccountClientContentProps) {
     <div className="min-h-screen rounded-md space-y-4 md:space-y-4 ">
          {/* Holdings Title and Action Buttons */}
          <div className="w-full flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-serif ">Holdings</h2>
+            <h2 className="text-2xl font-serif ">Holdings</h2>
             <div className="flex items-center space-x-2">
               <Button variant="secondary" size="sm">
                 <FileText className="mr-2 h-4 w-4" />
@@ -226,130 +258,180 @@ export function AccountClientContent({ accountId }: AccountClientContentProps) {
           </div>
       <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-4">
      
-        <Card className="md:col-span-2 min-w-0  p-4 md:p-6 flex flex-col justify-between bg-accent">
-          <div className="flex-grow space-y-4">
-            <div>
-              <h3>Portfolio Market Value</h3>
-              <span className="text-3xl font-serif font-medium text-black dark:text-white break-words">{portfolioData?.portfolioValue}</span>
-            </div>
-
-            {/* Combined Grid for all data points - Make Responsive */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 text-sm"> 
-              {/* Today's G/L */}
-              <div>
-                <span className="text-xs text-muted-foreground block">Today&apos;s G/L</span>
-                <span className="text-positive font-medium">
-                  {portfolioData?.todaysGL.amount} ({portfolioData?.todaysGL.percentage})
-                </span>
-              </div>
-              {/* Total G/L */}
-              <div>
-                <span className="text-xs text-muted-foreground block">Total G/L</span>
-                <span className="text-positive font-medium">
-                  {portfolioData?.totalGL.amount} ({portfolioData?.totalGL.percentage})
-                </span>
-              </div>
-              {/* Available Cash (Moved Here) */}
-              <div>
-                <span className="text-xs text-muted-foreground block">Available Cash</span>
-                <span className="text-md dark:text-white font-medium break-words">{portfolioData?.availableCash}</span>
-              </div>
-              {/* Long (Moved from 2nd row) */}
-              <div>
-                <span className="text-xs text-muted-foreground block">Long</span>
-                <span className="text-black dark:text-white font-medium">{portfolioData?.positions.long.amount}</span>
-              </div>
-              {/* Short (Moved from 1st row) */}
-              <div>
-                <span className="text-xs text-muted-foreground block">Short</span>
-                <span className="text-negative font-medium">{portfolioData?.positions.short.amount}</span>
-              </div>
-              {/* Funds Available */}
-              <div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-muted-foreground">Funds available</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button className="p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition shrink-0">
-                          <Info className="w-3 h-3 text-muted-foreground" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Funds available for withdrawal or trading.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+        <Card className="md:col-span-2 min-w-0 flex flex-col justify-start items-start overflow-hidden">
+          <div className="flex-1 w-full p-4 md:p-6 flex flex-col justify-between items-start">
+            <div className="w-full flex justify-between items-end">
+              {/* Left side: Portfolio value and G/L */}
+              <div className="flex-1 flex flex-col justify-start items-start gap-4">
+                <div className="flex flex-col justify-start items-start gap-2">
+                  <div className="flex flex-col justify-start items-start gap-1">
+                    <div className="text-sm font-medium text-card-foreground">Portfolio market value</div>
+                    {(() => {
+                      const value = portfolioData?.portfolioValue || '$0.00';
+                      const match = value.match(/^\$([\d,]+)\.(\d{2})$/);
+                      if (match) {
+                        return (
+                          <div className="flex items-start">
+                            <div className="text-2xl font-medium text-foreground">${match[1]}.</div>
+                            <div className="text-lg font-medium text-foreground leading-6">{match[2]}</div>
+                          </div>
+                        );
+                      }
+                      return <div className="text-2xl font-medium text-foreground">{value}</div>;
+                    })()}
+                  </div>
+                  <div className="flex flex-col justify-start items-start gap-2">
+                    <div className="flex justify-start items-center gap-1.5">
+                      <div className="text-sm font-medium text-card-foreground">Today&apos;s unrealized G/L</div>
+                      <div className="flex justify-start items-center gap-1">
+                        <div className="text-sm font-medium text-positive">
+                          {portfolioData?.todaysGL.amount} ({portfolioData?.todaysGL.percentage})
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center items-center gap-1.5">
+                      <div className="text-sm font-medium text-card-foreground">Total unrealized G/L</div>
+                      <div className="flex justify-start items-center gap-1">
+                        <div className="text-sm font-medium text-positive">
+                          {portfolioData?.totalGL.amount} ({portfolioData?.totalGL.percentage})
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-md dark:text-white font-medium break-words">{portfolioData?.fundsAvailable}</span>
               </div>
-              {/* Margin Balance */}
-              <div>
-                <span className="text-xs text-muted-foreground block">Margin Balance</span>
-                <span className="text-md dark:text-white font-medium break-words">{portfolioData?.marginBalance}</span>
+              
+              {/* Right side: Long and Short market values */}
+              <div className="flex flex-col justify-end items-start gap-2">
+                <div className="w-full flex justify-between items-center">
+                  <div className="flex justify-start items-center gap-4">
+                    <div className="text-sm font-medium text-card-foreground">Long market value</div>
+                  </div>
+                  <div className="text-sm font-medium text-foreground">{portfolioData?.positions.long.amount}</div>
+                </div>
+                <div className="w-full flex justify-between items-center">
+                  <div className="flex justify-start items-center gap-4">
+                    <div className="text-sm font-medium text-card-foreground">Short market value</div>
+                  </div>
+                  <div className="text-sm font-medium text-destructive">{portfolioData?.positions.short.amount}</div>
+                </div>
               </div>
-              {/* Total Account Value */}
-              <div>
-                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-muted-foreground">Total account value</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                         <button className="p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition shrink-0">
-                           <Info className="w-3 h-3 text-muted-foreground" />
-                         </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                         <p>Total value includes cash, investments, and other assets in your account</p>
-                      </TooltipContent>
-                    </Tooltip>
-                   </TooltipProvider>
-                 </div>
-                <span className="text-md dark:text-white font-medium break-words">{portfolioData?.totalAccountValue}</span>
+            </div>
+            
+            {/* Border separator */}
+            <div className="self-stretch h-px border-t border-border my-4"></div>
+            
+            {/* Bottom row: Available cash, FDIC Sweep, Margin balance, Funds available, Total account value */}
+            <div className="self-stretch rounded-lg border border-border inline-flex justify-between items-center">
+              <div className="flex-1 py-3 rounded-lg border-r border-border flex flex-col justify-start items-start gap-4 px-4">
+                <div className="flex flex-col justify-start items-start gap-1">
+                  <div className="text-sm font-medium text-card-foreground">Available cash</div>
+                  <div className="text-sm font-medium text-foreground">{portfolioData?.availableCash}</div>
+                </div>
               </div>
-              {/* FDIC Sweep */}
-              <div>
-                <span className="text-xs text-muted-foreground block">FDIC Sweep</span>
-                <span className="text-md dark:text-white font-medium break-words">{portfolioData?.fdicSweep}</span>
+              <div className="flex-1 py-3 rounded-lg border-r border-border flex flex-col justify-start items-start gap-4 px-4">
+                <div className="flex flex-col justify-start items-start gap-1">
+                  <div className="text-sm font-medium text-card-foreground">FDIC Sweep</div>
+                  <div className="text-sm font-medium text-foreground">{portfolioData?.fdicSweep}</div>
+                </div>
+              </div>
+              <div className="flex-1 py-3 rounded-lg border-r border-border flex flex-col justify-start items-start gap-4 px-4">
+                <div className="flex flex-col justify-start items-start gap-1">
+                  <div className="text-sm font-medium text-card-foreground">Margin balance</div>
+                  <div className="text-sm font-medium text-foreground">{portfolioData?.marginBalance}</div>
+                </div>
+              </div>
+              <div className="flex-1 py-3 rounded-lg border-r border-border flex flex-col justify-start items-start gap-4 px-4">
+                <div className="flex flex-col justify-start items-start gap-1">
+                  <div className="flex justify-start items-center gap-1">
+                    <div className="text-sm font-medium text-card-foreground">Funds available</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent">
+                            <Info className="w-3 h-3 text-card-foreground" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Funds available for withdrawal or trading.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-sm font-medium text-foreground">{portfolioData?.fundsAvailable}</div>
+                </div>
+              </div>
+              <div className="flex-1 py-3 rounded-lg flex flex-col justify-start items-start gap-4 px-4">
+                <div className="flex flex-col justify-start items-start gap-1">
+                  <div className="flex justify-start items-center gap-1">
+                    <div className="text-sm font-medium text-card-foreground">Total account value</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent">
+                            <Info className="w-3 h-3 text-card-foreground" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Total value includes cash, investments, and other assets in your account</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-sm font-medium text-foreground">{portfolioData?.totalAccountValue}</div>
+                </div>
               </div>
             </div>
           </div>
-          <LastUpdated 
-            timestamp="Updated 01/08/2025 8:05 AM ET" 
-            className="mt-4 md:mt-6 pt-3"
-          />
+          
+          {/* Footer with updated timestamp */}
+          <div className="self-stretch px-6 py-2 border-t border-border flex justify-between items-center">
+            <div className="flex-1 flex justify-start items-center gap-1.5">
+              <div className="text-xs font-normal text-card-foreground leading-5 tracking-tight">
+                Updated {new Date().toLocaleString('en-US', { 
+                  month: '2-digit', 
+                  day: '2-digit', 
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true 
+                }).replace(',', '')} ET
+              </div>
+              <button className="w-6 h-6 rounded-lg border border-border hover:bg-accent flex justify-center items-center">
+                <RefreshCw className="w-3 h-3 text-foreground" />
+              </button>
+            </div>
+          </div>
         </Card>
 
-        <Card className="min-w-0  md:p-6 flex flex-col justify-between  bg-accent">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3>Asset Allocation</h3>
-              <button className="text-sm text-primary hover:underline whitespace-nowrap">Expand view</button>
-            </div>
-            {/* Use flex-row to place chart and legend side-by-side */}
-            <div className='flex flex-row items-center gap-2'> 
-                {/* Chart container - reduced gap and increased max width */}
-                <div className="flex-shrink-0 w-full max-w-[120px] sm:max-w-[200px]">
-                   <DonutChart 
-                     data={portfolioData?.assetAllocation || []} 
-                     portfolioValue={portfolioData ? parseFloat(portfolioData.portfolioValue.replace(/[$,]/g, '')) : 0}
-                   />
-                </div>
-                {/* Legend container - use flex-col for vertical stacking, items will align left by default */}
-                <div className="flex flex-col gap-y-2 text-sm flex-1 min-w-0">
-                  {(portfolioData?.assetAllocation || []).map(item => (
-                     <div key={item.name} className="flex items-center gap-1.5">
-                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }}></span>
-                       <span className="truncate">{item.name}</span>
-                     </div>
-                  ))}
-                </div>
-            </div>
+        <Card className="px-6 pt-6 pb-3 flex flex-col items-center gap-6">
+          <div className="w-full flex justify-between items-center">
+            <span className="text-sm font-medium text-card-foreground">Asset allocation</span>
+            <button className="text-sm font-medium text-primary leading-6 tracking-tight hover:underline">Expand view</button>
           </div>
-          <LastUpdated 
-            timestamp="Updated 01/08/2025 8:05 AM ET" 
-            className="pt-3"
-          />
+          
+          {/* Chart container - centered */}
+          <div className="w-48 h-48 relative flex items-center justify-center">
+            <DonutChart 
+              data={portfolioData?.assetAllocation || []} 
+              portfolioValue={portfolioData ? parseFloat(portfolioData.portfolioValue.replace(/[$,]/g, '')) : 0}
+            />
+          </div>
+          
+          {/* Legend - centered with flex-wrap */}
+          <div className="w-full flex justify-center items-center gap-4 flex-wrap">
+            {(portfolioData?.assetAllocation || []).slice(0, 2).map((item) => (
+              <div key={item.name} className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded flex-shrink-0" style={{ backgroundColor: item.color }}></span>
+                <span className="text-xs font-medium text-card-foreground leading-5 tracking-tight">{item.name}</span>
+              </div>
+            ))}
+            {(portfolioData?.assetAllocation || []).length > 2 && (
+              <div className="text-xs font-medium text-card-foreground leading-5 tracking-tight">
+                +{(portfolioData?.assetAllocation || []).length - 2} more
+              </div>
+            )}
+          </div>
         </Card>
       </div>
       
@@ -361,7 +443,7 @@ export function AccountClientContent({ accountId }: AccountClientContentProps) {
        
 
       <Drawer direction="right" open={isStockDrawerOpen} onOpenChange={setIsStockDrawerOpen}>
-        <DrawerContent className="h-full w-full max-w-2xl flex flex-col bg-white dark:bg-black/50 dark:backdrop-blur-lg">
+        <DrawerContent className="h-full w-full max-w-2xl flex flex-col bg-card backdrop-blur-lg">
           <DrawerHeader className="p-4 border-b flex items-center">
             <DrawerTitle className="text-lg font-semibold">
                {/* Intentionally empty title */}

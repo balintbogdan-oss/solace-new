@@ -73,9 +73,9 @@ const defaultAppearanceSettings: AppearanceSettings = {
   gradientStartColor: '#f3eddc', // Light warm color
   gradientEndColor: '#f9f8f3', // Very light warm color
   // Background and card colors - Classic preset
-  backgroundColor: '#ffffff', // White background
+  backgroundColor: '#F1F5F9', // Light gray background
   cardColor: '#ffffff', // White cards
-  accentColor: '#f3eddc', // Light beige for accent/summary cards
+  accentColor: '#f6f6f4', // Light gray with subtle beige undertone
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -91,9 +91,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     
     // One-time migration: clear old appearance settings to force new defaults
     const appearanceVersion = localStorage.getItem('appearance-settings-version');
-    if (!appearanceVersion || appearanceVersion !== '5') {
+    if (!appearanceVersion || appearanceVersion !== '6') {
       localStorage.removeItem('appearance-settings');
-      localStorage.setItem('appearance-settings-version', '5');
+      localStorage.setItem('appearance-settings-version', '6');
     }
     
     const savedNavigationSettings = localStorage.getItem('navigation-settings');
@@ -136,7 +136,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setAppearanceSettings({ ...defaultAppearanceSettings, ...parsed });
       } catch (error) {
         console.error('Failed to parse saved appearance settings:', error);
+        // If parsing fails, use defaults
+        setAppearanceSettings(defaultAppearanceSettings);
       }
+    } else {
+      // If no saved settings, use defaults
+      setAppearanceSettings(defaultAppearanceSettings);
     }
   }, []);
 

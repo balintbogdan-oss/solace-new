@@ -1,14 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Rectangle } from 'recharts';
 import { TooltipProps } from 'recharts';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Download, RefreshCw } from 'lucide-react';
 import { LastUpdated } from '@/components/ui/last-updated';
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext';
+import { useAccountData } from '@/contexts/AccountDataContext';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useUserRole } from '@/contexts/UserRoleContext';
 
 // Custom Tooltip Component
 const CustomCommissionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
@@ -43,10 +45,12 @@ const renderCommissionBarShape = (props: CommissionBarShapeProps) => {
 };
 
 export default function CommissionPage() {
+  const router = useRouter();
+  const { role, isHydrated } = useUserRole();
   const { data: accountData, loading, error, refreshData } = useAccountData();
   const { theme } = useTheme();
   const { appearanceSettings } = useSettings();
-  
+
   // Use the same color logic as CommissionWidget
   const chartColor = useMemo(() => {
     return appearanceSettings.chartPrimaryColor || '#BEA36F';
@@ -108,6 +112,21 @@ export default function CommissionPage() {
     };
   }, [chartData]);
 
+  // Redirect clients away from commission page
+  useEffect(() => {
+    if (isHydrated && role === 'client') {
+      // Redirect to holdings page instead
+      if (accountData?.accountId) {
+        router.push(`/account/${accountData.accountId}/financials/holdings`);
+      }
+    }
+  }, [role, isHydrated, router, accountData?.accountId]);
+
+  // Don't render for clients
+  if (isHydrated && role === 'client') {
+    return null;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -134,7 +153,7 @@ export default function CommissionPage() {
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pb-2">
             <div>
-              <h1 className="text-3xl font-medium font-serif text-slate-900 dark:text-slate-100">Commission Summary</h1>
+              <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Commission Summary</h1>
               <p className="text-sm text-muted-foreground mt-1">Values as of the end of the prior business day</p>
             </div>
             <div className="flex gap-2">
@@ -154,7 +173,7 @@ export default function CommissionPage() {
               <div>
                 <div className="text-sm font-medium text-muted-foreground mb-1">Total commission earned</div>
                 <div className="text-sm text-muted-foreground mb-2">From September 2024 to August 2025</div>
-                <div className="text-3xl font-medium font-serif text-foreground">
+                <div className="text-3xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                   ${summaryData.totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">Figures shown represent gross values</div>
@@ -163,18 +182,18 @@ export default function CommissionPage() {
               <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground mb-1">No. of trades</div>
-                  <div className="text-lg font-medium font-serif text-foreground">{summaryData.totalTrades}</div>
+                  <div className="text-lg font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>{summaryData.totalTrades}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground mb-1">Avg per trade</div>
-                  <div className="text-lg font-medium font-serif text-foreground">
+                  <div className="text-lg font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                     ${summaryData.averagePerTrade.toFixed(2)}
                   </div>
                 </div>
               </div>
               
               <LastUpdated 
-                timestamp="Updated 01/08/2025 8:05 AM ET" 
+                timestamp="Updated 09/22/2025 3:35 PM ET" 
                 onRefresh={refreshData}
                 className="mt-4"
               />

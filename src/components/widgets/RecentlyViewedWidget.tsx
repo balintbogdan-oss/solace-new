@@ -8,16 +8,16 @@ import { User, Briefcase, ChevronRight } from 'lucide-react';
 const recentlyViewed = [
   {
     type: 'client',
-    id: 'jim-robinson',
-    name: 'Jim Robinson',
-    href: '/clients/jim-robinson'
+    id: 'michael-johnson',
+    name: 'Michael Johnson',
+    href: '/clients/michael-johnson'
   },
   {
     type: 'account',
     id: '1PB10001',
-    name: 'Jim & Alexa Brokerage',
+    name: 'Michael & Alexa Brokerage',
     accountNumber: '1PB10001',
-    href: '/clients/jim-robinson/accounts/1PB10001'
+    href: '/clients/michael-johnson/accounts/1PB10001'
   },
   {
     type: 'client',
@@ -28,9 +28,9 @@ const recentlyViewed = [
     {
     type: 'account',
     id: '1PB10003',
-    name: 'Kaiya and Jim Robinson INV LONG',
+    name: 'Kaiya and Michael Johnson INV LONG',
     accountNumber: '1PB10003',
-    href: '/clients/jim-robinson/accounts/1PB10003' // Placeholder
+    href: '/clients/michael-johnson/accounts/1PB10003' // Placeholder
   },
   {
     type: 'client',

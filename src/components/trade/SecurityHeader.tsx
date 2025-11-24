@@ -103,7 +103,7 @@ export const SecurityHeader: React.FC<SecurityHeaderProps> = ({
         {/* Exchange Info - Removed from here */}
         {/* Symbol and Search Button */}
         <div className="flex items-center gap-2 mb-1">
-          <h2 className={isDrawer ? "text-xl md:text-2xl font-serif" : "text-4xl font-serif"}>{symbol?.toUpperCase()}</h2>
+          <h2 className={isDrawer ? "text-xl md:text-2xl" : "text-4xl"}>{symbol?.toUpperCase()}</h2>
           <Button 
             variant="outline" 
             size="lg" 

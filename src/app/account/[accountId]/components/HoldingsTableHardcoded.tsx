@@ -267,7 +267,7 @@ export function HoldingsTableHardcoded({ onStockClick, onTradeClick, holdingsWit
 
       <div className="flex-grow overflow-x-auto overflow-y-visible bg-white dark:bg-black rounded-md shadow-sm">
         <table className="min-w-full text-sm text-left border-collapse rounded-md">
-          <thead className="sticky top-0 border-t border-b bg-background dark:border-white/10 text-muted-foreground z-10 text-xs">
+          <thead className="sticky top-0 border-t border-b bg-muted dark:border-white/10 text-muted-foreground z-10 text-xs">
             <tr>
               <th className="px-4 py-2 dark:text-white border-r w-14 whitespace-nowrap">Actions</th>
               {/* 1. Symbol/CUSIP */}

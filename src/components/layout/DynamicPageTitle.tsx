@@ -1,6 +1,9 @@
 'use client';
 
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext';
+import { useState, useEffect } from 'react';
+import { useAccountData } from '@/contexts/AccountDataContext';
+import { useUserRole } from '@/contexts/UserRoleContext';
+import { localDataService } from '@/services/localDataService';
 import { FullSizePageTitle } from './PageTitle';
 
 interface DynamicPageTitleProps {
@@ -15,8 +18,65 @@ export function DynamicPageTitle({
   setIsDropdownOpen,
 }: DynamicPageTitleProps) {
   const { data: accountData, loading, error } = useAccountData();
+  const { role } = useUserRole();
+  const [clientAccounts, setClientAccounts] = useState<Array<{
+    id: string;
+    name: string;
+    type: string;
+    investedValue: string;
+    marketValue: string;
+    fdicSweep: string;
+    availableMargin: string;
+  }>>([]);
+  const [accountsLoading, setAccountsLoading] = useState(true);
 
-  if (loading) {
+  // Fetch all client accounts for the dropdown
+  useEffect(() => {
+    const fetchClientAccounts = async () => {
+      if (!accountData) return;
+      
+      try {
+        setAccountsLoading(true);
+        // Get all accounts for this client
+        const clientData = await localDataService.getClientData(accountData.clientId);
+        
+        if (clientData) {
+          const accounts = clientData.accounts.map(acc => ({
+            id: acc.accountId,
+            name: acc.accountName,
+            type: acc.accountType,
+            investedValue: acc.balances?.investedValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+            marketValue: acc.balances?.totalValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+            fdicSweep: "0",
+            availableMargin: acc.balances?.buyingPower?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+          }));
+          setClientAccounts(accounts);
+        }
+      } catch (error) {
+        console.error('Error fetching client accounts:', error);
+        // Fallback to just the current account
+        if (accountData) {
+          setClientAccounts([{
+            id: accountData.accountId,
+            name: accountData.accountName,
+            type: accountData.accountType,
+            investedValue: accountData.balances?.investedValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+            marketValue: accountData.balances?.totalValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+            fdicSweep: "0",
+            availableMargin: accountData.balances?.buyingPower?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+          }]);
+        }
+      } finally {
+        setAccountsLoading(false);
+      }
+    };
+
+    if (accountData && !loading) {
+      fetchClientAccounts();
+    }
+  }, [accountData, loading]);
+
+  if (loading || accountsLoading) {
     return (
       <div className="flex px-6 items-center gap-2 text-sm h-[54px] bg-card border-b border-gray-200 dark:border-gray-700">
         <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-32 rounded"></div>
@@ -32,31 +92,28 @@ export function DynamicPageTitle({
     );
   }
 
-  // For now, we'll use a simplified structure since we only have one client
-  // In the future, this would be expanded to handle multiple clients
-  const clientId = accountData.clientId;
-  const clientName = `${accountData.client.firstName} ${accountData.client.lastName}`;
+  // For clients, don't show client name in breadcrumb - only show Home > Account
+  // For advisors, show Home > Client Name > Account
+  const clientId = role === 'advisor' ? accountData.clientId : undefined;
+  const clientName = role === 'advisor' ? `${accountData.client.firstName} ${accountData.client.lastName}` : undefined;
   
-  // Create a mock client accounts array for the dropdown
-  // In a real app, this would come from a clients context or API
-  const clientAccounts = [
-    {
-      id: accountData.accountId,
-      name: accountData.accountName,
-      type: accountData.accountType,
-      investedValue: "0",
-      marketValue: "0",
-      fdicSweep: "0",
-      availableMargin: "0",
-    }
-  ];
+  // Use fetched client accounts, or fallback to current account if still loading
+  const accountsToShow = clientAccounts.length > 0 ? clientAccounts : [{
+    id: accountData.accountId,
+    name: accountData.accountName,
+    type: accountData.accountType,
+    investedValue: accountData.balances?.investedValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+    marketValue: accountData.balances?.totalValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+    fdicSweep: "0",
+    availableMargin: accountData.balances?.buyingPower?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+  }];
 
   return (
     <FullSizePageTitle
       title={accountData.accountName}
       clientId={clientId}
       clientName={clientName}
-      clientAccounts={clientAccounts}
+      clientAccounts={accountsToShow}
       accountId={accountId}
       isDropdownOpen={isDropdownOpen}
       setIsDropdownOpen={setIsDropdownOpen}

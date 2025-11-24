@@ -38,18 +38,18 @@ export default function StatementsReportsPage() {
   // PDF URLs - in a real app, these would come from your database
   const pdfUrls = {
     'monthly-statements': {
-      'August 2025': 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/monthly-statements/2025/2025-08-statement.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvbW9udGhseS1zdGF0ZW1lbnRzLzIwMjUvMjAyNS0wOC1zdGF0ZW1lbnQucGRmIiwiaWF0IjoxNzU3NzgzMDI3LCJleHAiOjE3ODkzMTkwMjd9.26Jj13-wVCefiKeBFYy2c19oXWhtcVeV28ELsWnQl-A'
+      'August 2025': 'https://example.com/documents/monthly-statements/2025-08-statement.pdf'
     },
     'tax-statements': {
-      'FORM 1042-S': 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/tax-documents/2024/1042-s-2024.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvdGF4LWRvY3VtZW50cy8yMDI0LzEwNDItcy0yMDI0LnBkZiIsImlhdCI6MTc1Nzc4OTYzNCwiZXhwIjoxNzg5MzI1NjM0fQ.NWvw5tKIPpoqhVldw9_-O_WsDN_8zp3lJt5ThivDpbA',
+      'FORM 1042-S': 'https://example.com/documents/tax-documents/1042-s-2024.pdf',
       'FORM 1099-INT': 'https://example.com/tax-documents/form-1099-int.pdf',
       'FORM 1099-B': 'https://example.com/tax-documents/form-1099-b.pdf'
     },
     'trade-confirmations': {
-      '2025-08-13-RWT': 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/trade-confirmations/2025/2025-08-13-RWT-confirmation.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvdHJhZGUtY29uZmlybWF0aW9ucy8yMDI1LzIwMjUtMDgtMTMtUldULWNvbmZpcm1hdGlvbi5wZGYiLCJpYXQiOjE3NTc3ODk4MzEsImV4cCI6MTc4OTMyNTgzMX0.CBSqDBBTqsHvQlIfhgbUjR-ios5RDRyFVII9-VS8NYY'
+      '2025-08-13-RWT': 'https://example.com/documents/trade-confirmations/2025-08-13-RWT-confirmation.pdf'
     },
     'open-order-confirmations': {
-      '2025-order-confirm': 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/order-confirmations/2025/order_confirm_display.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvb3JkZXItY29uZmlybWF0aW9ucy8yMDI1L29yZGVyX2NvbmZpcm1fZGlzcGxheS5wZGYiLCJpYXQiOjE3NTc3ODk5NjgsImV4cCI6MTc4OTMyNTk2OH0.fyHBWimltjCG4JVj1K3hxORF5KPHPGpjbWlRfH_HGxg'
+      '2025-order-confirm': 'https://example.com/documents/order-confirmations/order_confirm_display.pdf'
     }
   }
 
@@ -109,7 +109,7 @@ export default function StatementsReportsPage() {
 
   // Mock data for shareholder documents
   const shareholderDocuments = [
-    { date: '09/03/25', symbol: 'ABALX', cusip: '026349502', issuer: 'Semi-Annual Report', issuerName: 'AMERICAN BALANCED FUND - CLASS A', type: 'Regulatory', dueDate: '', pdfUrl: 'https://fflfwtoljxmgjwpekkxv.supabase.co/storage/v1/object/sign/documents/1PB20025/shareholder-documents/Prospectus%20Semi-Annual%20Shareholder%20Report.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZTJkNGQ2Ny03MTI5LTRmZDUtOWEzMS05ZDQzYWZlY2FkYzIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvMVBCMjAwMjUvc2hhcmVob2xkZXItZG9jdW1lbnRzL1Byb3NwZWN0dXMgU2VtaS1Bbm51YWwgU2hhcmVob2xkZXIgUmVwb3J0LnBkZiIsImlhdCI6MTc1Nzk2MzYyMywiZXhwIjoxNzU4NTY4NDIzfQ.XYlhB3GLmR8_oL_CAMxverSjkObnKm-oA68-8_8eY7s' },
+    { date: '09/03/25', symbol: 'ABALX', cusip: '026349502', issuer: 'Semi-Annual Report', issuerName: 'AMERICAN BALANCED FUND - CLASS A', type: 'Regulatory', dueDate: '', pdfUrl: 'https://example.com/documents/shareholder-documents/prospectus-semi-annual-report.pdf' },
   ]
 
   const tabs = [
@@ -729,7 +729,7 @@ export default function StatementsReportsPage() {
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pb-2">
-            <h1 className="text-3xl font-medium font-serif text-slate-900 dark:text-slate-100">Documents</h1>
+            <h1 className="text-2xl font-medium font-serif text-slate-900 dark:text-slate-100">Documents</h1>
           </div>
         </div>
 

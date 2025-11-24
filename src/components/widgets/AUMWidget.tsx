@@ -66,7 +66,7 @@ const CustomAUMTooltip = ({ active, payload, label }: TooltipProps<number, strin
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-secondary))' }}></span>
-            <span className="text-foreground text-xs">Cash Balance: {formattedDeposit}</span>
+            <span className="text-foreground text-xs">Net Cash Deposits: {formattedDeposit}</span>
           </div>
         </div>
       </div>
@@ -205,7 +205,7 @@ export function AUMWidget({ selectedPeriod = '1Y' }: AUMWidgetProps) { // Defaul
       {/* Container for AUM value and Legend */}
       <div className="flex justify-between items-start mb-4">
         {/* AUM value display */}
-        <div className="text-3xl font-serif">{currentAUM.toLocaleString('en-US', { style: 'currency', currency: 'USD'})}</div>
+        <h2 className="text-3xl">{currentAUM.toLocaleString('en-US', { style: 'currency', currency: 'USD'})}</h2>
         
         {/* Legend Area - Use computed colors */}
         <div className="flex space-x-4 text-xs text-muted-foreground items-center pt-1">

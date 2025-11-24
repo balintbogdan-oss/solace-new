@@ -20,11 +20,10 @@ import {
   ArrowDown,
   Maximize,
   SlidersHorizontal,
-  RefreshCw
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LastUpdated } from '@/components/ui/last-updated';
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext';
+import { useAccountData } from '@/contexts/AccountDataContext';
 import { RealizedTrade } from '@/types/account';
 
 // Local extension type to support additional display-only fields used by this page
@@ -145,10 +144,72 @@ export default function RealizedGLPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading realized G/L data...</p>
+      <div className="w-full">
+        <div className="flex flex-col gap-7">
+          {/* Header Skeleton */}
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center pb-2">
+              <div className="h-8 w-40 bg-muted rounded animate-pulse"></div>
+              <div className="flex gap-2">
+                <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
+                <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary Card Skeleton */}
+          <Card className="p-6 bg-card">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                  <div className="h-7 w-40 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+            <div className="h-4 w-48 bg-muted rounded animate-pulse mt-4"></div>
+          </Card>
+
+          {/* Closed Trades Card Skeleton */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-6 w-32 bg-muted rounded animate-pulse"></div>
+              <div className="h-4 w-40 bg-muted rounded animate-pulse"></div>
+            </div>
+            
+            <div className="flex items-center justify-between mb-6">
+              <div className="h-10 w-64 bg-muted rounded animate-pulse"></div>
+              <div className="flex gap-2">
+                <div className="h-10 w-24 bg-muted rounded animate-pulse"></div>
+                <div className="h-10 w-40 bg-muted rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Table Skeleton */}
+            <div className="overflow-x-auto">
+              <div className="w-full min-w-[1500px]">
+                {/* Table Header Skeleton */}
+                <div className="flex border-b mb-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+                    <div key={i} className="flex-1 px-6 py-3">
+                      <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+                {/* Table Rows Skeleton */}
+                {[1, 2, 3].map((row) => (
+                  <div key={row} className="flex border-b py-3">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((col) => (
+                      <div key={col} className="flex-1 px-6">
+                        <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     );
@@ -169,7 +230,7 @@ export default function RealizedGLPage() {
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pb-2">
-            <h1 className="text-3xl font-medium font-serif text-slate-900 dark:text-slate-100">Realized G/L</h1>
+            <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Realized G/L</h1>
             <div className="flex gap-2">
               <Select value={yearFilter} onValueChange={setYearFilter}>
                 <SelectTrigger className="w-20 h-9">
@@ -190,11 +251,11 @@ export default function RealizedGLPage() {
         </div>
 
         {/* Summary Section */}
-        <Card className="p-6 bg-accent">
+        <Card className="p-6 bg-card">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total realized G/L</div>
-              <div className={`text-xl font-medium font-serif ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+              <div className={`text-xl font-medium ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.totalRealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalRealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </div>
               <div className={`text-sm ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
@@ -203,23 +264,23 @@ export default function RealizedGLPage() {
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized long term G/L</div>
-              <div className={`text-xl font-medium font-serif ${summaryData.realizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+              <div className={`text-xl font-medium ${summaryData.realizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.realizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized short term G/L</div>
-              <div className={`text-xl font-medium font-serif ${summaryData.realizedShortTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+              <div className={`text-xl font-medium ${summaryData.realizedShortTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.realizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <div className="text-xl font-medium font-serif">${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <div className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total sell value</div>
-              <div className="text-xl font-medium font-serif">${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <div className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
             </div>
           </div>
           <LastUpdated 
@@ -230,9 +291,9 @@ export default function RealizedGLPage() {
         </Card>
 
         {/* Closed Trades Section */}
-        <div>
+        <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Closed trades</h2>
+            <h2 className="text-lg font-sans font-medium">Closed trades</h2>
             <div className="text-xs text-muted-foreground">
               Updated {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })} {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} ET
             </div>
@@ -442,7 +503,7 @@ export default function RealizedGLPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
         </div>
       </div>
     </TooltipProvider>

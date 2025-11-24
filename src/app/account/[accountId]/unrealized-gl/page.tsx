@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-;
 import { 
   Select,
   SelectContent,
@@ -18,10 +17,9 @@ import {
   ArrowUp,
   ArrowDown,
   SlidersHorizontal,
-  RefreshCw
 } from 'lucide-react';
 import { LastUpdated } from '@/components/ui/last-updated';
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext';
+import { useAccountData } from '@/contexts/AccountDataContext';
 import { 
   Tooltip, 
   TooltipContent, 
@@ -171,10 +169,64 @@ export default function UnrealizedGLPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading unrealized G/L data...</p>
+      <div className="w-full">
+        <div className="flex flex-col gap-7">
+          {/* Header Skeleton */}
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center pb-2">
+              <div className="h-8 w-40 bg-muted rounded animate-pulse"></div>
+              <div className="flex gap-2">
+                <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
+                <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary Card Skeleton */}
+          <Card className="p-6 bg-card">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                  <div className="h-7 w-40 bg-muted rounded animate-pulse"></div>
+                  {i === 5 && <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>}
+                </div>
+              ))}
+            </div>
+            <div className="h-4 w-48 bg-muted rounded animate-pulse mt-4"></div>
+          </Card>
+
+          {/* All Tax Lots Section Skeleton */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="h-6 w-32 bg-muted rounded animate-pulse"></div>
+              <div className="h-10 w-40 bg-muted rounded animate-pulse"></div>
+            </div>
+
+            {/* Table Skeleton */}
+            <div className="overflow-x-auto">
+              <div className="w-full min-w-[1600px]">
+                {/* Table Header Skeleton */}
+                <div className="flex border-b mb-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+                    <div key={i} className="flex-1 px-6 py-3">
+                      <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+                {/* Table Rows Skeleton */}
+                {[1, 2, 3, 4, 5].map((row) => (
+                  <div key={row} className="flex border-b py-3">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((col) => (
+                      <div key={col} className="flex-1 px-6">
+                        <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -195,7 +247,7 @@ export default function UnrealizedGLPage() {
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pb-2">
-            <h1 className="text-3xl font-medium font-serif text-slate-900 dark:text-slate-100">Unrealized G/L</h1>
+            <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Unrealized G/L</h1>
             <div className="flex gap-2">
               <Select value={yearFilter} onValueChange={setYearFilter}>
                 <SelectTrigger className="w-20 h-9">
@@ -216,31 +268,31 @@ export default function UnrealizedGLPage() {
         </div>
 
         {/* Summary Section */}
-        <Card className="p-6 bg-accent">
+        <Card className="p-6 bg-card">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <div className="text-xl font-medium font-serif">${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <div className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Portfolio market value</div>
-              <div className="text-xl font-medium font-serif">${summaryData.portfolioMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <div className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.portfolioMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Unrealized long term G/L</div>
-              <div className={`text-xl font-medium font-serif ${summaryData.unrealizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+              <div className={`text-xl font-medium ${summaryData.unrealizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.unrealizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.unrealizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Unrealized short term G/L</div>
-              <div className="text-xl font-medium font-serif text-red-500">
+              <div className="text-xl font-medium text-red-500" style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.unrealizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.unrealizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total unrealized G/L</div>
-              <div className={`text-xl font-medium font-serif ${summaryData.totalUnrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+              <div className={`text-xl font-medium ${summaryData.totalUnrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.totalUnrealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalUnrealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </div>
               <div className={`text-sm ${summaryData.totalUnrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
@@ -422,10 +474,10 @@ export default function UnrealizedGLPage() {
                       <td className="px-6 py-3 text-center text-foreground">
                         {position.longShort}
                       </td>
-                      <td className={`px-6 py-3 text-right font-medium ${position.unrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+                      <td className={`px-6 py-3 text-right font-medium ${position.unrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`}>
                         {position.unrealizedGL >= 0 ? '+' : '-'}${Math.abs(position.unrealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </td>
-                      <td className={`px-6 py-3 text-right font-medium ${position.unrealizedGLPercent >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+                      <td className={`px-6 py-3 text-right font-medium ${position.unrealizedGLPercent >= 0 ? 'text-positive' : 'text-negative'}`}>
                         {position.unrealizedGLPercent >= 0 ? '+' : '-'}{Math.abs(position.unrealizedGLPercent).toFixed(2)}%
                       </td>
                       <td className="px-6 py-3 text-right text-foreground">

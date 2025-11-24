@@ -465,7 +465,7 @@ export function AccountClientContentHardcoded({ accountId }: AccountClientConten
     <div className="flex flex-col h-full space-y-4 md:space-y-4">
          {/* Holdings Title and Action Buttons */}
          <div className="w-full flex justify-between items-center">
-            <h2 className="text-3xl font-serif ">Holdings</h2>
+            <h2 className="text-2xl font-serif ">Holdings</h2>
             <div className="flex items-center space-x-2">
               <Button variant="secondary" size="sm">
                 <FileText className="mr-2 h-4 w-4" />
@@ -479,11 +479,11 @@ export function AccountClientContentHardcoded({ accountId }: AccountClientConten
           </div>
       <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-4">
      
-        <Card className="md:col-span-2 min-w-0  p-4 md:p-6 flex flex-col justify-between bg-accent">
+        <Card className="md:col-span-2 min-w-0  p-4 md:p-6 flex flex-col justify-between">
           <div className="flex-grow space-y-4">
             <div>
               <h3>Portfolio Market Value</h3>
-              <span className="text-3xl font-serif font-medium text-black dark:text-white break-words">{portfolioData?.portfolioValue}</span>
+              <span className="text-3xl font-serif font-medium text-foreground break-words">{portfolioData?.portfolioValue}</span>
             </div>
 
             {/* Combined Grid for all data points - Make Responsive */}
@@ -510,7 +510,7 @@ export function AccountClientContentHardcoded({ accountId }: AccountClientConten
               {/* Long (Moved from 2nd row) */}
               <div>
                 <span className="text-xs text-muted-foreground block">Long market value</span>
-                <span className="text-black dark:text-white font-medium">{portfolioData?.positions.long.amount}</span>
+                <span className="text-foreground font-medium">{portfolioData?.positions.long.amount}</span>
               </div>
               {/* Short (Moved from 1st row) */}
               <div>
@@ -574,7 +574,7 @@ Margin Balance + Portfolio Market Value.</p>
           />
         </Card>
 
-        <Card className="min-w-0  md:p-6 flex flex-col justify-between  bg-accent">
+        <Card className="min-w-0  md:p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3>Asset Allocation</h3>
@@ -617,7 +617,7 @@ Margin Balance + Portfolio Market Value.</p>
        
 
       <Drawer direction="right" open={isStockDrawerOpen} onOpenChange={setIsStockDrawerOpen}>
-        <DrawerContent className="h-full w-full max-w-2xl flex flex-col bg-white dark:bg-black/50 dark:backdrop-blur-lg">
+        <DrawerContent className="h-full w-full max-w-2xl flex flex-col bg-card backdrop-blur-lg">
           <DrawerHeader className="p-4 border-b flex items-center">
             <DrawerTitle className="text-lg font-semibold">
                {/* Intentionally empty title */}

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
-import { SupabaseAccountService } from '@/services/supabaseService'
+import { localDataService } from '@/services/localDataService'
 import { Household, AccountData } from '@/types/account'
 
 interface HouseholdData {
@@ -32,8 +32,7 @@ export function HouseholdDataProvider({ children, householdId }: HouseholdDataPr
     setLoading(true)
     setError(null)
     try {
-      const supabaseService = new SupabaseAccountService()
-      const householdData = await supabaseService.getHouseholdData(householdId)
+      const householdData = await localDataService.getHouseholdData(householdId)
       if (householdData) {
         setData(householdData)
       } else {

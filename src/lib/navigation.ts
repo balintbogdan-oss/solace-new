@@ -1,4 +1,4 @@
-import { LucideIcon, Home, Users, FileText, TrendingUp, MessageSquare, BarChart3, Link2, Wallet, Users2, Briefcase, Bell, PieChart, ChartLine } from 'lucide-react';
+import { LucideIcon, Home, Users, FileText, TrendingUp, MessageSquare, Briefcase, Bell, PieChart, ChartLine, Activity, FileBarChart, ClipboardList, TrendingUp as LineChart, Link, Coins, UserCheck } from 'lucide-react';
 import { NavigationSettings } from '@/contexts/SettingsContext';
 
 export interface NavItem {
@@ -28,14 +28,18 @@ export const topLevelNavItems: NavItem[] = [
 export const sidebarSections: Record<string, SidebarSection> = {
   // Reports section
   '/reports': {
-    label: 'Reports',
+    label: '',
     items: [
-      { label: 'Reports Overview', href: '/reports', icon: Home, groupTitle: 'GENERAL' },
+      { 
+        label: 'Overview', 
+        href: '/reports', 
+        icon: FileBarChart,
+      },
       { 
         label: 'Positions', 
         href: '/reports/positions', 
-        icon: Briefcase,
-        groupTitle: 'DETAILED REPORTS',
+        icon: ClipboardList,
+        groupTitle: 'CATEGORIES',
         subItems: [
           { label: 'Bond ratings', href: '/reports/positions/bond-ratings' },
           { label: 'Maturity schedule', href: '/reports/positions/maturity-schedule' },
@@ -46,7 +50,7 @@ export const sidebarSections: Record<string, SidebarSection> = {
       { 
         label: 'Analysis', 
         href: '/reports/analysis', 
-        icon: BarChart3,
+        icon: LineChart,
         subItems: [
           { label: 'Account analysis', href: '/reports/analysis/account-analysis' },
           { label: 'Options analysis', href: '/reports/analysis/options-analysis' },
@@ -58,7 +62,7 @@ export const sidebarSections: Record<string, SidebarSection> = {
       { 
         label: 'Commissions', 
         href: '/reports/commissions', 
-        icon: Link2,
+        icon: Link,
         subItems: [
           { label: 'Commissions detail', href: '/reports/commissions/commissions-detail' },
           { label: 'Commissions summary', href: '/reports/commissions/commissions-summary' },
@@ -68,10 +72,10 @@ export const sidebarSections: Record<string, SidebarSection> = {
       { 
         label: 'Funds', 
         href: '/reports/funds', 
-        icon: Wallet,
+        icon: Coins,
         subItems: [
           { label: 'Buying power', href: '/reports/funds/buying-power' },
-          { label: 'Market analysis', href: '/reports/funds/market-analysis' },
+          { label: 'Margin analysis', href: '/reports/funds/margin-analysis' },
           { label: 'Margin balance', href: '/reports/funds/margin-balance' },
           { label: 'Margin equity', href: '/reports/funds/margin-equity' },
           { label: 'Market equity percentage', href: '/reports/funds/market-equity-percentage' },
@@ -86,18 +90,28 @@ export const sidebarSections: Record<string, SidebarSection> = {
       { 
         label: 'Client admin', 
         href: '/reports/client-admin', 
-        icon: Users2,
-        groupTitle: 'ADMINISTRATION',
+        icon: UserCheck,
         subItems: [
-          { label: 'Account information changes', href: '/reports/client-admin/account-information-changes' },
+          { label: 'Account information chang...', href: '/reports/client-admin/account-information-changes' },
           { label: 'Action items', href: '/reports/client-admin/action-items' },
           { label: 'ACH', href: '/reports/client-admin/ach' },
           { label: 'ACAT status', href: '/reports/client-admin/acat-status' },
           { label: 'Credit plus', href: '/reports/client-admin/credit-plus' },
           { label: 'Document status', href: '/reports/client-admin/document-status' },
+          { label: 'Funds available', href: '/reports/client-admin/funds-available' },
+          { label: 'Household accounts', href: '/reports/client-admin/household-accounts' },
           { label: 'IRA minimum distribution', href: '/reports/client-admin/ira-minimum-distribution' },
           { label: 'Name and address', href: '/reports/client-admin/name-and-address' },
           { label: 'Pending income', href: '/reports/client-admin/pending-income' },
+        ]
+      },
+      { 
+        label: 'Activity', 
+        href: '/reports/activity', 
+        icon: Activity,
+        subItems: [
+          { label: 'Daily activity', href: '/reports/activity/daily-activity' },
+          { label: 'Dividend balance', href: '/reports/activity/dividend-balance' },
         ]
       },
     ],

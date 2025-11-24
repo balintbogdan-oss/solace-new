@@ -71,7 +71,7 @@ function HouseholdContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left Column - Household Info */}
-        <Card className="lg:col-span-2 space-y-4 rounded-lg bg-card p-6 border">
+        <Card className="lg:col-span-2 space-y-4 rounded-2xl bg-card p-6 border">
           <div className="flex justify-between items-start mb-4">
             <div className="space-y-2">
               <span className="text-muted-foreground text-sm mb-2">Household Name</span>

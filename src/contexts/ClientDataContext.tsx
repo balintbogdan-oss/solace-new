@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
-import { SupabaseAccountService } from '@/services/supabaseService'
+import { localDataService } from '@/services/localDataService'
 import { Client, AccountData } from '@/types/account'
 
 interface ClientDataContextType {
@@ -31,8 +31,7 @@ export function ClientDataProvider({ children, clientId }: ClientDataProviderPro
       setLoading(true)
       setError(null)
       
-      const service = new SupabaseAccountService()
-      const result = await service.getClientData(clientId)
+      const result = await localDataService.getClientData(clientId)
       
       if (result) {
         setData(result)

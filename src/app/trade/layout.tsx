@@ -4,7 +4,7 @@
 import { PageHeader } from '@/components/layout/PageHeader'
 // import { PageTitle } from '@/components/layout/PageTitle'
 import { NavigationProvider } from '@/contexts/NavigationContext'
-import { SupabaseAccountDataProvider } from '@/contexts/SupabaseAccountDataContext'
+import { AccountDataProvider } from '@/contexts/AccountDataContext'
 import { ReactNode } from 'react'
 
 export default function TradeLayout({
@@ -21,7 +21,7 @@ export default function TradeLayout({
 
   return (
     <NavigationProvider>
-      <SupabaseAccountDataProvider accountId="1PB10001">
+      <AccountDataProvider accountId="1PB10001">
         <PageHeader>
           <div>
             {/* No title needed - handled in page content */}
@@ -34,7 +34,7 @@ export default function TradeLayout({
               {children}
             </main>
         </div>
-      </SupabaseAccountDataProvider>
+      </AccountDataProvider>
     </NavigationProvider>
   )
 } 

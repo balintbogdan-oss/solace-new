@@ -12,7 +12,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext';
+import { useAccountData } from '@/contexts/AccountDataContext';
 import { PageLoading } from '@/components/ui/page-loading';
 
 // Enable static generation
@@ -51,7 +51,73 @@ function BalancesPageContent() {
   };
 
   if (loading) {
-    return <PageLoading message="Loading balance data..." />;
+    return (
+      <div className="w-full">
+        <div className="flex flex-col gap-7">
+          {/* Header Skeleton */}
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center pb-2">
+              <div className="h-8 w-32 bg-muted rounded animate-pulse"></div>
+              <div className="flex gap-2">
+                <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+                <div className="h-9 w-32 bg-muted rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Account Value Card Skeleton */}
+          <Card className="p-6 bg-card">
+            <div className="h-5 w-40 bg-muted rounded animate-pulse mb-4"></div>
+            <div className="h-10 w-48 bg-muted rounded animate-pulse mb-6"></div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                  <div className="h-5 w-32 bg-muted rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+            <div className="h-4 w-48 bg-muted rounded animate-pulse mt-4"></div>
+          </Card>
+
+          {/* Main Content Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-2 space-y-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="space-y-4">
+                  <div className="h-6 w-48 bg-muted rounded animate-pulse"></div>
+                  <div className="h-64 bg-muted rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="h-6 w-40 bg-muted rounded animate-pulse"></div>
+                <Card className="p-0">
+                  <div className="h-32 bg-muted rounded animate-pulse"></div>
+                </Card>
+              </div>
+              <div className="space-y-4">
+                <div className="h-6 w-40 bg-muted rounded animate-pulse"></div>
+                <Card className="p-6">
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="flex justify-between">
+                        <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                        <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error || !accountData) {
@@ -68,7 +134,7 @@ function BalancesPageContent() {
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pb-2">
-            <h1 className="text-3xl font-serif text-slate-900 dark:text-slate-100">Balances</h1>
+            <h1 className="text-2xl text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Balances</h1>
             <div className="flex gap-2">
               <Button variant="outline" className="h-9">
                 <Download className="w-4 h-4 mr-2" />
@@ -82,7 +148,7 @@ function BalancesPageContent() {
         </div>
 
         {/* Total Account Value */}
-        <Card className="p-6 bg-accent">
+        <Card className="p-6 bg-card">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-sm font-medium">Total account value</h2>
             <TooltipProvider>
@@ -98,7 +164,7 @@ function BalancesPageContent() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="text-4xl font-serif mb-6">{formatAmount(balanceData.totalValue)}</div>
+          <div className="text-2xl mb-6" style={{ fontFamily: 'var(--font-display)' }}>{formatAmount(balanceData.totalValue)}</div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
             <div>
               <div className="text-muted-foreground">Available cash</div>
@@ -413,7 +479,7 @@ function BalancesPageContent() {
 
 export default function BalancesPage() {
   return (
-    <Suspense fallback={<PageLoading message="Loading balance data..." />}>
+    <Suspense fallback={<PageLoading />}>
       <BalancesPageContent />
     </Suspense>
   );

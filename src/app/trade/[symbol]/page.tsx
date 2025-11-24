@@ -11,7 +11,7 @@ import {
   MutualFundDetailPanel
 } from '@/components/trade/MutualFundDetailPanel'
 import { MutualFundInfo } from '@/types/account'
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
+import { useAccountData } from '@/contexts/AccountDataContext'
 import { TradeExecutionPanel } from '@/components/trade/TradeExecutionPanel'
 import { AccountSelectionModal } from '@/components/trade/AccountSelectionModal'
 import { SearchModal } from '@/components/trade/SearchModal'

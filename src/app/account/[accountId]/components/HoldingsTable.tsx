@@ -3,6 +3,14 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Search, SlidersHorizontal, RefreshCcw, MoreHorizontal, ChevronsUpDown, Info, ArrowUp, ArrowDown, TrendingUp, RotateCcw, BarChart3 } from 'lucide-react'
 import {
   Tooltip,
@@ -67,12 +75,12 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
     setSearchTerm(event.target.value);
   };
 
-  const handleAccountTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setAccountTypeFilter(event.target.value);
+  const handleAccountTypeChange = (value: string) => {
+    setAccountTypeFilter(value);
   };
 
-  const handleAssetClassChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setAssetClassFilter(event.target.value);
+  const handleAssetClassChange = (value: string) => {
+    setAssetClassFilter(value);
   };
 
   // Get unique options for filters
@@ -186,54 +194,57 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
   }, [holdingsWithDetails, sortColumn, sortDirection, searchTerm, accountTypeFilter, assetClassFilter]);
 
   return (
-    <div className="w-full space-y-4  rounded-md">
-      <div className="flex items-center justify-between ">
-        <h2>Holdings details</h2>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          Updated 01/08/2025 8:05 AM ET
-          <button className="p-1.5 rounded-md hover:bg-white/10 transition">
-            <RefreshCcw className="w-4 h-4 text-muted-foreground" />
-          </button>
+    <Card className="p-6">
+      <div className="w-full space-y-4">
+        <div className="flex items-center justify-between ">
+          <h2>Details</h2>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            Updated 09/22/2025 3:35 PM ET
+            <button className="p-1.5 rounded-md hover:bg-white/10 transition">
+              <RefreshCcw className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
         <div className=" relative rounded-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search by Symbol or CUSIP"
-            className="w-[250px] border  bg-white dark:bg-black   text-sm placeholder:text-muted-foreground pl-10 pr-4 py-2 rounded-md focus:outline-none"
+            className="w-[250px] border bg-card text-sm placeholder:text-muted-foreground pl-10 pr-4 py-2 rounded-md focus:outline-none"
             value={searchTerm}
             onChange={handleSearchChange}
           />
         </div>
 
-        <select 
-          className=" border bg-white dark:bg-black border-input text-sm bg-transparent px-3 py-2 rounded-md focus:outline-none"
-          value={accountTypeFilter}
-          onChange={handleAccountTypeChange}
-        >
-          {accountTypes.map(type => (
-            <option key={type} value={type}>{
-              type === 'All' ? 'Account Type' : type
-            }</option>
-          ))}
-        </select>
+        <Select value={accountTypeFilter} onValueChange={handleAccountTypeChange}>
+          <SelectTrigger className="bg-card">
+            <SelectValue placeholder="Account Type" />
+          </SelectTrigger>
+          <SelectContent>
+            {accountTypes.map(type => (
+              <SelectItem key={type} value={type}>
+                {type === 'All' ? 'Account Type' : type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <select 
-          className=" border border-input text-sm bg-transparent px-3 py-2 rounded-md focus:outline-none"
-          value={assetClassFilter}
-          onChange={handleAssetClassChange}
-        >
-          {assetClasses.map(assetClass => (
-            <option key={assetClass} value={assetClass}>{
-              assetClass === 'All' ? 'Asset Class' : assetClass
-            }</option>
-          ))}
-        </select>
+        <Select value={assetClassFilter} onValueChange={handleAssetClassChange}>
+          <SelectTrigger className="bg-card">
+            <SelectValue placeholder="Asset Class" />
+          </SelectTrigger>
+          <SelectContent>
+            {assetClasses.map(assetClass => (
+              <SelectItem key={assetClass} value={assetClass}>
+                {assetClass === 'All' ? 'Asset Class' : assetClass}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <div className="bg-white dark:bg-black ml-auto flex gap-2">
+        <div className="ml-auto flex gap-2">
           <Button variant="outline">
             <SlidersHorizontal className="w-4 h-4" />
             Customize columns
@@ -241,13 +252,13 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-white dark:bg-black rounded-md shadow-sm rounded-md">
-        <table className="min-w-full text-sm text-left border-collapse rounded-md">
-          <thead className="sticky top-0 border-t border-b bg-background dark:border-white/10 text-muted-foreground z-10">
+      <div className="overflow-x-auto bg-card rounded-md shadow-sm">
+        <table className="w-full text-sm text-left border-separate border-spacing-0 rounded-md">
+          <thead className="sticky top-0 border-t border-b bg-muted text-muted-foreground z-10">
             <tr>
-              <th className="px-4 py-2 dark:text-white border-r w-14 whitespace-nowrap">Actions</th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="flex items-center gap-1 bg-white dark:bg-black w-full" onClick={() => handleSort('symbol')}>
+              <th className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-30 bg-muted px-4">Actions</th>
+              <th className={`px-4 py-2 dark:text-white border-r border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 dark:hover:bg-accent/30 whitespace-nowrap sticky z-30 bg-muted ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`} style={{ left: '56px' }}>
+                <button className="flex items-center gap-1 bg-transparent w-full" onClick={() => handleSort('symbol')}>
                   <span>Symbol/CUSIP</span>
                   {sortColumn === 'symbol' ? (
                     sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
@@ -256,8 +267,8 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'assetClass' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="bg-white dark:bg-black  flex items-center gap-1 w-full" onClick={() => handleSort('assetClass')}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'assetClass' ? 'border-b-2 border-b-primary' : ''}`}>
+                <button className="bg-transparent flex items-center gap-1 w-full" onClick={() => handleSort('assetClass')}>
                   <span>Asset class</span>
                   {sortColumn === 'assetClass' ? (
                     sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
@@ -266,7 +277,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('quantity')}>
                   <span>Quantity</span>
                   {sortColumn === 'quantity' ? (
@@ -276,7 +287,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'marketValue' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'marketValue' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('marketValue')}>
                   <span>Market Value</span>
                   {sortColumn === 'marketValue' ? (
@@ -286,7 +297,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('description')}>
                   <span>Description</span>
                   {sortColumn === 'description' ? (
@@ -296,7 +307,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'unrealizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'unrealizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('unrealizedGL')}>
                   <span>Unrealized G/L</span>
                   {sortColumn === 'unrealizedGL' ? (
@@ -306,7 +317,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'unrealizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'unrealizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('unrealizedGLPercent')}>
                   <span>Unrealized G/L %</span>
                   {sortColumn === 'unrealizedGLPercent' ? (
@@ -316,7 +327,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'currentPrice' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'currentPrice' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('currentPrice')}>
                   <span>Current Price</span>
                   <TooltipProvider>
@@ -336,7 +347,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r cursor-pointer hover:bg-muted/50 whitespace-nowrap ${sortColumn === 'avgPrice' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'avgPrice' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('avgPrice')}>
                   <span>Avg Price</span>
                   <TooltipProvider>
@@ -362,9 +373,9 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
             {processedHoldings.map((row) => (
               <tr
                 key={row.security.cusip}
-                className={'bg-white/5 hover:bg-gray-100 border-b dark:hover:bg-white/10 cursor-pointer'}
+                className={'hover:bg-muted/50 dark:hover:bg-accent/30 border-b border cursor-pointer relative group'}
               >
-                <td className="px-4 py-2 dark:text-white w-14 whitespace-nowrap">
+                <td className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-20 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 border-b px-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" aria-label="Actions">
@@ -388,29 +399,31 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   </DropdownMenu>
                 </td>
                 <td 
-                  className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap"
+                  className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-20 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 border-r border-b"
+                  style={{ left: '56px' }}
                   onClick={() => onStockClick?.(row.symbol)}
                 >
                   {row.symbol}
                   <div className="text-xs text-muted-foreground whitespace-nowrap">{row.security.cusip}</div>
                 </td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap">{getAssetClass(row)}</td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap">{row.quantity}</td>
-                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap">${(row.marketValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                <td className="px-4 py-2 truncate max-w-[160px] dark:text-white whitespace-nowrap">{row.security.description}</td>
-                <td className={`px-4 py-2 font-semibold text-right whitespace-nowrap ${(row.unrealizedGL || 0) >= 0 ? 'text-positive' : 'text-negative'}`}>
+                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b">{getAssetClass(row)}</td>
+                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b">{row.quantity}</td>
+                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap border-b">${(row.marketValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td className="px-4 py-2 truncate dark:text-white whitespace-nowrap border-b">{row.security.description}</td>
+                <td className={`px-4 py-2 font-semibold text-right whitespace-nowrap border-b ${(row.unrealizedGL || 0) >= 0 ? 'text-positive' : 'text-negative'}`}>
                   ${(row.unrealizedGL || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </td>
-                <td className={`px-4 py-2 font-semibold text-right whitespace-nowrap ${(row.unrealizedGLPercent || 0) >= 0 ? 'text-positive' : 'text-negative'}`}>
+                <td className={`px-4 py-2 font-semibold text-right whitespace-nowrap border-b ${(row.unrealizedGLPercent || 0) >= 0 ? 'text-positive' : 'text-negative'}`}>
                   {(row.unrealizedGLPercent || 0).toFixed(2)}%
                 </td>
-                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap">${(row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap">${(row.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap border-b">${(row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap border-b">${(row.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
+    </Card>
   )
 }

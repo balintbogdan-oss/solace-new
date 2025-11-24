@@ -182,9 +182,9 @@ export function CommissionWidget({ commissionViewType = 'Net' }: CommissionWidge
   return (
     <div className="h-full flex flex-col lg:flex-row lg:gap-6">
       <div className="flex flex-col mb-4 lg:w-1/3 lg:shrink-0 lg:mb-0">
-        <div className="text-3xl font-serif mb-1">
+        <h2 className="text-3xl mb-1">
           {displayValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-        </div>
+        </h2>
         <div className="text-xs text-muted-foreground mb-4">
           {displayLabel}
         </div>

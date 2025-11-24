@@ -429,7 +429,7 @@ export function Header() {
             onClick={() => setShowDropdown(!showDropdown)}
             className="h-8 w-8 rounded-full bg-white dark:bg-white/30 flex items-center justify-center text-sm hover:bg-white/80 dark:hover:bg-white/50 hover:scale-105 transition-all duration-200"
           >
-            M
+            D
           </button>
           {showDropdown && (
             <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5">
@@ -437,10 +437,10 @@ export function Header() {
                 {/* User info section */}
                 <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                   <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    Mark Johnson
+                    David Chen
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    mark.johnson@wedbush.com
+                    david.chen@wedbush.com
                   </div>
                 </div>
                 

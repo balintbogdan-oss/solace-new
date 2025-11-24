@@ -407,7 +407,7 @@ function ActivityPageContent() {
     <div className="min-h-screen rounded-md space-y-4 md:space-y-4">
       {/* Page Title and Controls */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-serif text-foreground">Activity</h1>
+        <h1 className="text-2xl font-serif text-foreground">Activity</h1>
         <div className="flex items-center gap-3">
           <Select value={timeframe} onValueChange={setTimeframe}>
             <SelectTrigger className="w-[140px]">
@@ -430,11 +430,11 @@ function ActivityPageContent() {
       {/* Three Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Net Flow Card */}
-        <Card className="p-6 bg-accent">
+        <Card className="p-6 bg-card">
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Net flow</p>
-              <p className="text-2xl font-serif font-normal text-foreground">
+              <p className="text-2xl font-normal text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                 {formatAmount(mockSummaryData.netFlow.total)}
               </p>
             </div>
@@ -478,11 +478,11 @@ function ActivityPageContent() {
         </Card>
 
         {/* Total Income Card */}
-        <Card className="p-6 bg-accent">
+        <Card className="p-6 bg-card">
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total income</p>
-              <p className="text-2xl font-serif font-normal text-foreground">
+              <p className="text-2xl font-normal text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                 {formatAmount(mockSummaryData.totalIncome.total)}
               </p>
             </div>
@@ -520,11 +520,11 @@ function ActivityPageContent() {
         </Card>
 
         {/* Upcoming Actions Card */}
-        <Card className="p-6 bg-accent">
+        <Card className="p-6 bg-card">
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Upcoming actions</p>
-              <p className="text-2xl font-serif font-normal text-foreground">
+              <p className="text-2xl font-normal text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                 {mockSummaryData.upcomingActions.total} events
               </p>
             </div>
@@ -795,7 +795,7 @@ function ActivityPageContent() {
 
 export default function ActivityPage() {
   return (
-    <Suspense fallback={<PageLoading message="Loading activity data..." />}>
+    <Suspense fallback={<PageLoading />}>
       <ActivityPageContent />
     </Suspense>
   );

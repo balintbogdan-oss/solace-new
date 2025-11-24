@@ -1,9 +1,7 @@
-// Search service for clients and accounts
-import { supabase } from './supabaseService';
+// Search service for clients and accounts - using local data
+import { localDataService } from './localDataService';
 import { Client, AccountData, Household } from '@/types/account';
 import { formatAccountType } from '@/lib/utils';
-
-// Using pre-configured Supabase client from supabaseService
 
 export interface SearchResult {
   clients: Client[];
@@ -22,117 +20,66 @@ export interface SearchResultItem {
 
 export class SearchService {
   // Search across clients, accounts, and households
-  async search(query: string): Promise<SearchResult> {
+  // If clientId is provided, only return accounts for that client
+  async search(query: string, clientId?: string): Promise<SearchResult> {
     if (!query.trim()) {
       return { clients: [], accounts: [], households: [] };
     }
 
-    const searchTerm = `%${query.toLowerCase()}%`;
+    const searchTerm = query.toLowerCase();
 
     try {
+      // Get all clients and accounts
+      const allClients = await localDataService.getAllClients();
+      
       // Search clients
-      const { data: clients, error: clientsError } = await supabase
-        .from('clients')
-        .select('*')
-        .or(`first_name.ilike.${searchTerm},last_name.ilike.${searchTerm},email.ilike.${searchTerm}`)
-        .limit(5);
+      const matchedClients = allClients.filter(client => {
+        const firstName = client.firstName?.toLowerCase() || '';
+        const lastName = client.lastName?.toLowerCase() || '';
+        const email = client.email?.toLowerCase() || '';
+        return firstName.includes(searchTerm) || 
+               lastName.includes(searchTerm) || 
+               email.includes(searchTerm);
+      }).slice(0, 5);
 
-      if (clientsError) {
-        console.error('Error searching clients:', clientsError);
+      // Get accounts for matched clients
+      const accounts: AccountData[] = [];
+      for (const client of matchedClients) {
+        const clientData = await localDataService.getClientData(client.id);
+        if (clientData) {
+          accounts.push(...clientData.accounts);
+        }
       }
 
-      // Search accounts
-      const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select(`
-          *,
-          clients:client_id (
-            id,
-            first_name,
-            last_name,
-            email,
-            phone
-          ),
-          households:household_id (
-            id,
-            name,
-            description
-          ),
-          balances (
-            total_value,
-            buying_power,
-            invested_value,
-            cash,
-            margin
-          )
-        `)
-        .or(`account_id.ilike.${searchTerm},account_name.ilike.${searchTerm}`)
-        .limit(5);
-
-      if (accountsError) {
-        console.error('Error searching accounts:', accountsError);
+      // Also search accounts directly by account ID or name
+      const allAccounts: AccountData[] = [];
+      for (const client of allClients) {
+        const clientData = await localDataService.getClientData(client.id);
+        if (clientData) {
+          allAccounts.push(...clientData.accounts);
+        }
       }
 
+      const matchedAccounts = allAccounts.filter(account => {
+        const accountId = account.accountId?.toLowerCase() || '';
+        const accountName = account.accountName?.toLowerCase() || '';
+        return accountId.includes(searchTerm) || accountName.includes(searchTerm);
+      }).slice(0, 5);
 
-      // Transform accounts data to match AccountData interface
-      const transformedAccounts: AccountData[] = (accounts || [])
-        .filter(account => account.clients) // Only include accounts with client data
-        .map(account => {
-          const balance = account.balances?.[0] || {};
-          const client = account.clients!; // We know it exists due to filter above
-          return {
-            accountId: account.account_id,
-            accountName: account.account_name,
-            accountType: account.account_type,
-            clientId: account.client_id,
-            client: {
-              id: client.id,
-              firstName: client.first_name,
-              lastName: client.last_name,
-              email: client.email,
-              phone: client.phone,
-              createdAt: new Date().toISOString(),
-              lastUpdated: new Date().toISOString()
-            },
-            householdId: account.household_id,
-            household: undefined,
-            isPrimary: account.is_primary || false,
-            securities: [], // Will be populated if needed
-            holdings: [],
-            marketData: [],
-            trades: [],
-            activities: [],
-            balances: {
-              buyingPower: balance.buying_power || 0,
-              investedValue: balance.invested_value || 0,
-              totalValue: balance.total_value || 0,
-              cash: balance.cash || 0,
-              margin: balance.margin || 0,
-              realizedGL: 0,
-              lastUpdated: new Date().toISOString()
-            },
-            realizedGL: [],
-            unrealizedGL: [],
-            commissions: [],
-            lastUpdated: new Date().toISOString()
-          };
-        });
+      // Combine and deduplicate accounts
+      let uniqueAccounts = Array.from(
+        new Map(matchedAccounts.map(acc => [acc.accountId, acc])).values()
+      );
 
-      // Transform clients data to match Client interface
-      const transformedClients: Client[] = (clients || []).map(client => ({
-        id: client.id,
-        firstName: client.first_name,
-        lastName: client.last_name,
-        email: client.email,
-        phone: client.phone,
-        createdAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
-      }));
+      // If clientId is provided, filter to only show accounts for that client
+      if (clientId) {
+        uniqueAccounts = uniqueAccounts.filter(acc => acc.clientId === clientId);
+      }
 
       return {
-        clients: transformedClients,
-        accounts: transformedAccounts,
-        households: []
+        clients: clientId ? [] : matchedClients, // Don't show other clients if filtering by clientId
+        accounts: uniqueAccounts,
+        households: [] // Households can be added later if needed
       };
     } catch (error) {
       console.error('Error in search service:', error);
@@ -140,147 +87,55 @@ export class SearchService {
     }
   }
 
-  // Get recent searches from database - only clients and accounts
-  async getRecentSearches(): Promise<SearchResultItem[]> {
+  // Get recent searches - return recent clients and accounts
+  // If clientId is provided, only return accounts for that client
+  async getRecentSearches(clientId?: string): Promise<SearchResultItem[]> {
     try {
-      // Using imported supabase client
-      
-      // Fetch recent clients (limit 3)
-      const { data: clients } = await supabase
-        .from('clients')
-        .select('*')
-        .limit(3);
-
-      // Fetch recent accounts (simplified query first)
-      const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('*')
-        .order('account_id', { ascending: false })
-        .limit(4);
-
-      if (accountsError) {
-        console.error('Error fetching accounts:', accountsError);
-        console.error('Error details:', JSON.stringify(accountsError, null, 2));
-      }
-
-      // Fetch client and balance data separately if accounts exist
-      let clientsData: Client[] = [];
-      let balancesData: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-      if (accounts && accounts.length > 0) {
-        // Get client data for these accounts
-        const clientIds = [...new Set(accounts.map(acc => acc.client_id))];
-        const { data: accountClients } = await supabase
-          .from('clients')
-          .select('*')
-          .in('id', clientIds);
-        clientsData = accountClients || [];
-
-        // Get balance data for these accounts
-        const accountIds = accounts.map(acc => acc.account_id);
-        const { data: balances } = await supabase
-          .from('balances')
-          .select('*')
-          .in('account_id', accountIds);
-        balancesData = balances || [];
-      }
-
+      const allClients = await localDataService.getAllClients();
       const results: SearchResultItem[] = [];
 
-      console.log('Fetched accounts:', accounts?.length || 0);
-      console.log('Fetched clients:', clients?.length || 0);
+      // Get accounts for first few clients
+      const clientsToShow = allClients.slice(0, 3);
+      const accountsToShow: AccountData[] = [];
 
-      // Add accounts first (most important)
-      if (accounts && accounts.length > 0) {
-        console.log('Processing accounts:', accounts.map(a => a.account_id));
-        accounts
-          .filter(account => {
-            const client = clientsData.find(c => c.id === account.client_id);
-            return client; // Only include accounts with client data
-          })
-          .forEach(account => {
-            console.log('Processing account:', account.account_id, account.account_name);
-            
-            // Find related data from separately fetched arrays
-            const client = clientsData.find(c => c.id === account.client_id)!; // We know it exists due to filter
-            const balances = balancesData.find(b => b.account_id === account.account_id);
-
-            results.push({
-              type: 'account',
-              id: account.account_id,
-              name: `${account.account_id} • ${formatAccountType(account.account_type)}`,
-              subtitle: account.account_name,
-              href: `/account/${account.account_id}`,
-              data: {
-                accountId: account.account_id,
-                accountName: account.account_name,
-                accountType: account.account_type,
-                clientId: account.client_id,
-                client: {
-                  id: client.id,
-                  firstName: client.firstName,
-                  lastName: client.lastName,
-                  email: client.email,
-                  phone: client.phone,
-                  createdAt: new Date().toISOString(),
-                  lastUpdated: new Date().toISOString()
-                },
-                householdId: account.household_id,
-                household: undefined,
-                isPrimary: account.is_primary,
-                securities: [],
-                holdings: [],
-                marketData: [],
-                trades: [],
-                activities: [],
-                balances: balances ? {
-                  buyingPower: balances.buying_power,
-                  investedValue: balances.invested_value,
-                  totalValue: balances.total_value,
-                  cash: balances.cash,
-                  margin: balances.margin,
-                  realizedGL: 0,
-                  lastUpdated: new Date().toISOString()
-                } : {
-                  buyingPower: 0,
-                  investedValue: 0,
-                  totalValue: 0,
-                  cash: 0,
-                  margin: 0,
-                  realizedGL: 0,
-                  lastUpdated: new Date().toISOString()
-                },
-                realizedGL: [],
-                unrealizedGL: [],
-                commissions: [],
-                lastUpdated: new Date().toISOString()
-              }
-            });
-          });
+      for (const client of clientsToShow) {
+        const clientData = await localDataService.getClientData(client.id);
+        if (clientData && clientData.accounts.length > 0) {
+          accountsToShow.push(...clientData.accounts.slice(0, 2));
+        }
       }
 
-      // Add clients
-      if (clients) {
-        clients.forEach(client => {
+      // Filter accounts by clientId if provided
+      let filteredAccounts = accountsToShow;
+      if (clientId) {
+        filteredAccounts = accountsToShow.filter(acc => acc.clientId === clientId);
+      }
+
+      // Add accounts first
+      filteredAccounts.slice(0, 4).forEach(account => {
+        results.push({
+          type: 'account',
+          id: account.accountId,
+          name: `${account.accountId} • ${formatAccountType(account.accountType)}`,
+          subtitle: account.accountName,
+          href: `/account/${account.accountId}`,
+          data: account
+        });
+      });
+
+      // Add clients (only if not filtering by clientId)
+      if (!clientId) {
+        clientsToShow.forEach(client => {
           results.push({
             type: 'client',
             id: client.id,
-            name: `${client.first_name} ${client.last_name}`,
-            subtitle: client.email,
+            name: `${client.firstName} ${client.lastName}`,
+            subtitle: client.email || 'No email',
             href: `/clients/${client.id}`,
-            data: {
-              id: client.id,
-              firstName: client.first_name,
-              lastName: client.last_name,
-              email: client.email,
-              phone: client.phone,
-              createdAt: client.created_at,
-              lastUpdated: client.last_updated
-            }
+            data: client
           });
         });
       }
-
 
       // Shuffle the results to mix them up
       return this.shuffleArray(results);
@@ -300,16 +155,15 @@ export class SearchService {
     return shuffled;
   }
 
-  // Save search to recent searches (no-op since we're using database data)
+  // Save search to recent searches (no-op for local data)
   saveRecentSearch(item: SearchResultItem): void {
-    // No-op since we're fetching recent searches from database
-    // This method is kept for compatibility but doesn't actually save anything
+    // No-op since we're using local data
     console.log('Recent search clicked:', item.name);
   }
 
-  // Clear all recent searches (no-op since we're using database data)
+  // Clear all recent searches (no-op for local data)
   clearRecentSearches(): void {
-    // No-op since we're fetching recent searches from database
+    // No-op since we're using local data
     console.log('Clear recent searches requested');
   }
 

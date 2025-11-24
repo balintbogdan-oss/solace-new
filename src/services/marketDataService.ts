@@ -135,74 +135,10 @@ export async function getMarketDataForSymbols(symbols: string[]): Promise<Market
     return [];
   }
   
-  // First try to get data from Supabase database
-  try {
-    // Attempting to load market data from database
-    const { createClient } = await import('@supabase/supabase-js');
-    const { getValidatedEnv } = await import('@/lib/env-validation');
-    
-    let supabase;
-    try {
-      const env = getValidatedEnv();
-      supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-    } catch {
-      // Missing Supabase environment variables, falling back to JSON files
-      throw new Error('Missing Supabase credentials');
-    }
-    
-    const { data: dbData, error } = await supabase
-      .from('market_data')
-      .select('*')
-      .in('symbol', symbols);
-    
-    if (error) {
-      console.error('❌ Database error:', error);
-    } else if (dbData && dbData.length > 0) {
-      const result = dbData.map((stock: Record<string, unknown>) => ({
-        symbol: String(stock.symbol || ''),
-        currentPrice: Number(stock.current_price) || 0,
-        previousClose: Number(stock.previous_close) || 0,
-        dayChange: Number(stock.day_change) || 0,
-        dayChangePercent: Number(stock.day_change_percent) || 0,
-        volume: Number(stock.volume) || 0,
-        marketCap: Number(stock.market_cap) || 0,
-        open: Number(stock.current_price) || 0, // Use current price as fallback
-        high: (Number(stock.current_price) || 0) * 1.02, // Generate realistic high
-        low: (Number(stock.current_price) || 0) * 0.98, // Generate realistic low
-        fiftyTwoWeekHigh: (Number(stock.current_price) || 0) * 1.2, // Generate realistic 52W high
-        fiftyTwoWeekLow: (Number(stock.current_price) || 0) * 0.8, // Generate realistic 52W low
-        sector: 'Technology', // Default sector
-        description: String(stock.symbol || '') + ' Inc.', // Generate description
-        fundDetails: stock.fundDetails ? {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          previousClose: Number((stock.fundDetails as any).previousClose) || 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ytdReturn: Number((stock.fundDetails as any).ytdReturn) || 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          expenseRatio: Number((stock.fundDetails as any).expenseRatio) || 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          category: String((stock.fundDetails as any).category) || '',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          netAssets: Number((stock.fundDetails as any).netAssets) || 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          yield: Number((stock.fundDetails as any).yield) || 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          frontLoad: String((stock.fundDetails as any).frontLoad) || '-',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          inceptionDate: String((stock.fundDetails as any).inceptionDate) || ''
-        } : undefined,
-        lastUpdated: String(stock.last_updated) || new Date().toISOString()
-      }));
-      
-      return result;
-    } else {
-      // No data found in database
-    }
-  } catch {
-    // Database fetch failed, falling back to JSON files
-  }
+  // Using local data only
+  // Go straight to loading from JSON files
   
-  // Fallback to local JSON files - check both equities and mutual funds
+  // Load from local JSON files - check both equities and mutual funds
   const equitiesData = await loadEquitiesMarketData();
   const mutualFundsData = await loadMutualFundsMarketData();
   

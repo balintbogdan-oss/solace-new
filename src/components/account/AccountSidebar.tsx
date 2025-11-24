@@ -13,8 +13,9 @@ import {
   Folders,
   ChevronDown,
 } from 'lucide-react'
+import { useUserRole } from '@/contexts/UserRoleContext'
 
-const navigationItems = [
+const getNavigationItems = (isAdvisor: boolean) => [
   {
     name: 'Overview',
     href: '',
@@ -29,7 +30,8 @@ const navigationItems = [
       { name: 'Activity', href: 'activity' },
       { name: 'Balances', href: 'balances' },
       { name: 'Realized G/L', href: 'realized-gl' },
-      { name: 'Commission', href: 'commission' },
+      // Only show Commission for advisors
+      ...(isAdvisor ? [{ name: 'Commission', href: 'commission' }] : []),
     ],
   },
   {
@@ -62,6 +64,9 @@ const navigationItems = [
 export function AccountSidebar() {
   const pathname = usePathname()
   const accountId = pathname?.split('/')[2]
+  const { role } = useUserRole()
+  const isAdvisor = role === 'advisor'
+  const navigationItems = getNavigationItems(isAdvisor)
   const [expandedItems, setExpandedItems] = useState<string[]>(['financials']) // Default expanded state
 
   const toggleExpand = (href: string) => {

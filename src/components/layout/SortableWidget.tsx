@@ -123,7 +123,7 @@ export default function SortableWidget({ id, widget, onRemove, dropIndicator, he
              
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1">
-                  <h3 className="text-sm font-medium text-muted-foreground truncate font-sans">{widget.title}</h3>
+                  <div className="text-sm font-medium text-muted-foreground truncate">{widget.title}</div>
                   {/* Conditionally render Info icon only for commission widget */}
                   {widget.id === 'commission' && (
                     <Info className="h-4 w-4 text-gray-400 shrink-0" />
@@ -223,7 +223,7 @@ export default function SortableWidget({ id, widget, onRemove, dropIndicator, he
 
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-white/10 shrink-0">
             <div className="text-xs text-gray-500 truncate">
-              Updated 01/08/2025 8:05 AM ET
+              Updated 09/22/2025 3:35 PM ET
             </div>
             <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
           </div>

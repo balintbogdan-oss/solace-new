@@ -17,7 +17,49 @@ export default function AppearanceSettingsPage() {
     resetAppearanceSettings 
   } = useSettings();
   
+  
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+
+  // Default appearance settings for comparison
+  const defaultAppearanceSettings = {
+    primaryColor: '#8B5504',
+    fontFamily: 'Inter',
+    headerFontFamily: 'Source Serif 4',
+    bodyFontFamily: 'Inter',
+    fontSize: 'base' as const,
+    borderRadius: 'md' as const,
+    logoUrl: '',
+    headerBackgroundColor: '#000000',
+    chartPositiveColor: '#60a821',
+    chartNegativeColor: '#f87171',
+    chartPrimaryColor: '#B8860B',
+    chartSecondaryColor: '#20b2aa',
+    positiveColor: '#22c55e',
+    negativeColor: '#ef4444',
+    gradientStartColor: '#f3eddc',
+    gradientEndColor: '#f9f8f3',
+    backgroundColor: '#ffffff',
+    cardColor: '#ffffff',
+    accentColor: '#f6f6f4',
+  };
+
+  // Check if any settings have diverged from defaults
+  const hasSettingsChanged = () => {
+    return Object.keys(defaultAppearanceSettings).some(key => {
+      const currentValue = appearanceSettings[key as keyof typeof appearanceSettings];
+      const defaultValue = defaultAppearanceSettings[key as keyof typeof defaultAppearanceSettings];
+      return currentValue !== defaultValue;
+    });
+  };
+
+  const settingsChanged = hasSettingsChanged();
+
+  // Check if a specific setting has changed from default
+  const isSettingChanged = (key: keyof typeof appearanceSettings) => {
+    const currentValue = appearanceSettings[key];
+    const defaultValue = defaultAppearanceSettings[key as keyof typeof defaultAppearanceSettings];
+    return currentValue !== defaultValue;
+  };
 
   const handleAppearanceChange = (key: keyof typeof appearanceSettings, value: string) => {
     updateAppearanceSetting(key, value);
@@ -100,7 +142,7 @@ export default function AppearanceSettingsPage() {
       gradientEndColor: '#f9f8f3',
       backgroundColor: '#ffffff',
       cardColor: '#ffffff',
-      accentColor: '#f3eddc',
+      accentColor: '#f6f6f4',
       description: 'Brown primary with black header'
     },
     { 
@@ -191,15 +233,14 @@ export default function AppearanceSettingsPage() {
   ];
 
   const fontFamilies = [
-    { value: 'Inter', label: 'Inter', preview: 'font-sans' },
-    { value: 'Roboto', label: 'Roboto', preview: 'font-sans' },
-    { value: 'Open Sans', label: 'Open Sans', preview: 'font-sans' },
-    { value: 'Lato', label: 'Lato', preview: 'font-sans' },
-    { value: 'Montserrat', label: 'Montserrat', preview: 'font-sans' },
-    { value: 'Source Sans Pro', label: 'Source Sans Pro', preview: 'font-sans' },
     { value: 'Source Serif 4', label: 'Source Serif 4', preview: 'font-serif' },
-    { value: 'Poppins', label: 'Poppins', preview: 'font-sans' },
-    { value: 'Nunito', label: 'Nunito', preview: 'font-sans' },
+    { value: 'Inter', label: 'Inter', preview: 'font-sans' },
+    { value: 'Schibsted Grotesk', label: 'Schibsted Grotesk', preview: 'font-sans' },
+    { value: 'Funnel Sans', label: 'Funnel Sans', preview: 'font-sans' },
+    { value: 'Corben', label: 'Corben', preview: 'font-serif' },
+    { value: 'Fraunces', label: 'Fraunces', preview: 'font-serif' },
+    { value: 'IBM Plex Serif', label: 'IBM Plex Serif', preview: 'font-serif' },
+    { value: 'Geist', label: 'Geist', preview: 'font-sans' },
   ];
 
   const fontSizes = [
@@ -217,7 +258,7 @@ export default function AppearanceSettingsPage() {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 pb-20">
         {/* Colors */}
         <Card>
           <CardHeader>
@@ -263,7 +304,12 @@ export default function AppearanceSettingsPage() {
             <div className="space-y-2">
               {/* Primary Color */}
               <div className="flex items-center justify-between py-1">
-                <div className="text-sm font-medium">Primary Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm font-medium">Primary Color</div>
+                  {isSettingChanged('primaryColor') && (
+                    <div className="w-2 h-2 bg-primary rounded-full" title="Modified from default" />
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <div 
@@ -284,7 +330,12 @@ export default function AppearanceSettingsPage() {
 
               {/* Header Background Color */}
               <div className="flex items-center justify-between py-1">
-                <div className="text-sm font-medium">Header Background Color</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm font-medium">Header Background Color</div>
+                  {isSettingChanged('headerBackgroundColor') && (
+                    <div className="w-2 h-2 bg-primary rounded-full" title="Modified from default" />
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <div 
@@ -550,7 +601,12 @@ export default function AppearanceSettingsPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Header Font</label>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">Header Font</label>
+                  {isSettingChanged('headerFontFamily') && (
+                    <div className="w-2 h-2 bg-primary rounded-full" title="Modified from default" />
+                  )}
+                </div>
                 <Select
                   value={appearanceSettings.headerFontFamily}
                   onValueChange={(value) => handleAppearanceChange('headerFontFamily', value)}
@@ -571,7 +627,12 @@ export default function AppearanceSettingsPage() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">Body Font</label>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">Body Font</label>
+                  {isSettingChanged('bodyFontFamily') && (
+                    <div className="w-2 h-2 bg-primary rounded-full" title="Modified from default" />
+                  )}
+                </div>
                 <Select
                   value={appearanceSettings.bodyFontFamily}
                   onValueChange={(value) => handleAppearanceChange('bodyFontFamily', value)}
@@ -703,16 +764,21 @@ export default function AppearanceSettingsPage() {
 
       </div>
 
-      <div className="mt-6 flex justify-end">
-        <Button
-          variant="outline"
-          onClick={handleReset}
-          className="flex items-center gap-2"
-        >
-          <RotateCcw className="h-4 w-4" />
-          Reset All to Default
-        </Button>
-      </div>
+      {/* Sticky Reset Button - Only shows when settings have changed */}
+      {settingsChanged && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-4 z-50">
+          <div className="max-w-7xl mx-auto flex justify-end">
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              className="flex items-center gap-2 shadow-lg"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Reset All to Default
+            </Button>
+          </div>
+        </div>
+      )}
 
     </>
   );

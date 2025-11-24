@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useAccountData } from '@/contexts/SupabaseAccountDataContext'
+import { useAccountData } from '@/contexts/AccountDataContext'
 import { Button } from '@/components/ui/button'
 import { ArrowUpRight, RefreshCcw, Info, SlidersHorizontal, ArrowUp, ArrowDown, ChevronsUpDown } from 'lucide-react'
 
@@ -177,11 +177,11 @@ export default function SecurityUnrealizedGLPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-medium font-serif text-slate-900 dark:text-slate-100">{symbol}</h1>
+              <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100">{symbol}</h1>
               <div className="text-sm text-muted-foreground">Apple Inc. • 037833100</div>
             </div>
             <div className="flex items-center gap-4 mt-2">
-              <div className="text-3xl font-serif text-slate-900 dark:text-slate-100">${mockData.totalMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <div className="text-3xl text-slate-900 dark:text-slate-100">${mockData.totalMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
               <div className="text-sm text-muted-foreground">LTP</div>
             </div>
             <div className="text-sm text-muted-foreground mt-1">Long position</div>
@@ -200,35 +200,35 @@ export default function SecurityUnrealizedGLPage() {
           <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total G/L</div>
-              <div className="text-lg font-medium font-serif text-[hsl(var(--positive))]">
+              <div className="text-lg font-medium text-[hsl(var(--positive))]">
                 +${mockData.totalUnrealizedGL.toLocaleString('en-US', { minimumFractionDigits: 2 })} ({mockData.totalUnrealizedGLPercent.toFixed(2)}%)
               </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Today&apos;s G/L</div>
-              <div className="text-lg font-medium font-serif text-[hsl(var(--negative))]">
+              <div className="text-lg font-medium text-[hsl(var(--negative))]">
                 ${mockData.todaysGL.toLocaleString('en-US', { minimumFractionDigits: 2 })} ({mockData.todaysGLPercent.toFixed(2)}%)
               </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Quantity</div>
-              <div className="text-lg font-medium font-serif text-foreground">{mockData.totalQuantity.toLocaleString()}</div>
+              <div className="text-lg font-medium text-foreground">{mockData.totalQuantity.toLocaleString()}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Avg Buy price</div>
-              <div className="text-lg font-medium font-serif text-foreground">${mockData.avgBuyPrice.toFixed(2)}</div>
+              <div className="text-lg font-medium text-foreground">${mockData.avgBuyPrice.toFixed(2)}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <div className="text-lg font-medium font-serif text-foreground">${mockData.totalInvestedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <div className="text-lg font-medium text-foreground">${mockData.totalInvestedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Adj. Invested value</div>
-              <div className="text-lg font-medium font-serif text-foreground">${mockData.totalInvestedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <div className="text-lg font-medium text-foreground">${mockData.totalInvestedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4">
-            Updated 01/08/2025 8:05 AM ET
+            Updated 09/22/2025 3:35 PM ET
             <button className="p-1.5 rounded-md hover:bg-muted/50 transition">
               <RefreshCcw className="w-4 h-4" />
             </button>
