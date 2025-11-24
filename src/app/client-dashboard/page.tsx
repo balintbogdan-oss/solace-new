@@ -315,42 +315,51 @@ export default function ClientDashboardPage() {
     return allAccounts.filter(acc => selectedAccountIds.has(acc.accountId));
   }, [allAccounts, selectedAccountIds]);
 
-  // Get button label based on selection
+  // Get button label based on active filter
   const getDropdownButtonLabel = () => {
-    // If all accounts are selected, show "All accounts"
-    if (selectedAccounts.length === allAccounts.length && allAccounts.length > 0) {
+    // If filter is "all", show "All accounts"
+    if (activeFilter === 'all') {
       return 'All accounts';
     }
-    if (selectedAccounts.length === 0) {
-      return 'All accounts';
-    }
-    if (selectedAccounts.length === 1) {
-      const account = selectedAccounts[0];
-      const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
-                         account.accountType === 'trust' ? 'Personal trust' :
-                         account.accountType === 'individual' ? 'Single account' :
-                         account.accountType === 'ira' ? 'Single account' :
-                         'Account';
-      return accountType;
-    }
-    if (selectedAccounts.length === 2) {
-      const account = selectedAccounts[0];
-      const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
-                         account.accountType === 'trust' ? 'Personal trust' :
-                         account.accountType === 'individual' ? 'Single account' :
-                         account.accountType === 'ira' ? 'Single account' :
-                         'Account';
-      return `${accountType} +1 more`;
-    }
-    // Check if all are household or all are non-household
-    const householdCount = selectedAccounts.filter(acc => acc.householdId).length;
-    if (householdCount === selectedAccounts.length && householdCount > 0) {
+    
+    // If filter is "household", show "Household accounts"
+    if (activeFilter === 'household') {
       return 'Household accounts';
     }
-    if (householdCount === 0 && selectedAccounts.length > 0) {
+    
+    // If filter is "non-household", show "Non-household accounts"
+    if (activeFilter === 'non-household') {
       return 'Non-household accounts';
     }
-    return `${selectedAccounts.length} accounts`;
+    
+    // If filter is "custom", show selection-based label
+    if (activeFilter === 'custom') {
+      if (selectedAccounts.length === 0) {
+        return 'All accounts';
+      }
+      if (selectedAccounts.length === 1) {
+        const account = selectedAccounts[0];
+        const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
+                           account.accountType === 'trust' ? 'Personal trust' :
+                           account.accountType === 'individual' ? 'Single account' :
+                           account.accountType === 'ira' ? 'Single account' :
+                           'Account';
+        return accountType;
+      }
+      if (selectedAccounts.length === 2) {
+        const account = selectedAccounts[0];
+        const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
+                           account.accountType === 'trust' ? 'Personal trust' :
+                           account.accountType === 'individual' ? 'Single account' :
+                           account.accountType === 'ira' ? 'Single account' :
+                           'Account';
+        return `${accountType} +1 more`;
+      }
+      return `${selectedAccounts.length} accounts`;
+    }
+    
+    // Fallback
+    return 'All accounts';
   };
 
   const selectAllAccounts = () => {
@@ -757,124 +766,175 @@ export default function ClientDashboardPage() {
                     <Button
                       variant={activeFilter === 'all' ? 'outline' : 'active'}
                       size="sm"
-                      className={`flex items-center gap-2 ${activeFilter === 'all' ? '!bg-white' : ''}`}
+                      className={`flex items-center gap-2 text-sm ${activeFilter === 'all' ? '!bg-white' : ''}`}
                     >
                       <span>{getDropdownButtonLabel()}</span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-80">
-                    {/* Filter Buttons */}
-                    <div className="p-2 flex gap-2 border-b">
-                      <Button
-                        variant={activeFilter === 'all' ? 'active' : 'outline'}
-                        size="sm"
-                        onClick={() => selectFilter('all')}
-                        className="flex-1"
-                      >
-                        All
-                      </Button>
-                      <Button
-                        variant={activeFilter === 'household' ? 'active' : 'outline'}
-                        size="sm"
-                        onClick={() => selectFilter('household')}
-                        className="flex-1"
-                      >
-                        Household
-                      </Button>
-                      <Button
-                        variant={activeFilter === 'non-household' ? 'active' : 'outline'}
-                        size="sm"
-                        onClick={() => selectFilter('non-household')}
-                        className="flex-1"
-                      >
-                        Non-household
-                      </Button>
-                      <Button
-                        variant={activeFilter === 'custom' ? 'active' : 'outline'}
-                        size="sm"
-                        onClick={() => selectFilter('custom')}
-                        className="flex-1"
-                      >
-                        Custom
-                      </Button>
+                  <DropdownMenuContent align="end" className="w-[402px] z-[100] p-0">
+                    {/* Filter Section */}
+                    <div className="border-b px-4 py-[18px]">
+                      <div className="flex flex-col gap-3">
+                        <p className="text-sm text-muted-foreground">Filter by</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => selectFilter('all')}
+                            className={`h-7 px-3 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                              activeFilter === 'all'
+                                ? 'bg-accent border border-primary text-primary'
+                                : 'bg-card border text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            All
+                          </button>
+                          <button
+                            onClick={() => selectFilter('household')}
+                            className={`h-7 px-3 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                              activeFilter === 'household'
+                                ? 'bg-accent border border-primary text-primary'
+                                : 'bg-card border text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            Household
+                          </button>
+                          <button
+                            onClick={() => selectFilter('non-household')}
+                            className={`h-7 px-3 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                              activeFilter === 'non-household'
+                                ? 'bg-accent border border-primary text-primary'
+                                : 'bg-card border text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            Non-household
+                          </button>
+                          <button
+                            onClick={() => selectFilter('custom')}
+                            className={`h-7 px-3 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                              activeFilter === 'custom'
+                                ? 'bg-accent border border-primary text-primary'
+                                : 'bg-card border text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            Custom
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Account List */}
                     <div className="max-h-96 overflow-y-auto">
                       {/* Household Accounts */}
-                      {householdGroups.length > 0 && (
-                        <div className="p-2">
-                          <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Household</div>
-                          {householdGroups.flatMap(group => group.accounts).map((account) => {
-                            const isSelected = selectedAccountIds.has(account.accountId);
-                            return (
-                              <div
-                                key={account.accountId}
-                                className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-muted cursor-pointer"
-                                onClick={() => toggleAccountSelection(account.accountId)}
-                              >
-                                <div className="w-4 h-4 rounded flex items-center justify-center bg-muted">
-                                  <Home className="h-3 w-3 text-foreground" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-foreground truncate">
-                                    {account.accountType === 'joint_jtwros' ? 'Joint account' : 
-                                     account.accountType === 'trust' ? 'Personal trust' :
-                                     account.accountType === 'individual' ? 'Single account' :
-                                     account.accountType === 'ira' ? 'Single account' :
-                                     'Account'}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground truncate">
-                                    {account.accountId} • {account.accountName}
-                                  </div>
-                                </div>
-                                {isSelected && (
-                                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                                    <Check className="h-3 w-3 text-primary-foreground" />
-                                  </div>
-                                )}
+                      {householdGroups.map((group) => {
+                        const householdName = group.household?.name?.toUpperCase() || 'HOUSEHOLD';
+                        return (
+                          <div key={group.household?.id || 'household'} className="px-2 py-0">
+                            {/* Household Header */}
+                            <div className="flex items-center gap-1.5 px-1 py-1.5">
+                              <div className="w-6 h-6 rounded-[13.714px] bg-accent flex items-center justify-center">
+                                <Home className="h-4 w-4 text-primary" />
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                              <p className="text-xs font-medium text-muted-foreground uppercase leading-none">
+                                {householdName}
+                              </p>
+                            </div>
+                            
+                            {/* Household Accounts */}
+                            <div className="flex flex-col gap-2">
+                              {group.accounts.map((account) => {
+                                const isSelected = selectedAccountIds.has(account.accountId);
+                                const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
+                                                   account.accountType === 'trust' ? 'Personal trust' :
+                                                   account.accountType === 'individual' ? 'Single account' :
+                                                   account.accountType === 'ira' ? 'Single account' :
+                                                   'Account';
+                                return (
+                                  <div
+                                    key={account.accountId}
+                                    className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                                    onClick={() => toggleAccountSelection(account.accountId)}
+                                  >
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-1 mb-1">
+                                        <p className="text-sm font-medium text-foreground leading-none">
+                                          {accountType}
+                                        </p>
+                                        {account.isPrimary && (
+                                          <div className="h-5 px-1.5 py-0.5 rounded-full bg-[#eaeffc] flex items-center">
+                                            <p className="text-xs font-medium text-[#2c54c9] leading-5">
+                                              Primary
+                                            </p>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <p className="text-sm text-muted-foreground truncate leading-6">
+                                        {account.accountId} • {account.accountName}
+                                      </p>
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                      isSelected ? 'bg-primary' : 'bg-card border opacity-0'
+                                    }`}>
+                                      {isSelected && (
+                                        <Check className="h-4 w-4 text-white" />
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
 
                       {/* Non-household Accounts */}
                       {nonHouseholdAccounts.length > 0 && (
-                        <div className="p-2 border-t">
-                          <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Non-household</div>
-                          {nonHouseholdAccounts.map((account) => {
-                            const isSelected = selectedAccountIds.has(account.accountId);
-                            return (
-                              <div
-                                key={account.accountId}
-                                className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-muted cursor-pointer"
-                                onClick={() => toggleAccountSelection(account.accountId)}
-                              >
-                                <div className="w-4 h-4 rounded flex items-center justify-center bg-muted">
-                                  <Building2 className="h-3 w-3 text-foreground" />
+                        <div className="px-2 py-0">
+                          {/* Non-household Header */}
+                          <div className="flex items-center gap-1.5 px-1 py-1.5">
+                            <div className="w-6 h-6 rounded-[13.714px] bg-accent flex items-center justify-center">
+                              <Building2 className="h-4 w-4 text-primary" />
+                            </div>
+                            <p className="text-xs font-medium text-muted-foreground uppercase leading-none">
+                              Non-household
+                            </p>
+                          </div>
+                          
+                          {/* Non-household Accounts */}
+                          <div className="flex flex-col gap-2">
+                            {nonHouseholdAccounts.map((account) => {
+                              const isSelected = selectedAccountIds.has(account.accountId);
+                              const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
+                                                 account.accountType === 'trust' ? 'Personal trust' :
+                                                 account.accountType === 'individual' ? 'Single account' :
+                                                 account.accountType === 'ira' ? 'Single account' :
+                                                 'Account';
+                              return (
+                                <div
+                                  key={account.accountId}
+                                  className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                                  onClick={() => toggleAccountSelection(account.accountId)}
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1 mb-1">
+                                      <p className="text-sm font-medium text-foreground leading-none">
+                                        {accountType}
+                                      </p>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground truncate leading-6">
+                                      {account.accountId} • {account.accountName}
+                                    </p>
+                                  </div>
+                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    isSelected ? 'bg-primary' : 'bg-card border border-border opacity-0'
+                                  }`}>
+                                    {isSelected && (
+                                      <Check className="h-4 w-4 text-white" />
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-foreground truncate">
-                                    {account.accountType === 'joint_jtwros' ? 'Joint account' : 
-                                     account.accountType === 'trust' ? 'Personal trust' :
-                                     account.accountType === 'individual' ? 'Single account' :
-                                     account.accountType === 'ira' ? 'Single account' :
-                                     'Account'}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground truncate">
-                                    {account.accountId} • {account.accountName}
-                                  </div>
-                                </div>
-                                {isSelected && (
-                                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                                    <Check className="h-3 w-3 text-primary-foreground" />
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
                     </div>
