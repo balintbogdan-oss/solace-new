@@ -210,7 +210,7 @@ export function SearchAndWatchlist({
         </Card>
 
         {/* Right card: Watchlist */}
-        <div className="p-6 bg-card-blend dark:bg-card-blend-dark rounded-lg border">
+        <div className="p-6 bg-card rounded-lg border">
           <WatchlistTable 
             showVolumeColumn={showVolumeColumn} // Pass prop down
             showPriceColumn={showPriceColumn}   // Pass prop down

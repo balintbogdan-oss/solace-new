@@ -258,7 +258,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
           </div>
       <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-4">
      
-        <Card className="md:col-span-2 min-w-0 flex flex-col items-start overflow-hidden rounded-2xl shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] p-0">
+        <Card className="md:col-span-2 min-w-0 flex flex-col items-start overflow-hidden rounded-2xl p-0">
           <div className="flex-1 w-full p-4 sm:p-6 flex flex-col justify-between items-start gap-4">
             <div className="w-full flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 lg:gap-0">
               {/* Left side: Portfolio value and G/L */}

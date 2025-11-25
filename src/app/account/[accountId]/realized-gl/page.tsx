@@ -235,7 +235,7 @@ export default function RealizedGLPage() {
             <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Realized G/L</h1>
             <div className="flex gap-2">
               <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="w-20 h-9">
+                <SelectTrigger className="w-20 h-9 bg-white dark:bg-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -244,7 +244,7 @@ export default function RealizedGLPage() {
                   <SelectItem value="2023">2023</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" className="h-9">
+              <Button variant="outline" className="h-9 bg-white dark:bg-white">
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
@@ -315,11 +315,11 @@ export default function RealizedGLPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="text-sm px-4 py-4">
+              <Button variant="outline" size="sm" className="text-sm px-4 py-4 bg-white dark:bg-white">
                 <Maximize className="w-4 h-4 mr-2" />
                 Expand
               </Button>
-              <Button variant="outline" size="sm" className="text-sm px-4 py-4">
+              <Button variant="outline" size="sm" className="text-sm px-4 py-4 bg-white dark:bg-white">
                 <SlidersHorizontal className="w-4 h-4 mr-2" />
                 Customize columns
               </Button>

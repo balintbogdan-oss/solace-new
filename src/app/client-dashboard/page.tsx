@@ -36,6 +36,11 @@ export default function ClientDashboardPage() {
   const [householdRefreshRotation, setHouseholdRefreshRotation] = useState(0);
   const [nonHouseholdRefreshRotation, setNonHouseholdRefreshRotation] = useState(0);
   const [isAdvisorsDrawerOpen, setIsAdvisorsDrawerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Redirect if not a client (unless they're on an account page)
   useEffect(() => {
@@ -194,14 +199,14 @@ export default function ClientDashboardPage() {
     return null;
   }
 
-  // Show skeleton if loading, but suppress hydration warning since
-  // Next.js may render Suspense boundary on server while we render skeleton on client
+  // During SSR, return null to match what Next.js expects (Suspense boundary)
+  // After mount, show skeleton if loading
+  if (!mounted) {
+    return null;
+  }
+
   if (loading) {
-    return (
-      <div suppressHydrationWarning>
-        <ClientDashboardSkeleton />
-      </div>
-    );
+    return <ClientDashboardSkeleton />;
   }
 
   return (
