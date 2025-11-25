@@ -41,18 +41,18 @@ export default function StatementsReportsPage() {
   // PDF URLs - in a real app, these would come from your database
   const pdfUrls = {
     'monthly-statements': {
-      'August 2025': 'https://example.com/documents/monthly-statements/2025-08-statement.pdf'
+      'August 2025': '/documents/example.pdf'
     },
     'tax-statements': {
-      'FORM 1042-S': 'https://example.com/documents/tax-documents/1042-s-2024.pdf',
-      'FORM 1099-INT': 'https://example.com/tax-documents/form-1099-int.pdf',
-      'FORM 1099-B': 'https://example.com/tax-documents/form-1099-b.pdf'
+      'FORM 1042-S': '/documents/example.pdf',
+      'FORM 1099-INT': '/documents/example.pdf',
+      'FORM 1099-B': '/documents/example.pdf'
     },
     'trade-confirmations': {
-      '2025-08-13-RWT': 'https://example.com/documents/trade-confirmations/2025-08-13-RWT-confirmation.pdf'
+      '2025-08-13-RWT': '/documents/example.pdf'
     },
     'open-order-confirmations': {
-      '2025-order-confirm': 'https://example.com/documents/order-confirmations/order_confirm_display.pdf'
+      '2025-order-confirm': '/documents/example.pdf'
     }
   }
 
@@ -112,7 +112,7 @@ export default function StatementsReportsPage() {
 
   // Mock data for shareholder documents
   const shareholderDocuments = [
-    { date: '09/03/25', symbol: 'ABALX', cusip: '026349502', issuer: 'Semi-Annual Report', issuerName: 'AMERICAN BALANCED FUND - CLASS A', type: 'Regulatory', dueDate: '', pdfUrl: 'https://example.com/documents/shareholder-documents/prospectus-semi-annual-report.pdf' },
+    { date: '09/03/25', symbol: 'ABALX', cusip: '026349502', issuer: 'Semi-Annual Report', issuerName: 'AMERICAN BALANCED FUND - CLASS A', type: 'Regulatory', dueDate: '', pdfUrl: '/documents/example.pdf' },
   ]
 
   const tabs = [
@@ -261,14 +261,14 @@ export default function StatementsReportsPage() {
                 <tbody>
                   {taxStatements.map((statement, index) => {
                     const pdfUrl = pdfUrls['tax-statements'][statement.name as keyof typeof pdfUrls['tax-statements']]
-                    const hasPDF = pdfUrl && !pdfUrl.includes('example.com')
+                    const hasPDF = !!pdfUrl
                     
                     return (
                       <tr 
                         key={statement.name} 
                         className={`border-b ${hasPDF ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''} ${index % 2 === 1 ? 'bg-card' : ''}`}
                         onClick={() => {
-                          if (hasPDF) {
+                          if (hasPDF && pdfUrl) {
                             openPDFViewer(pdfUrl, `${statement.name} - ${selectedTaxYear}`)
                           }
                         }}
@@ -284,7 +284,7 @@ export default function StatementsReportsPage() {
                               className="h-8 w-8"
                               onClick={(e) => {
                                 e.stopPropagation() // Prevent row click
-                                if (hasPDF) {
+                                if (hasPDF && pdfUrl) {
                                   window.open(pdfUrl, '_blank')
                                 }
                               }}
@@ -298,7 +298,7 @@ export default function StatementsReportsPage() {
                               className="h-8 w-8"
                               onClick={(e) => {
                                 e.stopPropagation() // Prevent row click
-                                if (hasPDF) {
+                                if (hasPDF && pdfUrl) {
                                   openPDFViewer(pdfUrl, `${statement.name} - ${selectedTaxYear}`)
                                 }
                               }}
@@ -738,12 +738,10 @@ export default function StatementsReportsPage() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center pb-2">
-            <h1 className="text-2xl font-medium font-serif text-slate-900 dark:text-slate-100">Documents</h1>
-          </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-medium font-serif text-slate-900 dark:text-slate-100">Documents</h1>
         </div>
 
         {/* Tabs */}

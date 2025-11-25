@@ -235,6 +235,7 @@ export function PortfolioDetailsSection({
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-16">
             <div className="w-[200px] h-[200px] flex-shrink-0 mx-auto sm:mx-0">
               <DonutChart 
+                key={Array.from(selectedAccountIds).sort().join(',')}
                 data={assetAllocationData} 
                 portfolioValue={totalPortfolioValue}
                 size="large"

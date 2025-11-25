@@ -84,6 +84,17 @@ export default function ClientDashboardPage() {
     ];
   }, [householdGroups, nonHouseholdAccounts]);
 
+  // Auto-select all accounts when filter is "all" and accounts are loaded
+  useEffect(() => {
+    if (activeFilter === 'all' && allAccounts.length > 0) {
+      const allAccountIds = new Set(allAccounts.map(acc => acc.accountId));
+      // Only update if not all accounts are selected
+      if (selectedAccountIds.size !== allAccountIds.size) {
+        setSelectedAccountIds(allAccountIds);
+      }
+    }
+  }, [activeFilter, allAccounts, selectedAccountIds.size]);
+
   // Get selected accounts for display
   const selectedAccounts = useMemo(() => {
     if (selectedAccountIds.size === 0 || selectedAccountIds.size === allAccounts.length) {

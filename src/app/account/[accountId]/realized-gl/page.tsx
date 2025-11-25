@@ -147,21 +147,19 @@ export default function RealizedGLPage() {
   if (loading) {
     return (
       <div className="w-full">
-        <div className="flex flex-col gap-7">
+        <div className="flex flex-col gap-4">
           {/* Header Skeleton */}
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center pb-2">
-              <div className="h-8 w-40 bg-muted rounded animate-pulse"></div>
-              <div className="flex gap-2">
-                <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
-                <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
-              </div>
+          <div className="flex justify-between items-center">
+            <div className="h-8 w-40 bg-muted rounded animate-pulse"></div>
+            <div className="flex gap-2">
+              <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
+              <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
             </div>
           </div>
 
           {/* Summary Card Skeleton */}
           <Card className="p-6 bg-card">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="space-y-2">
                   <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
@@ -228,61 +226,59 @@ export default function RealizedGLPage() {
   return (
     <TooltipProvider>
       <div className="w-full">
-        <div className="flex flex-col gap-7">
-        {/* Header */}
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center pb-2">
-            <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Realized G/L</h1>
-            <div className="flex gap-2">
-              <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="w-20 h-9 bg-white dark:bg-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" className="h-9 bg-white dark:bg-white">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-            </div>
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Realized G/L</h1>
+          <div className="flex gap-2">
+            <Select value={yearFilter} onValueChange={setYearFilter}>
+              <SelectTrigger className="w-20 h-9 bg-white dark:bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2025">2025</SelectItem>
+                <SelectItem value="2024">2024</SelectItem>
+                <SelectItem value="2023">2023</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="h-9 bg-white dark:bg-white">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
           </div>
         </div>
 
         {/* Summary Section */}
         <Card className="p-6 bg-card">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total realized G/L</div>
-              <div className={`text-xl font-medium ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-xl font-medium ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.totalRealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalRealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </div>
+              </h3>
               <div className={`text-sm ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
                 {summaryData.totalRealizedGL >= 0 ? '+' : ''}{summaryData.totalGLPercent.toFixed(2)}%
               </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized long term G/L</div>
-              <div className={`text-xl font-medium ${summaryData.realizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-xl font-medium ${summaryData.realizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.realizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </div>
+              </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized short term G/L</div>
-              <div className={`text-xl font-medium ${summaryData.realizedShortTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-xl font-medium ${summaryData.realizedShortTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.realizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </div>
+              </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <div className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total sell value</div>
-              <div className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
           </div>
           <LastUpdated 

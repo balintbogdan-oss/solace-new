@@ -9,7 +9,7 @@ import { TooltipProps } from 'recharts';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Download, RefreshCw } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { LastUpdated } from '@/components/ui/last-updated';
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -132,10 +132,56 @@ export default function CommissionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading commission data...</p>
+      <div className="w-full">
+        <div className="flex flex-col gap-4">
+          {/* Header Skeleton */}
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center pb-2">
+              <div>
+                <div className="h-8 w-48 bg-muted rounded animate-pulse mb-2"></div>
+                <div className="h-4 w-64 bg-muted rounded animate-pulse"></div>
+              </div>
+              <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Summary and Chart Card Skeleton */}
+          <Card className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Summary Section Skeleton */}
+              <div className="space-y-4">
+                <div className="h-4 w-40 bg-muted rounded animate-pulse"></div>
+                <div className="h-4 w-56 bg-muted rounded animate-pulse"></div>
+                <div className="h-10 w-48 bg-muted rounded animate-pulse"></div>
+                <div className="space-y-2 mt-6">
+                  <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                  <div className="h-6 w-36 bg-muted rounded animate-pulse"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                  <div className="h-6 w-36 bg-muted rounded animate-pulse"></div>
+                </div>
+              </div>
+              {/* Chart Section Skeleton */}
+              <div className="h-[300px] bg-muted rounded animate-pulse"></div>
+            </div>
+          </Card>
+
+          {/* Commission Table Card Skeleton */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-6 w-32 bg-muted rounded animate-pulse"></div>
+              <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
+            </div>
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b">
+                  <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
       </div>
     );
@@ -151,20 +197,18 @@ export default function CommissionPage() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center pb-2">
-            <div>
-              <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Commission Summary</h1>
-              <p className="text-sm text-muted-foreground mt-1">Values as of the end of the prior business day</p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-            </div>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Commission Summary</h1>
+            <p className="text-sm text-muted-foreground mt-1">Values as of the end of the prior business day</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
           </div>
         </div>
 

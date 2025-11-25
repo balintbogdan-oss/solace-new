@@ -28,12 +28,10 @@ export default function PerformancePage() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center pb-2">
-            <h1 className="text-2xl font-medium font-serif text-slate-900 dark:text-slate-100">Performance</h1>
-          </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-medium font-serif text-slate-900 dark:text-slate-100">Performance</h1>
         </div>
 
         {/* Year selector and download all */}

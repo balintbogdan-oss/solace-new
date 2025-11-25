@@ -170,21 +170,19 @@ export default function UnrealizedGLPage() {
   if (loading) {
     return (
       <div className="w-full">
-        <div className="flex flex-col gap-7">
+        <div className="flex flex-col gap-4">
           {/* Header Skeleton */}
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center pb-2">
-              <div className="h-8 w-40 bg-muted rounded animate-pulse"></div>
-              <div className="flex gap-2">
-                <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
-                <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
-              </div>
+          <div className="flex justify-between items-center">
+            <div className="h-8 w-40 bg-muted rounded animate-pulse"></div>
+            <div className="flex gap-2">
+              <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
+              <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
             </div>
           </div>
 
           {/* Summary Card Skeleton */}
           <Card className="p-6 bg-card">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="space-y-2">
                   <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
@@ -197,7 +195,7 @@ export default function UnrealizedGLPage() {
           </Card>
 
           {/* All Tax Lots Section Skeleton */}
-          <div>
+          <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="h-6 w-32 bg-muted rounded animate-pulse"></div>
               <div className="h-10 w-40 bg-muted rounded animate-pulse"></div>
@@ -226,7 +224,7 @@ export default function UnrealizedGLPage() {
                 ))}
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -243,58 +241,56 @@ export default function UnrealizedGLPage() {
   return (
     <TooltipProvider>
       <div className="w-full">
-        <div className="flex flex-col gap-7">
-        {/* Header */}
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center pb-2">
-            <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Unrealized G/L</h1>
-            <div className="flex gap-2">
-              <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="w-20 h-9">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" className="h-9">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-            </div>
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Unrealized G/L</h1>
+          <div className="flex gap-2">
+            <Select value={yearFilter} onValueChange={setYearFilter}>
+              <SelectTrigger className="w-20 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2025">2025</SelectItem>
+                <SelectItem value="2024">2024</SelectItem>
+                <SelectItem value="2023">2023</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="h-9">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
           </div>
         </div>
 
         {/* Summary Section */}
         <Card className="p-6 bg-card">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <div className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Portfolio market value</div>
-              <div className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.portfolioMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.portfolioMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Unrealized long term G/L</div>
-              <div className={`text-xl font-medium ${summaryData.unrealizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-xl font-medium ${summaryData.unrealizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.unrealizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.unrealizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </div>
+              </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Unrealized short term G/L</div>
-              <div className="text-xl font-medium text-red-500" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className="text-xl font-medium text-red-500" style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.unrealizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.unrealizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </div>
+              </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total unrealized G/L</div>
-              <div className={`text-xl font-medium ${summaryData.totalUnrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-xl font-medium ${summaryData.totalUnrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.totalUnrealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalUnrealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </div>
+              </h3>
               <div className={`text-sm ${summaryData.totalUnrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
                 {summaryData.totalUnrealizedGL >= 0 ? '+' : ''}{summaryData.totalUnrealizedGLPercent.toFixed(2)}%
               </div>

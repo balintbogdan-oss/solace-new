@@ -169,7 +169,7 @@ export default function SecurityUnrealizedGLPage() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-4">
         {/* Breadcrumbs */}
         <div className="text-sm text-muted-foreground">
           Holdings &gt; Unrealized G/L

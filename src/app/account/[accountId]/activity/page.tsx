@@ -21,7 +21,6 @@ import {
   Search,
   ChevronsUpDown
 } from 'lucide-react';
-import { PageLoading } from '@/components/ui/page-loading';
 import { Activity } from '@/types/account';
 
 const activityTypes = [
@@ -431,9 +430,9 @@ function ActivityPageContent() {
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Net flow</p>
-              <p className="text-2xl font-normal text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                 {formatAmount(mockSummaryData.netFlow.total)}
-              </p>
+              </h3>
             </div>
             
             <div className="space-y-2">
@@ -479,9 +478,9 @@ function ActivityPageContent() {
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total income</p>
-              <p className="text-2xl font-normal text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                 {formatAmount(mockSummaryData.totalIncome.total)}
-              </p>
+              </h3>
             </div>
             
             <div className="space-y-2">
@@ -521,9 +520,9 @@ function ActivityPageContent() {
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Upcoming actions</p>
-              <p className="text-2xl font-normal text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                 {mockSummaryData.upcomingActions.total} events
-              </p>
+              </h3>
             </div>
             
             <div className="space-y-2">
@@ -794,9 +793,71 @@ function ActivityPageContent() {
   );
 }
 
+function ActivityPageSkeleton() {
+  return (
+    <div className="rounded-md space-y-4 md:space-y-4">
+      {/* Page Title and Controls Skeleton */}
+      <div className="flex items-center justify-between">
+        <div className="h-8 w-32 bg-muted rounded animate-pulse"></div>
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-[140px] bg-muted rounded animate-pulse"></div>
+          <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+        </div>
+      </div>
+
+      {/* Three Summary Cards Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="p-6 bg-card">
+            <div className="space-y-4">
+              <div>
+                <div className="h-4 w-24 bg-muted rounded animate-pulse mb-2"></div>
+                <div className="h-7 w-32 bg-muted rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-full bg-muted rounded animate-pulse"></div>
+                <div className="h-4 w-full bg-muted rounded animate-pulse"></div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Activity Card Skeleton */}
+      <Card className="p-6">
+        <div className="space-y-4">
+          {/* Tabs Skeleton */}
+          <div className="flex space-x-8 border-b pb-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-6 w-24 bg-muted rounded animate-pulse"></div>
+            ))}
+          </div>
+          {/* Filters Skeleton */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="h-10 flex-1 bg-muted rounded animate-pulse"></div>
+            <div className="flex gap-2">
+              <div className="h-10 w-[180px] bg-muted rounded animate-pulse"></div>
+              <div className="h-10 w-[140px] bg-muted rounded animate-pulse"></div>
+              <div className="h-10 w-24 bg-muted rounded animate-pulse"></div>
+              <div className="h-10 w-40 bg-muted rounded animate-pulse"></div>
+            </div>
+          </div>
+          {/* Table Skeleton */}
+          <div className="min-h-[400px]">
+            <div className="h-10 w-full bg-muted rounded animate-pulse mb-2"></div>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-12 w-full bg-muted rounded animate-pulse mb-2"></div>
+            ))}
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 export default function ActivityPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<ActivityPageSkeleton />}>
       <ActivityPageContent />
     </Suspense>
   );

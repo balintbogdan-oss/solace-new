@@ -216,9 +216,9 @@ export function AccountContent({ accountId }: AccountContentProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen rounded-md space-y-4 md:space-y-4">
+      <div className="rounded-md space-y-4 md:space-y-4">
         {/* Holdings Title Skeleton */}
-        <div className="w-full flex justify-between items-center mb-8">
+        <div className="w-full flex justify-between items-center">
           <div className="h-8 w-32 bg-muted rounded animate-pulse"></div>
           <div className="flex items-center space-x-2">
             <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
@@ -241,9 +241,9 @@ export function AccountContent({ accountId }: AccountContentProps) {
   }
 
   return (
-    <div className="min-h-screen rounded-md space-y-4 md:space-y-4 ">
+    <div className="rounded-md space-y-4 md:space-y-4">
          {/* Holdings Title and Action Buttons */}
-         <div className="w-full flex justify-between items-center mb-8">
+         <div className="w-full flex justify-between items-center">
             <h2 className="text-2xl font-serif ">Holdings</h2>
             <div className="flex items-center space-x-2">
               <Button variant="secondary">
@@ -271,17 +271,17 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       const match = value.match(/^\$([\d,]+)\.(\d{2})$/);
                       if (match) {
                         return (
-                          <div className="flex items-start leading-none">
-                            <div className="text-xl sm:text-2xl font-medium text-foreground tracking-[-0.24px] leading-[32px] sm:leading-[40px]" style={{ fontFamily: 'var(--font-family-headers, "Source Serif 4")' }}>
+                          <h3 className="flex items-start leading-none">
+                            <span className="text-xl sm:text-2xl font-medium text-foreground tracking-[-0.24px] leading-[32px] sm:leading-[40px]" style={{ fontFamily: 'var(--font-family-headers, "Source Serif 4")' }}>
                               ${match[1]}.
-                            </div>
-                            <div className="text-base sm:text-lg font-medium text-foreground leading-6 h-[28px] sm:h-[35px] flex items-end" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
+                            </span>
+                            <span className="text-base sm:text-lg font-medium text-foreground leading-6 h-[28px] sm:h-[35px] flex items-end" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
                               {match[2]}
-                            </div>
-                          </div>
+                            </span>
+                          </h3>
                         );
                       }
-                      return <div className="text-xl sm:text-2xl font-medium text-foreground">{value}</div>;
+                      return <h3 className="text-xl sm:text-2xl font-medium text-foreground">{value}</h3>;
                     })()}
                   </div>
                   <div className="flex flex-col items-start gap-2 w-full">

@@ -80,11 +80,11 @@ export function DonutChart({ data, portfolioValue, size = 'default' }: DonutChar
         {isLarge ? (
           <>
             <div className={`${labelTextSize} font-medium ${labelLeading} text-muted-foreground`}>Portfolio value</div>
-            <div className={`${valueTextSize} font-medium ${valueLeading} text-foreground`}>{formatPortfolioValue(portfolioValue, true)}</div>
+            <h3 className={`${valueTextSize} font-medium ${valueLeading} text-foreground`}>{formatPortfolioValue(portfolioValue, true)}</h3>
           </>
         ) : (
           <>
-            <div className={`${valueTextSize} font-medium ${valueLeading} text-foreground`}>{formatPortfolioValue(portfolioValue)}</div>
+            <h3 className={`${valueTextSize} font-medium ${valueLeading} text-foreground`}>{formatPortfolioValue(portfolioValue)}</h3>
             <div className={`${labelTextSize} font-medium ${labelLeading} text-card-foreground`}>Portfolio value</div>
           </>
         )}

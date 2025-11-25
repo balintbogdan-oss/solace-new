@@ -52,15 +52,13 @@ function BalancesPageContent() {
   if (loading) {
     return (
       <div className="w-full">
-        <div className="flex flex-col gap-7">
+        <div className="flex flex-col gap-4">
           {/* Header Skeleton */}
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center pb-2">
-              <div className="h-8 w-32 bg-muted rounded animate-pulse"></div>
-              <div className="flex gap-2">
-                <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
-                <div className="h-9 w-32 bg-muted rounded animate-pulse"></div>
-              </div>
+          <div className="flex justify-between items-center">
+            <div className="h-8 w-32 bg-muted rounded animate-pulse"></div>
+            <div className="flex gap-2">
+              <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+              <div className="h-9 w-32 bg-muted rounded animate-pulse"></div>
             </div>
           </div>
 
@@ -131,18 +129,16 @@ function BalancesPageContent() {
     <div className="w-full">
       <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center pb-2">
-            <h1 className="text-2xl text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Balances</h1>
-            <div className="flex gap-2">
-              <Button variant="outline" className="h-9">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-              <Button variant="outline" className="h-9">
-                View History
-              </Button>
-            </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Balances</h1>
+          <div className="flex gap-2">
+            <Button variant="secondary" className="h-9">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="secondary" className="h-9">
+              View History
+            </Button>
           </div>
         </div>
 
