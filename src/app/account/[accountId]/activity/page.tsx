@@ -441,9 +441,9 @@ function ActivityPageContent() {
                 <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                   <ArrowDown className="h-3 w-3 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
-                    Deposits · {mockSummaryData.netFlow.deposits.count} transactions
+                    Deposits
                   </span>
                   <div className="text-sm font-medium text-foreground">
                     {formatAmount(mockSummaryData.netFlow.deposits.amount)}
@@ -455,9 +455,9 @@ function ActivityPageContent() {
                 <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
                   <ArrowUp className="h-3 w-3 text-orange-600 dark:text-orange-400" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
-                    Withdrawals · {mockSummaryData.netFlow.withdrawals.count} transactions
+                    Withdrawals
                   </span>
                   <div className="text-sm font-medium text-foreground">
                     {formatAmount(mockSummaryData.netFlow.withdrawals.amount)}
@@ -486,7 +486,7 @@ function ActivityPageContent() {
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="flex-1">
+                <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
                     Dividend income · {mockSummaryData.totalIncome.dividendIncome.count} transactions
                   </span>
@@ -497,7 +497,7 @@ function ActivityPageContent() {
               </div>
               
               <div className="flex items-center gap-2">
-                <div className="flex-1">
+                <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
                     Interest payments
                   </span>
@@ -528,7 +528,7 @@ function ActivityPageContent() {
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="flex-1">
+                <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
                     Maturing bonds
                   </span>
@@ -539,7 +539,7 @@ function ActivityPageContent() {
               </div>
               
               <div className="flex items-center gap-2">
-                <div className="flex-1">
+                <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
                     Corporate Actions
                   </span>
@@ -559,86 +559,89 @@ function ActivityPageContent() {
         </Card>
       </div>
 
-      {/* Activity Tabs */}
-      <div className="flex justify-between items-end border-b">
-        <div className="flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as 'all' | 'cashflow' | 'ira')}
-              className={`pb-2 font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      {/* Activity Tabs, Filters, and Table */}
+      <Card className="p-6">
+        {/* Activity Tabs */}
+        <div className="flex justify-between items-end border-b mb-4 pb-2">
+          <div className="flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as 'all' | 'cashflow' | 'ira')}
+                className={`pb-2 font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-b-2 border-primary text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <LastUpdated 
+            timestamp={`Updated ${getCurrentTimestamp()}`} 
+            onRefresh={handleRefresh}
+            className="pb-2"
+            showBorder={false}
+          />
         </div>
-        <LastUpdated 
-          timestamp={`Updated ${getCurrentTimestamp()}`} 
-          onRefresh={handleRefresh}
-          className="pb-2"
-        />
-      </div>
 
-      {/* Tab Content */}
-      <div className="space-y-4">
-        {/* Filters and Search */}
+        {/* Tab Content */}
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search by Symbol or CUSIP"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="border-gray-300 dark:border-gray-600 pl-10"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Select value={activityTypeFilter} onValueChange={setActivityTypeFilter}>
-                <SelectTrigger className="w-[180px] border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
-                  <SelectValue placeholder="Activity type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {activityTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type === 'All' ? 'Activity type' : type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Filters and Search */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search by Symbol or CUSIP"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border-gray-300 dark:border-gray-600 pl-10"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Select value={activityTypeFilter} onValueChange={setActivityTypeFilter}>
+                  <SelectTrigger className="w-[180px] border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
+                    <SelectValue placeholder="Activity type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activityTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type === 'All' ? 'Activity type' : type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <Select value={accountTypeFilter} onValueChange={setAccountTypeFilter}>
-                <SelectTrigger className="w-[140px] border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
-                  <SelectValue placeholder="Account type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {accountTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type === 'All' ? 'Account type' : type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Select value={accountTypeFilter} onValueChange={setAccountTypeFilter}>
+                  <SelectTrigger className="w-[140px] border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
+                    <SelectValue placeholder="Account type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accountTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type === 'All' ? 'Account type' : type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                <Maximize className="h-4 w-4 mr-2" />
-                Expand
-              </Button>
+                <Button variant="secondary">
+                  <Maximize className="h-4 w-4 mr-2" />
+                  Expand
+                </Button>
 
-              <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                Customize columns
-              </Button>
+                <Button variant="secondary">
+                  Customize columns
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Activity Table */}
-        <div className="bg-card rounded-lg">
-          <div className="overflow-x-auto">
+          {/* Activity Table */}
+          <div className="rounded-lg min-h-[400px]">
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
@@ -783,9 +786,10 @@ function ActivityPageContent() {
                 </tr>
               </tfoot>
             </table>
+            </div>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

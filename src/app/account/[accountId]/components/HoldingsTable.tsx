@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -11,7 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search, SlidersHorizontal, RefreshCcw, MoreHorizontal, ChevronsUpDown, Info, ArrowUp, ArrowDown, TrendingUp, RotateCcw, BarChart3 } from 'lucide-react'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Switch } from '@/components/ui/switch'
+import { Search, SlidersHorizontal, RefreshCcw, MoreHorizontal, ChevronsUpDown, Info, ArrowUp, ArrowDown, TrendingUp, RotateCcw, BarChart3, GripVertical } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -24,10 +30,35 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 import { HoldingWithDetails } from '@/types/account';
 
 type SortableColumn = keyof HoldingWithDetails | 'currentPrice' | 'sector' | 'description' | 'assetClass';
+
+interface ColumnDefinition {
+  id: string;
+  label: string;
+  sortKey: SortableColumn | null;
+  defaultVisible: boolean;
+  alwaysVisible?: boolean; // For Actions and Symbol which are sticky
+}
 
 interface HoldingsTableProps {
   onStockClick?: (symbol: string) => void;
@@ -36,8 +67,125 @@ interface HoldingsTableProps {
   accountId?: string;
 }
 
+// Column definitions
+const COLUMN_DEFINITIONS: ColumnDefinition[] = [
+  { id: 'actions', label: 'Actions', sortKey: null, defaultVisible: true, alwaysVisible: true },
+  { id: 'symbol', label: 'Symbol/CUSIP', sortKey: 'symbol', defaultVisible: true, alwaysVisible: true },
+  { id: 'assetClass', label: 'Asset class', sortKey: 'assetClass', defaultVisible: true },
+  { id: 'quantity', label: 'Quantity', sortKey: 'quantity', defaultVisible: true },
+  { id: 'marketValue', label: 'Market Value', sortKey: 'marketValue', defaultVisible: true },
+  { id: 'description', label: 'Description', sortKey: 'description', defaultVisible: true },
+  { id: 'unrealizedGL', label: 'Unrealized G/L', sortKey: 'unrealizedGL', defaultVisible: true },
+  { id: 'unrealizedGLPercent', label: 'Unrealized G/L %', sortKey: 'unrealizedGLPercent', defaultVisible: true },
+  { id: 'currentPrice', label: 'Current Price', sortKey: 'currentPrice', defaultVisible: true },
+  { id: 'avgPrice', label: 'Avg Price', sortKey: 'avgPrice', defaultVisible: true },
+];
+
+const STORAGE_KEY = 'holdings-table-columns';
+
+function loadColumnPreferences(): { order: string[]; visibility: Record<string, boolean> } {
+  if (typeof window === 'undefined') {
+    return {
+      order: COLUMN_DEFINITIONS.map(col => col.id),
+      visibility: Object.fromEntries(COLUMN_DEFINITIONS.map(col => [col.id, col.defaultVisible])),
+    };
+  }
+  
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Ignore errors
+  }
+  
+  return {
+    order: COLUMN_DEFINITIONS.map(col => col.id),
+    visibility: Object.fromEntries(COLUMN_DEFINITIONS.map(col => [col.id, col.defaultVisible])),
+  };
+}
+
+function saveColumnPreferences(order: string[], visibility: Record<string, boolean>) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ order, visibility }));
+  } catch {
+    // Ignore errors
+  }
+}
+
+// Sortable column item component
+function SortableColumnItem({ 
+  id, 
+  label, 
+  visible, 
+  onToggle,
+  alwaysVisible 
+}: { 
+  id: string; 
+  label: string; 
+  visible: boolean; 
+  onToggle: (id: string) => void;
+  alwaysVisible?: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ 
+    id,
+    disabled: alwaysVisible, // Disable dragging for required columns
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 px-3 py-1.5 rounded-md bg-muted/30 hover:bg-muted/50 transition-colors"
+    >
+      {!alwaysVisible && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground flex-shrink-0"
+        >
+          <GripVertical className="h-4 w-4" />
+        </div>
+      )}
+      {alwaysVisible && (
+        <div className="w-4 h-4 flex-shrink-0" /> // Spacer for alignment when no drag handle
+      )}
+      <span className={`flex-1 text-sm ${alwaysVisible ? 'text-muted-foreground' : 'text-foreground'}`}>
+        {label}
+      </span>
+      <Switch
+        checked={visible}
+        onCheckedChange={() => onToggle(id)}
+        disabled={alwaysVisible}
+        className="flex-shrink-0"
+      />
+    </div>
+  );
+}
+
 export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails, accountId }: HoldingsTableProps) {
   const router = useRouter();
+  
+  // Load column preferences from localStorage
+  const initialPrefs = loadColumnPreferences();
+  const [columnOrder, setColumnOrder] = useState<string[]>(initialPrefs.order);
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(initialPrefs.visibility);
+  const [isCustomizeDialogOpen, setIsCustomizeDialogOpen] = useState(false);
   
   // State for sorting
   const [sortColumn, setSortColumn] = useState<SortableColumn | null>(null);
@@ -47,6 +195,71 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
   const [searchTerm, setSearchTerm] = useState('');
   const [accountTypeFilter, setAccountTypeFilter] = useState('All');
   const [assetClassFilter, setAssetClassFilter] = useState('All');
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Save preferences when they change
+  useEffect(() => {
+    saveColumnPreferences(columnOrder, columnVisibility);
+  }, [columnOrder, columnVisibility]);
+
+  // Get visible columns in order
+  const visibleColumns = useMemo(() => {
+    return columnOrder.filter(id => columnVisibility[id] || COLUMN_DEFINITIONS.find(col => col.id === id)?.alwaysVisible);
+  }, [columnOrder, columnVisibility]);
+
+  // Get column definition by ID
+  const getColumnDef = (id: string) => COLUMN_DEFINITIONS.find(col => col.id === id);
+
+  // Handle column toggle
+  const handleToggleColumn = (id: string) => {
+    const col = getColumnDef(id);
+    if (col?.alwaysVisible) return;
+    
+    setColumnVisibility(prev => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    
+    const activeId = active.id as string;
+    const overId = over.id as string;
+    
+    // Prevent moving required columns (actions and symbol)
+    const activeCol = getColumnDef(activeId);
+    const overCol = getColumnDef(overId);
+    
+    if (activeCol?.alwaysVisible || overCol?.alwaysVisible) {
+      return; // Don't allow moving required columns
+    }
+    
+    setColumnOrder(items => {
+      // Keep required columns in their fixed positions
+      const requiredColumns = items.filter(id => getColumnDef(id)?.alwaysVisible);
+      const movableColumns = items.filter(id => !getColumnDef(id)?.alwaysVisible);
+      
+      const oldIndex = movableColumns.indexOf(activeId);
+      const newIndex = movableColumns.indexOf(overId);
+      
+      if (oldIndex === -1 || newIndex === -1) return items;
+      
+      const reorderedMovable = arrayMove(movableColumns, oldIndex, newIndex);
+      
+      // Reconstruct: required columns first, then movable columns
+      return [...requiredColumns, ...reorderedMovable];
+    });
+  };
 
   // Handler functions for dropdown menu
   const handleTradeClick = (symbol: string) => {
@@ -245,10 +458,43 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
         </Select>
 
         <div className="ml-auto flex gap-2">
-          <Button variant="outline">
-            <SlidersHorizontal className="w-4 h-4" />
-            Customize columns
-          </Button>
+          <Popover open={isCustomizeDialogOpen} onOpenChange={setIsCustomizeDialogOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                <SlidersHorizontal className="w-4 h-4" />
+                Customize columns
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4" align="end">
+              <div className="space-y-0.5 max-h-[400px] overflow-y-auto">
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={columnOrder.filter(id => !getColumnDef(id)?.alwaysVisible)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {columnOrder.map((columnId) => {
+                        const col = getColumnDef(columnId);
+                        if (!col) return null;
+                        return (
+                          <SortableColumnItem
+                            key={columnId}
+                            id={columnId}
+                            label={col.label}
+                            visible={columnVisibility[columnId] ?? col.defaultVisible}
+                            onToggle={handleToggleColumn}
+                            alwaysVisible={col.alwaysVisible}
+                          />
+                        );
+                      })}
+                    </SortableContext>
+                  </DndContext>
+                </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -256,168 +502,175 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
         <table className="w-full text-sm text-left border-separate border-spacing-0 rounded-md">
           <thead className="sticky top-0 border-t border-b bg-muted text-muted-foreground z-10">
             <tr>
-              <th className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-30 bg-muted px-4 text-left">Actions</th>
-              <th className={`px-4 py-2 dark:text-white border-r border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 dark:hover:bg-accent/30 whitespace-nowrap sticky z-30 bg-muted text-left ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`} style={{ left: '56px' }}>
-                <button className="flex items-center gap-1 bg-transparent w-full" onClick={() => handleSort('symbol')}>
-                  <span>Symbol/CUSIP</span>
-                  {sortColumn === 'symbol' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted text-left ${sortColumn === 'assetClass' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="bg-transparent flex items-center gap-1 w-full" onClick={() => handleSort('assetClass')}>
-                  <span>Asset class</span>
-                  {sortColumn === 'assetClass' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted text-left ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="flex items-center gap-1 w-full" onClick={() => handleSort('quantity')}>
-                  <span>Quantity</span>
-                  {sortColumn === 'quantity' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted text-left ${sortColumn === 'marketValue' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="flex items-center gap-1 w-full" onClick={() => handleSort('marketValue')}>
-                  <span>Market Value</span>
-                  {sortColumn === 'marketValue' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted text-left ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="flex items-center gap-1 w-full" onClick={() => handleSort('description')}>
-                  <span>Description</span>
-                  {sortColumn === 'description' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted ${sortColumn === 'unrealizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="flex items-center gap-1 w-full" onClick={() => handleSort('unrealizedGL')}>
-                  <span>Unrealized G/L</span>
-                  {sortColumn === 'unrealizedGL' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted ${sortColumn === 'unrealizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="flex items-center gap-1 w-full" onClick={() => handleSort('unrealizedGLPercent')}>
-                  <span>Unrealized G/L %</span>
-                  {sortColumn === 'unrealizedGLPercent' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted ${sortColumn === 'currentPrice' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="flex items-center gap-1 w-full" onClick={() => handleSort('currentPrice')}>
-                  <span>Current Price</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="ml-1 h-3 w-3 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Current Market Price</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  {sortColumn === 'currentPrice' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted ${sortColumn === 'avgPrice' ? 'border-b-2 border-b-primary' : ''}`}>
-                <button className="flex items-center gap-1 w-full" onClick={() => handleSort('avgPrice')}>
-                  <span>Avg Price</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="ml-1 h-3 w-3 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Average Purchase Price</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  {sortColumn === 'avgPrice' ? (
-                    sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </button>
-              </th>
+              {visibleColumns.map((columnId) => {
+                const col = getColumnDef(columnId);
+                if (!col) return null;
+
+                // Render header cell based on column type
+                if (columnId === 'actions') {
+                  return (
+                    <th key={columnId} className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-40 bg-muted px-4 text-left font-medium">
+                      Actions
+                    </th>
+                  );
+                }
+
+                if (columnId === 'symbol') {
+                  return (
+                    <th
+                      key={columnId}
+                      className={`px-4 py-2 dark:text-white border-b border-r cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap sticky z-40 bg-muted text-left font-medium ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}
+                      style={{ left: '56px' }}
+                    >
+                      <button className="flex items-center gap-1 bg-transparent w-full font-medium" onClick={() => handleSort('symbol')}>
+                        <span>Symbol/CUSIP</span>
+                        {sortColumn === 'symbol' ? (
+                          sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        ) : (
+                          <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        )}
+                      </button>
+                    </th>
+                  );
+                }
+
+                const isSortable = col.sortKey !== null;
+                const isSorted = sortColumn === col.sortKey;
+
+                return (
+                  <th
+                    key={columnId}
+                    className={`px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium ${isSortable ? 'text-left' : ''} ${isSorted ? 'border-b-2 border-b-primary' : ''}`}
+                  >
+                    {isSortable ? (
+                      <button className="flex items-center gap-1 w-full font-medium" onClick={() => col.sortKey && handleSort(col.sortKey)}>
+                        <span>{col.label}</span>
+                        {col.id === 'currentPrice' || col.id === 'avgPrice' ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="ml-1 h-3 w-3 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{col.id === 'currentPrice' ? 'Current Market Price' : 'Average Purchase Price'}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : null}
+                        {isSorted ? (
+                          sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        ) : (
+                          <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        )}
+                      </button>
+                    ) : (
+                      <span>{col.label}</span>
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
             {processedHoldings.map((row) => (
               <tr
                 key={row.security.cusip}
-                className={'hover:bg-muted/50 dark:hover:bg-accent/30 border-b border cursor-pointer relative group bg-card'}
+                className={'hover:bg-muted dark:hover:bg-accent border-b border cursor-pointer relative group bg-card'}
               >
-                <td className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-30 bg-card border-b px-4 group-hover:!bg-muted/50 dark:group-hover:!bg-accent/30">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="Actions">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleTradeClick(row.symbol)}>
-                        <TrendingUp className="mr-2 h-4 w-4" />
-                        Trade
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleViewUnrealizedGL(row.symbol)}>
-                        <RotateCcw className="mr-2 h-4 w-4" />
-                        View Unrealized G/L
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleStockDetails(row.symbol)}>
-                        <BarChart3 className="mr-2 h-4 w-4" />
-                        Stock details
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-                <td 
-                  className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-30 bg-card border-r border-b group-hover:!bg-muted/50 dark:group-hover:!bg-accent/30"
-                  style={{ left: '56px' }}
-                  onClick={() => onStockClick?.(row.symbol)}
-                >
-                  {row.symbol}
-                  <div className="text-xs text-muted-foreground whitespace-nowrap">{row.security.cusip}</div>
-                </td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">{getAssetClass(row)}</td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">{row.quantity}</td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">${(row.marketValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                <td className="px-4 py-2 truncate dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">{row.security.description}</td>
-                <td className={`px-4 py-2 font-semibold whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 ${(row.unrealizedGL || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
-                  {(row.unrealizedGL || 0) >= 0 ? '+' : '-'}${Math.abs(row.unrealizedGL || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                </td>
-                <td className={`px-4 py-2 font-semibold whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 ${(row.unrealizedGLPercent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
-                  {(row.unrealizedGLPercent || 0) >= 0 ? '+' : '-'}{Math.abs(row.unrealizedGLPercent || 0).toFixed(2)}%
-                </td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">${(row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">${(row.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                {visibleColumns.map((columnId) => {
+                  const col = getColumnDef(columnId);
+                  if (!col) return null;
+
+                  // Render cell based on column type
+                  if (columnId === 'actions') {
+                    return (
+                      <td key={columnId} className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-40 border-b px-4 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" aria-label="Actions">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleTradeClick(row.symbol)}>
+                              <TrendingUp className="mr-2 h-4 w-4" />
+                              Trade
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewUnrealizedGL(row.symbol)}>
+                              <RotateCcw className="mr-2 h-4 w-4" />
+                              View Unrealized G/L
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStockDetails(row.symbol)}>
+                              <BarChart3 className="mr-2 h-4 w-4" />
+                              Stock details
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    );
+                  }
+
+                  if (columnId === 'symbol') {
+                    return (
+                      <td
+                        key={columnId}
+                        className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-40 border-b border-r bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30"
+                        style={{ left: '56px' }}
+                        onClick={() => onStockClick?.(row.symbol)}
+                      >
+                        {row.symbol}
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">{row.security.cusip}</div>
+                      </td>
+                    );
+                  }
+
+                  let cellContent: React.ReactNode;
+                  switch (columnId) {
+                    case 'assetClass':
+                      cellContent = getAssetClass(row);
+                      break;
+                    case 'quantity':
+                      cellContent = row.quantity;
+                      break;
+                    case 'marketValue':
+                      cellContent = `$${(row.marketValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                      break;
+                    case 'description':
+                      cellContent = <span className="truncate">{row.security.description}</span>;
+                      break;
+                    case 'unrealizedGL':
+                      cellContent = (
+                        <span className={`${(row.unrealizedGL || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                          {(row.unrealizedGL || 0) >= 0 ? '+' : '-'}${Math.abs(row.unrealizedGL || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      );
+                      break;
+                    case 'unrealizedGLPercent':
+                      cellContent = (
+                        <span className={`${(row.unrealizedGLPercent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                          {(row.unrealizedGLPercent || 0) >= 0 ? '+' : '-'}{Math.abs(row.unrealizedGLPercent || 0).toFixed(2)}%
+                        </span>
+                      );
+                      break;
+                    case 'currentPrice':
+                      cellContent = `$${(row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                      break;
+                    case 'avgPrice':
+                      cellContent = `$${(row.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                      break;
+                    default:
+                      cellContent = null;
+                  }
+
+                  return (
+                    <td
+                      key={columnId}
+                      className={`px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30`}
+                    >
+                      {cellContent}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>

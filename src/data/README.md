@@ -83,22 +83,6 @@ import { getAllStocks } from '@/services/marketDataService';
 const allStocks = await getAllStocks();
 ```
 
-## Data Generation
-
-The market data is generated using the scripts in `/scripts/`:
-
-### `generate-market-data.js`
-- Generates realistic stock market data
-- Creates 120+ stocks across all major sectors
-- Simulates realistic price movements and trading volumes
-- Updates CUSIPs, market caps, and other financial metrics
-
-### `generate-options-data.js`
-- Generates comprehensive options data
-- Creates 10,000+ option contracts
-- Covers 20 popular underlying stocks
-- Includes realistic Greeks and pricing
-
 ## Testing
 
 Visit `/test-market-data` to see a live display of the market data including:
@@ -117,12 +101,4 @@ All data follows the TypeScript interfaces defined in `/src/types/account.ts`:
 - `Security` interface for stock information
 - Custom interfaces for options data
 
-## Updates
-
-To regenerate the market data with fresh prices:
-```bash
-node scripts/generate-market-data.js
-node scripts/generate-options-data.js
-```
-
-The data includes realistic volatility and price movements while maintaining consistent relationships between strikes, expirations, and underlying prices.
+The market data files are static JSON files that can be manually updated as needed. The data includes realistic volatility and price movements while maintaining consistent relationships between strikes, expirations, and underlying prices.
