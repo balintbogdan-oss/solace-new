@@ -56,8 +56,8 @@ export function PortfolioDetailsSection({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-lg sm:text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
           Portfolio details
         </h2>
         <DropdownMenu open={isAccountDropdownOpen} onOpenChange={onSetIsAccountDropdownOpen}>
@@ -65,17 +65,18 @@ export function PortfolioDetailsSection({
             <Button
               variant={activeFilter === 'all' ? 'outline' : 'active'}
               size="sm"
-              className={`flex items-center gap-2 text-sm ${activeFilter === 'all' ? '!bg-white' : ''}`}
+              className={`flex items-center gap-2 text-sm flex-shrink-0 ${activeFilter === 'all' ? '!bg-white' : ''}`}
             >
-              <span>{getDropdownButtonLabel()}</span>
+              <span className="hidden sm:inline">{getDropdownButtonLabel()}</span>
+              <span className="sm:hidden">Filter</span>
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[402px] z-[100] p-0">
+          <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-[402px] max-w-[402px] z-[100] p-0">
             <div className="border-b px-4 py-[18px]">
               <div className="flex flex-col gap-3">
                 <p className="text-sm text-muted-foreground">Filter by</p>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => onSelectFilter('all')}
                     className={`h-7 px-3 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
@@ -226,13 +227,13 @@ export function PortfolioDetailsSection({
       </div>
 
       <Card className="rounded-2xl shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] overflow-hidden">
-        <div className="p-6 flex flex-col gap-6">
+        <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-medium text-foreground leading-6">Asset Allocation</h2>
           </div>
 
-          <div className="flex items-start gap-16">
-            <div className="w-[200px] h-[200px] flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-16">
+            <div className="w-[200px] h-[200px] flex-shrink-0 mx-auto sm:mx-0">
               <DonutChart 
                 data={assetAllocationData} 
                 portfolioValue={totalPortfolioValue}
@@ -240,8 +241,8 @@ export function PortfolioDetailsSection({
               />
             </div>
 
-            <div className="flex-1 flex items-start overflow-hidden">
-              <div className="w-[134px] flex flex-col overflow-hidden">
+            <div className="flex-1 w-full sm:w-auto flex flex-col sm:flex-row items-start overflow-hidden gap-0 sm:gap-0">
+              <div className="w-full sm:w-[134px] flex flex-col overflow-hidden">
                 {assetAllocationData.map((item, index) => (
                   <div 
                     key={item.name} 
@@ -257,7 +258,7 @@ export function PortfolioDetailsSection({
                 ))}
               </div>
 
-              <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 w-full sm:w-auto flex flex-col overflow-hidden">
                 {assetAllocationData.map((item, index) => {
                   const dollarValue = (totalPortfolioValue * item.value) / 100;
                   const formattedValue = dollarValue >= 1000000 
@@ -269,11 +270,11 @@ export function PortfolioDetailsSection({
                   return (
                     <div 
                       key={item.name} 
-                      className={`min-w-[85px] px-2 py-2.5 flex items-center gap-2 ${
+                      className={`min-w-[85px] px-2 py-2.5 flex items-center justify-between sm:justify-start gap-2 ${
                         index < assetAllocationData.length - 1 ? 'border-b' : ''
                       }`}
                     >
-                      <div className="flex-1 text-right text-sm font-medium text-foreground leading-6 line-clamp-1">
+                      <div className="text-sm font-medium text-foreground leading-6 line-clamp-1 sm:text-right">
                         {item.value}%
                       </div>
                       <div className="text-sm font-normal text-muted-foreground leading-6 line-clamp-1">
@@ -286,9 +287,11 @@ export function PortfolioDetailsSection({
             </div>
           </div>
         </div>
-        <div className="px-6 py-2 border-t flex justify-between items-center">
+        <div className="px-4 sm:px-6 py-2 border-t flex justify-between items-center">
           <div className="text-xs text-muted-foreground">
-            Updated {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })} {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} ET
+            <span className="hidden sm:inline">Updated </span>
+            <span className="sm:hidden">Upd. </span>
+            {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })} {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} ET
           </div>
         </div>
       </Card>

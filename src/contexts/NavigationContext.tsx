@@ -53,9 +53,9 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
           // Check dynamic route match
           if (path.includes('[') && path.includes(']')) {
             // Regex to match the pattern and capture the base dynamic part
-            // Example: /account/[accountId] -> /^(\/account\/[^\/]+)(?:\/|$)/
+            // Example: /account/[accountId] -> /^(\/account\/[^\/]+)(?:\/.*)?$/
             const dynamicBasePattern = path.replace(/\[.*?\]/g, '[^\/]+'); // Converts [accountId] to [^/]+
-            const regex = new RegExp(`^(${dynamicBasePattern})(?:\/|$)`); // Match base + optional slash or end
+            const regex = new RegExp(`^(${dynamicBasePattern})(?:\/.*)?$`); // Match base + optional slash and any sub-path
             const match = pathname?.match(regex);
             if (match) {
               baseHref = match[1]; // Capture the full base path like /account/1PB10001

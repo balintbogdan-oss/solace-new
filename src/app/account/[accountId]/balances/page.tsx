@@ -127,7 +127,7 @@ function BalancesPageContent() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-4">
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pb-2">
@@ -147,7 +147,7 @@ function BalancesPageContent() {
         {/* Total Account Value */}
         <Card className="p-6 bg-card">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-sm font-medium">Total account value</h2>
+            <span className="text-sm font-normal">Total account value</span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -161,7 +161,7 @@ function BalancesPageContent() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="text-2xl mb-6" style={{ fontFamily: 'var(--font-display)' }}>{formatAmount(balanceData.totalValue)}</div>
+          <h3 className="text-2xl mb-6" style={{ fontFamily: 'var(--font-display)' }}>{formatAmount(balanceData.totalValue)}</h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
             <div>
               <div className="text-muted-foreground">Available cash</div>
@@ -196,7 +196,7 @@ function BalancesPageContent() {
           {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-6">
             {/* Balance & Market Value */}
-            <div>
+            <Card className="p-6">
               <h3 className="text-lg font-medium mb-4">Balance & market value</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -235,10 +235,10 @@ function BalancesPageContent() {
                   className="mt-4"
                 />
               </div>
-            </div>
+            </Card>
 
             {/* Cashflow Summary */}
-            <div>
+            <Card className="p-6">
               <h3 className="text-lg font-medium mb-4">Cashflow summary</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -287,11 +287,11 @@ function BalancesPageContent() {
                   className="mt-4"
                 />
               </div>
-            </div>
+            </Card>
 
 
             {/* Total Account Value History */}
-            <div>
+            <Card className="p-6">
               <h3 className="text-lg font-medium mb-4">Total account value history</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -335,10 +335,10 @@ function BalancesPageContent() {
                   className="mt-4"
                 />
               </div>
-            </div>
+            </Card>
 
             {/* Interest */}
-            <div>
+            <Card className="p-6">
               <h3 className="text-lg font-medium mb-4">Interest</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -382,7 +382,7 @@ function BalancesPageContent() {
                   className="mt-4"
                 />
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Right Column - 1/3 width */}

@@ -467,12 +467,12 @@ export function AccountClientContentHardcoded({ accountId }: AccountClientConten
          <div className="w-full flex justify-between items-center">
             <h2 className="text-2xl font-serif ">Holdings</h2>
             <div className="flex items-center space-x-2">
-              <Button variant="secondary" size="sm">
-                <FileText className="mr-2 h-4 w-4" />
+              <Button variant="secondary">
+                <FileText className="mr-2 h-5 w-5" />
                 Export
               </Button>
-              <Button variant="secondary" size="sm">
-                <History className="mr-2 h-4 w-4" />
+              <Button variant="secondary">
+                <History className="mr-2 h-5 w-5" />
                 View History
               </Button>
             </div>

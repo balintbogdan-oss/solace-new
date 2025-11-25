@@ -32,7 +32,7 @@ function ReportsLayoutContent({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-black">
+    <div className="flex-1 flex flex-col bg-background">
       <FullSizePageHeader>
         <div className="flex flex-col gap-2">
           {/* Rep/Office codes switcher */}
@@ -42,7 +42,7 @@ function ReportsLayoutContent({
         </div>
       </FullSizePageHeader>
       <div className="flex flex-1 min-h-screen pt-0">
-        <div className={`sticky border-r h-[calc(100vh-theme(spacing.20))] flex-shrink-0 transition-all duration-300 ${
+        <div className={`sticky h-[calc(100vh-theme(spacing.20))] flex-shrink-0 transition-all duration-300 pt-2 ${
           isMinimized ? 'w-[60px]' : 'w-[260px]'
         }`}>
           <Sidebar />

@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Rectangle } 
 import { TooltipProps } from 'recharts';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Download, RefreshCw } from 'lucide-react';
 import { LastUpdated } from '@/components/ui/last-updated';
 import { useAccountData } from '@/contexts/AccountDataContext';
@@ -166,16 +167,16 @@ export default function CommissionPage() {
         </div>
 
         {/* Combined Summary and Chart Section */}
-        <div className="border p-6 rounded-md">
+        <Card className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Summary Section */}
-            <div className="space-y-4">
+            <div className="flex flex-col justify-between min-h-[300px]">
               <div>
                 <div className="text-sm font-medium text-muted-foreground mb-1">Total commission earned</div>
                 <div className="text-sm text-muted-foreground mb-2">From September 2024 to August 2025</div>
-                <div className="text-3xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+                <h3 className="text-3xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
                   ${summaryData.totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                </div>
+                </h3>
                 <div className="text-xs text-muted-foreground mt-1">Figures shown represent gross values</div>
               </div>
               
@@ -195,7 +196,6 @@ export default function CommissionPage() {
               <LastUpdated 
                 timestamp="Updated 09/22/2025 3:35 PM ET" 
                 onRefresh={refreshData}
-                className="mt-4"
               />
             </div>
 
@@ -240,12 +240,12 @@ export default function CommissionPage() {
               </ResponsiveContainer>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Monthly Breakdown Section */}
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold">Monthly breakdown</h2>
+            <h2 className="text-lg font-normal">Monthly breakdown</h2>
             <LastUpdated 
               timestamp="Updated 01/08/2025 8:05 AM ET" 
               className=""
@@ -253,114 +253,118 @@ export default function CommissionPage() {
           </div>
 
           {/* 2025 Table */}
-          <div className="mb-8">
-            <h3 className="text-md font-medium text-foreground mb-4">2025</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Month</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Total commission</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Average per trade</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Equity trades</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Option trades</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">
-                      <span className="text-xs">Other trades</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data2025.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No commission data for 2025
-                      </td>
+          <Card className="mb-8">
+            <div className="p-6">
+              <h3 className="text-md font-medium text-foreground mb-4">2025</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Month</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Total commission</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Average per trade</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Equity trades</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Option trades</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">
+                        <span className="text-xs">Other trades</span>
+                      </th>
                     </tr>
-                  ) : (
-                    data2025.map((item, index) => (
-                      <tr key={item.id} className={`border-b cursor-pointer hover:bg-accent transition-colors ${index % 2 === 1 ? 'bg-card' : ''}`}>
-                        <td className="px-4 py-3 text-foreground">{item.month}</td>
-                        <td className="px-4 py-3 text-right text-foreground">
-                          ${item.totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </thead>
+                  <tbody>
+                    {data2025.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No commission data for 2025
                         </td>
-                        <td className="px-4 py-3 text-right text-foreground">
-                          ${(item.totalCommission / (item.equityTrades + item.optionTrades + item.otherTrades)).toFixed(2)}
-                        </td>
-                        <td className="px-4 py-3 text-right text-foreground">{item.equityTrades === 0 ? '-' : item.equityTrades}</td>
-                        <td className="px-4 py-3 text-right text-foreground">{item.optionTrades === 0 ? '-' : item.optionTrades}</td>
-                        <td className="px-4 py-3 text-right text-foreground">{item.otherTrades === 0 ? '-' : item.otherTrades}</td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      data2025.map((item, index) => (
+                        <tr key={item.id} className={`border-b cursor-pointer hover:bg-accent transition-colors ${index % 2 === 1 ? 'bg-card' : ''}`}>
+                          <td className="px-4 py-3 text-foreground">{item.month}</td>
+                          <td className="px-4 py-3 text-right text-foreground">
+                            ${item.totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-4 py-3 text-right text-foreground">
+                            ${(item.totalCommission / (item.equityTrades + item.optionTrades + item.otherTrades)).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-foreground">{item.equityTrades === 0 ? '-' : item.equityTrades}</td>
+                          <td className="px-4 py-3 text-right text-foreground">{item.optionTrades === 0 ? '-' : item.optionTrades}</td>
+                          <td className="px-4 py-3 text-right text-foreground">{item.otherTrades === 0 ? '-' : item.otherTrades}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </Card>
 
           {/* 2024 Table */}
-          <div>
-            <h3 className="text-md font-medium text-foreground mb-4">2024</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Month</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Total commission</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Average per trade</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Equity trades</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
-                      <span className="text-xs">Option trades</span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">
-                      <span className="text-xs">Other trades</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data2024.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No commission data for 2024
-                      </td>
+          <Card>
+            <div className="p-6">
+              <h3 className="text-md font-medium text-foreground mb-4">2024</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Month</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Total commission</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Average per trade</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Equity trades</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap border-r">
+                        <span className="text-xs">Option trades</span>
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">
+                        <span className="text-xs">Other trades</span>
+                      </th>
                     </tr>
-                  ) : (
-                    data2024.map((item, index) => (
-                      <tr key={item.id} className={`border-b cursor-pointer hover:bg-accent transition-colors ${index % 2 === 1 ? 'bg-card' : ''}`}>
-                        <td className="px-4 py-3 text-foreground">{item.month}</td>
-                        <td className="px-4 py-3 text-right text-foreground">
-                          ${item.totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </thead>
+                  <tbody>
+                    {data2024.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No commission data for 2024
                         </td>
-                        <td className="px-4 py-3 text-right text-foreground">
-                          ${(item.totalCommission / (item.equityTrades + item.optionTrades + item.otherTrades)).toFixed(2)}
-                        </td>
-                        <td className="px-4 py-3 text-right text-foreground">{item.equityTrades === 0 ? '-' : item.equityTrades}</td>
-                        <td className="px-4 py-3 text-right text-foreground">{item.optionTrades === 0 ? '-' : item.optionTrades}</td>
-                        <td className="px-4 py-3 text-right text-foreground">{item.otherTrades === 0 ? '-' : item.otherTrades}</td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      data2024.map((item, index) => (
+                        <tr key={item.id} className={`border-b cursor-pointer hover:bg-accent transition-colors ${index % 2 === 1 ? 'bg-card' : ''}`}>
+                          <td className="px-4 py-3 text-foreground">{item.month}</td>
+                          <td className="px-4 py-3 text-right text-foreground">
+                            ${item.totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-4 py-3 text-right text-foreground">
+                            ${(item.totalCommission / (item.equityTrades + item.optionTrades + item.otherTrades)).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-foreground">{item.equityTrades === 0 ? '-' : item.equityTrades}</td>
+                          <td className="px-4 py-3 text-right text-foreground">{item.optionTrades === 0 ? '-' : item.optionTrades}</td>
+                          <td className="px-4 py-3 text-right text-foreground">{item.otherTrades === 0 ? '-' : item.otherTrades}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

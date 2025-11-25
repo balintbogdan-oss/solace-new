@@ -117,7 +117,7 @@ export function AccountSidebar() {
                   {hasSubItems && isExpanded && (
                     <ul className="pl-9 mt-0.5 space-y-0.5">
                       {item.subItems.map((subItem) => {
-                        const subHref = `/account/${accountId}/${item.href}/${subItem.href}`
+                        const subHref = `/account/${accountId}/${subItem.href}`
                         const isSubActive = pathname?.endsWith(subItem.href)
                         
                         return (

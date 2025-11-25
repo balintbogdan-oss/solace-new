@@ -202,9 +202,9 @@ export default function ClientDashboardPage() {
     <div className="min-h-screen bg-background">
       <HeroSection clientName={clientName} />
       
-      <div className="max-w-[1440px] mx-auto px-[100px] py-0">
-        <div className="flex gap-8 py-6">
-          <div className="flex-1 space-y-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-[100px] py-0">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 py-6">
+          <div className="flex-1 space-y-6 lg:space-y-8">
             <AccountsSection
               householdGroups={householdGroups}
               nonHouseholdAccounts={nonHouseholdAccounts}
@@ -247,6 +247,7 @@ export default function ClientDashboardPage() {
       <AdvisorsDrawer
         isOpen={isAdvisorsDrawerOpen}
         onOpenChange={setIsAdvisorsDrawerOpen}
+        accounts={allAccounts}
       />
     </div>
   );

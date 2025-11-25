@@ -38,6 +38,8 @@ export function UserRoleProvider({ children }: { children: ReactNode }) {
         const savedRole = localStorage.getItem('user-role') as UserRole;
         if (savedRole === 'advisor' || savedRole === 'client') {
           setRoleState(savedRole);
+          // Sync cookie with localStorage
+          document.cookie = `user-role=${savedRole}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
         }
       }
       setIsHydrated(true);
@@ -48,6 +50,8 @@ export function UserRoleProvider({ children }: { children: ReactNode }) {
     setRoleState(newRole);
     if (typeof window !== 'undefined') {
       localStorage.setItem('user-role', newRole);
+      // Also update the cookie to keep it in sync
+      document.cookie = `user-role=${newRole}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
     }
   };
 

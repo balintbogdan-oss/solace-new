@@ -122,20 +122,20 @@ export function FullSizePageTitle({
   const showDropdown = clientAccounts.length > 0;
   
   return (
-    <div className="flex px-6 items-center gap-2 text-sm h-[54px] bg-card border-b border-gray-200 dark:border-gray-700">
+    <div className="flex px-6 items-center gap-2 text-sm h-[54px] bg-card border-b border-gray-200 dark:border-gray-700 min-w-0">
         {/* Home breadcrumb - always show */}
-        <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
-          <Home className="h-4 w-4" />
-          <span>Home</span>
+        <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 flex-shrink-0">
+          <Home className="h-4 w-4 flex-shrink-0" />
+          <span className="whitespace-nowrap">Home</span>
         </Link>
         
         {/* Client breadcrumb - show if we have client info */}
         {clientId && clientName && (
           <>
-            <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-            <Link href={`/clients/${clientId}`} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
-              <User className="h-4 w-4" />
-              <span>{clientName}</span>
+            <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+            <Link href={`/clients/${clientId}`} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 min-w-0 flex-shrink-0">
+              <User className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate whitespace-nowrap">{clientName}</span>
             </Link>
           </>
         )}
@@ -148,10 +148,10 @@ export function FullSizePageTitle({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-auto p-0 hover:bg-transparent"
+                  className="h-auto p-0 hover:bg-muted/50 dark:hover:bg-muted/30 rounded-md px-2 py-1 transition-colors"
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <div className={cn(
                         "w-6 h-6 rounded-full flex items-center justify-center",
                         role === 'client' 
@@ -174,17 +174,17 @@ export function FullSizePageTitle({
                         {accountId}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900 dark:text-white text-sm font-medium">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="font-semibold text-gray-900 dark:text-white text-sm font-medium flex-shrink-0">
                         {(() => {
                           const account = clientAccounts.find(acc => acc.id === accountId);
                           return account?.type ? formatAccountType(account.type) : 'Individual';
                         })()}
                       </span>
-                      <span className="text-gray-400 dark:text-gray-500">•</span>
-                      <span className="text-gray-500 dark:text-gray-500 text-sm">{title}</span>
+                      <span className="text-gray-400 dark:text-gray-500 flex-shrink-0">•</span>
+                      <span className="text-gray-500 dark:text-gray-500 text-sm truncate min-w-0">{title}</span>
                     </div>
-                    <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   </div>
                 </Button>
               </DropdownMenuTrigger>

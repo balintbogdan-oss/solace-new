@@ -43,10 +43,10 @@ function ClientDetailContent({
           />
         </div>
       </FullSizePageHeader>
-      <div className="flex flex-1 bg-white dark:bg-black min-h-screen pt-0">
-        <div className={`flex flex-col py-6 sticky border-r top-12 h-[calc(100vh-theme(spacing.20))] transition-all duration-300 ${
+      <div className="flex flex-1 bg-background min-h-screen pt-0">
+        <div className={`flex flex-col sticky top-12 h-[calc(100vh-theme(spacing.20))] transition-all duration-300 ${
           isMinimized ? 'w-16' : 'w-[260px]'
-        } flex-shrink-0`}>
+        } flex-shrink-0 pt-2`}>
           <Sidebar />
         </div>
         <main className="flex-1 min-w-0 rounded-md">

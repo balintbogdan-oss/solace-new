@@ -417,8 +417,8 @@ function ActivityPageContent() {
               <SelectItem value="Last year">Last year</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-            <Download className="h-4 w-4 mr-2" />
+          <Button variant="secondary">
+            <Download className="h-5 w-5 mr-2" />
             Export
           </Button>
         </div>

@@ -256,8 +256,8 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
         <table className="w-full text-sm text-left border-separate border-spacing-0 rounded-md">
           <thead className="sticky top-0 border-t border-b bg-muted text-muted-foreground z-10">
             <tr>
-              <th className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-30 bg-muted px-4">Actions</th>
-              <th className={`px-4 py-2 dark:text-white border-r border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 dark:hover:bg-accent/30 whitespace-nowrap sticky z-30 bg-muted ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`} style={{ left: '56px' }}>
+              <th className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-30 bg-muted px-4 text-left">Actions</th>
+              <th className={`px-4 py-2 dark:text-white border-r border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 dark:hover:bg-accent/30 whitespace-nowrap sticky z-30 bg-muted text-left ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`} style={{ left: '56px' }}>
                 <button className="flex items-center gap-1 bg-transparent w-full" onClick={() => handleSort('symbol')}>
                   <span>Symbol/CUSIP</span>
                   {sortColumn === 'symbol' ? (
@@ -267,7 +267,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'assetClass' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted text-left ${sortColumn === 'assetClass' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="bg-transparent flex items-center gap-1 w-full" onClick={() => handleSort('assetClass')}>
                   <span>Asset class</span>
                   {sortColumn === 'assetClass' ? (
@@ -277,7 +277,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted text-left ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('quantity')}>
                   <span>Quantity</span>
                   {sortColumn === 'quantity' ? (
@@ -287,7 +287,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'marketValue' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted text-left ${sortColumn === 'marketValue' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('marketValue')}>
                   <span>Market Value</span>
                   {sortColumn === 'marketValue' ? (
@@ -297,7 +297,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted text-left ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('description')}>
                   <span>Description</span>
                   {sortColumn === 'description' ? (
@@ -307,7 +307,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'unrealizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted ${sortColumn === 'unrealizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('unrealizedGL')}>
                   <span>Unrealized G/L</span>
                   {sortColumn === 'unrealizedGL' ? (
@@ -317,7 +317,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'unrealizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted ${sortColumn === 'unrealizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('unrealizedGLPercent')}>
                   <span>Unrealized G/L %</span>
                   {sortColumn === 'unrealizedGLPercent' ? (
@@ -327,7 +327,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'currentPrice' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted ${sortColumn === 'currentPrice' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('currentPrice')}>
                   <span>Current Price</span>
                   <TooltipProvider>
@@ -347,7 +347,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   )}
                 </button>
               </th>
-              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap ${sortColumn === 'avgPrice' ? 'border-b-2 border-b-primary' : ''}`}>
+              <th className={`px-4 py-2 dark:text-white border-r border cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted ${sortColumn === 'avgPrice' ? 'border-b-2 border-b-primary' : ''}`}>
                 <button className="flex items-center gap-1 w-full" onClick={() => handleSort('avgPrice')}>
                   <span>Avg Price</span>
                   <TooltipProvider>
@@ -373,9 +373,9 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
             {processedHoldings.map((row) => (
               <tr
                 key={row.security.cusip}
-                className={'hover:bg-muted/50 dark:hover:bg-accent/30 border-b border cursor-pointer relative group'}
+                className={'hover:bg-muted/50 dark:hover:bg-accent/30 border-b border cursor-pointer relative group bg-card'}
               >
-                <td className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-20 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 border-b px-4">
+                <td className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-30 bg-card border-b px-4 group-hover:!bg-muted/50 dark:group-hover:!bg-accent/30">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" aria-label="Actions">
@@ -399,25 +399,25 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   </DropdownMenu>
                 </td>
                 <td 
-                  className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-20 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 border-r border-b"
+                  className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-30 bg-card border-r border-b group-hover:!bg-muted/50 dark:group-hover:!bg-accent/30"
                   style={{ left: '56px' }}
                   onClick={() => onStockClick?.(row.symbol)}
                 >
                   {row.symbol}
                   <div className="text-xs text-muted-foreground whitespace-nowrap">{row.security.cusip}</div>
                 </td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b">{getAssetClass(row)}</td>
-                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b">{row.quantity}</td>
-                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap border-b">${(row.marketValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                <td className="px-4 py-2 truncate dark:text-white whitespace-nowrap border-b">{row.security.description}</td>
-                <td className={`px-4 py-2 font-semibold text-right whitespace-nowrap border-b ${(row.unrealizedGL || 0) >= 0 ? 'text-positive' : 'text-negative'}`}>
-                  ${(row.unrealizedGL || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">{getAssetClass(row)}</td>
+                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">{row.quantity}</td>
+                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">${(row.marketValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td className="px-4 py-2 truncate dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">{row.security.description}</td>
+                <td className={`px-4 py-2 font-semibold whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 ${(row.unrealizedGL || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                  {(row.unrealizedGL || 0) >= 0 ? '+' : '-'}${Math.abs(row.unrealizedGL || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </td>
-                <td className={`px-4 py-2 font-semibold text-right whitespace-nowrap border-b ${(row.unrealizedGLPercent || 0) >= 0 ? 'text-positive' : 'text-negative'}`}>
-                  {(row.unrealizedGLPercent || 0).toFixed(2)}%
+                <td className={`px-4 py-2 font-semibold whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 ${(row.unrealizedGLPercent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                  {(row.unrealizedGLPercent || 0) >= 0 ? '+' : '-'}{Math.abs(row.unrealizedGLPercent || 0).toFixed(2)}%
                 </td>
-                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap border-b">${(row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                <td className="px-4 py-2 dark:text-white text-right whitespace-nowrap border-b">${(row.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">${(row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td className="px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">${(row.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
               </tr>
             ))}
           </tbody>

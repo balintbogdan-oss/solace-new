@@ -9,7 +9,7 @@ interface RightColumnWidgetsProps {
 
 export function RightColumnWidgets({ onAdvisorsClick }: RightColumnWidgetsProps) {
   return (
-    <div className="w-[312px] space-y-[28px] pt-[44px]">
+    <div className="w-full lg:w-[312px] space-y-6 lg:space-y-[28px] pt-6 lg:pt-[44px]">
       {/* Your advisors widget */}
       <Card 
         className="h-[132px] p-6 rounded-2xl shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex flex-col justify-between overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors"

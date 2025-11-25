@@ -26,7 +26,7 @@ function QuickActionCard({ icon, label, category, href, className }: QuickAction
       href={href}
       className={cn(
         "flex flex-col items-start p-5 rounded-lg transition-transform hover:scale-[1.02] border ",
-        "bg-white dark:bg-card-blend-dark text-foreground shadow-sm",
+        "bg-card text-foreground shadow-sm",
         className
       )}
     >
@@ -90,7 +90,7 @@ export default function ReportsPage() {
               label={report.label}
               category={report.category}
               href={report.href}
-              className="sm:w-auto w-60 shrink-0 bg-accent"
+              className="sm:w-auto w-60 shrink-0"
             />
             ))}
           </div>
