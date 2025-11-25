@@ -143,7 +143,7 @@ export default function FundsAvailablePage() {
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button variant="outline" onClick={handleExport}>
+          <Button variant="secondary" onClick={handleExport}>
             Export
           </Button>
         </div>

@@ -256,7 +256,7 @@ export default function UnrealizedGLPage() {
                 <SelectItem value="2023">2023</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="h-9">
+            <Button variant="secondary" className="h-9">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
