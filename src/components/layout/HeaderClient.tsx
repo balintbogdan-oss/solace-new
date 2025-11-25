@@ -45,6 +45,7 @@ export function HeaderClient() {
 
   return (
     <header 
+      suppressHydrationWarning
       className="sticky top-0 z-50 h-14 sm:h-16 px-3 sm:px-4 md:px-6 py-2 backdrop-blur-lg"
       style={{ backgroundColor: '#041340' }}
     >

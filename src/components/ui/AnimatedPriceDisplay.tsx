@@ -84,7 +84,7 @@ export const AnimatedPriceDisplay: React.FC<AnimatedPriceDisplayProps> = ({
   const prevChars = prevFormattedPrice.padStart(maxLength, ' ').split('');
 
   return (
-    <div className={`flex font-serif ${className}`}> {/* Use mono font for consistent digit width */} 
+    <h3 className={`flex ${className}`}>
       {currentChars.map((char, index) => {
         const prevChar = prevChars[index];
         const isDigit = /\d/.test(char);
@@ -104,6 +104,6 @@ export const AnimatedPriceDisplay: React.FC<AnimatedPriceDisplayProps> = ({
           return <span key={index}>{char}</span>;
         }
       })}
-    </div>
+    </h3>
   );
 }; 

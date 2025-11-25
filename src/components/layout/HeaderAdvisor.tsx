@@ -126,6 +126,7 @@ export function HeaderAdvisor() {
 
   return (
     <header 
+      suppressHydrationWarning
       className="dark:border-b sticky top-0 z-50 h-16 px-6 dark:backdrop-blur-xl"
       style={{ backgroundColor: appearanceSettings.headerBackgroundColor || '#000000' }}
     >

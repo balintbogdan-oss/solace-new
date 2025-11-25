@@ -13,38 +13,56 @@ interface UserRoleContextType {
 
 const UserRoleContext = createContext<UserRoleContextType | undefined>(undefined);
 
+// Helper to get role synchronously from cookie/localStorage
+function getRoleSync(): UserRole {
+  if (typeof window === 'undefined') return 'advisor';
+  
+  // Try cookie first
+  const getCookie = (name: string) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
+    return null;
+  };
+  
+  const cookieRole = getCookie('user-role') as UserRole;
+  if (cookieRole === 'advisor' || cookieRole === 'client') {
+    return cookieRole;
+  }
+  
+  // Fallback to localStorage
+  try {
+    const savedRole = localStorage.getItem('user-role') as UserRole;
+    if (savedRole === 'advisor' || savedRole === 'client') {
+      return savedRole;
+    }
+  } catch {
+    // localStorage not available
+  }
+  
+  return 'advisor'; // Default
+}
+
 export function UserRoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<UserRole>('advisor');
+  // Initialize role synchronously on client side
+  const [role, setRoleState] = useState<UserRole>(() => getRoleSync());
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Initialize from cookie or localStorage on mount
+  // Sync and verify role on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // First try to get role from cookie (set by login)
-      const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift();
-        return null;
-      };
-      
-      const cookieRole = getCookie('user-role') as UserRole;
-      if (cookieRole === 'advisor' || cookieRole === 'client') {
-        setRoleState(cookieRole);
-        // Also save to localStorage for consistency
-        localStorage.setItem('user-role', cookieRole);
-      } else {
-        // Fallback to localStorage
-        const savedRole = localStorage.getItem('user-role') as UserRole;
-        if (savedRole === 'advisor' || savedRole === 'client') {
-          setRoleState(savedRole);
-          // Sync cookie with localStorage
-          document.cookie = `user-role=${savedRole}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
-        }
+      const currentRole = getRoleSync();
+      if (currentRole !== role) {
+        setRoleState(currentRole);
+      }
+      // Sync cookie and localStorage
+      if (currentRole === 'advisor' || currentRole === 'client') {
+        localStorage.setItem('user-role', currentRole);
+        document.cookie = `user-role=${currentRole}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
       }
       setIsHydrated(true);
     }
-  }, []);
+  }, [role]);
 
   const setRole = (newRole: UserRole) => {
     setRoleState(newRole);

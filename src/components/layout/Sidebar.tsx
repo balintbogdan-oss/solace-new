@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -15,6 +15,7 @@ import React from 'react'
 
 export function Sidebar() { // Removed props
   const pathname = usePathname() ?? '';
+  const router = useRouter();
   const { currentSectionItems, currentBaseHref, currentSectionLabel } = useNavigation(); // Get base href and label from context
   const { isMinimized, toggleSidebar, setMinimized, resetManualSetting, isHydrated } = useSidebar();
   // Initialize expanded state based on current path belonging to a section
@@ -142,14 +143,14 @@ export function Sidebar() { // Removed props
                   if (item.label === 'Trade') {
                     console.log('Trade clicked: setting minimized to true, navigating to:', fullHref);
                     setMinimized(true);
-                    window.location.href = fullHref;
+                    router.push(fullHref);
                   } else {
                     // Navigate to other pages when sidebar is expanded
                     // Reset manual setting when leaving trade pages
                     if (pathname.includes('/trade/') && !fullHref.includes('/trade/')) {
                       resetManualSetting();
                     }
-                    window.location.href = fullHref;
+                    router.push(fullHref);
                   }
                 }
               }}
@@ -184,10 +185,14 @@ export function Sidebar() { // Removed props
   // Prevent hydration mismatch by not rendering until hydrated
   if (!isHydrated) {
     return (
-      <div className="px-4 hidden md:block flex-shrink-0 min-h-[calc(100vh-116px)] rounded-md transition-all duration-300 w-[260px]">
+      <nav className={cn(
+        "px-4 hidden md:block flex-shrink-0 min-h-[calc(100vh-116px)] rounded-md transition-all duration-300",
+        "w-[260px] bg-background"
+      )}>
         <div className="flex flex-col h-full">
-          <div className="flex justify-between items-center mb-6">
-            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div className={cn("flex items-center", "justify-between", "pt-6 pb-1")}>
+            <div className="w-16 h-4 bg-muted rounded animate-pulse"></div>
+            <div className="w-8 h-8 bg-muted rounded animate-pulse"></div>
           </div>
           <div className="flex-1">
             <ul className="space-y-1">
@@ -195,8 +200,8 @@ export function Sidebar() { // Removed props
                 <li key={i}>
                   <div className="flex items-center justify-between w-full rounded-md px-3 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      <div className="w-4 h-4 bg-muted rounded animate-pulse"></div>
+                      <div className="w-20 h-4 bg-muted rounded animate-pulse"></div>
                     </div>
                   </div>
                 </li>
@@ -204,7 +209,7 @@ export function Sidebar() { // Removed props
             </ul>
           </div>
         </div>
-      </div>
+      </nav>
     );
   }
 

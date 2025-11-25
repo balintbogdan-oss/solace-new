@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 
 export function ClientDashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" suppressHydrationWarning>
       <div className="w-full relative" style={{ backgroundColor: '#041340' }}>
         <div className="max-w-[1440px] mx-auto px-[100px] py-8 relative">
           <div className="relative z-10">

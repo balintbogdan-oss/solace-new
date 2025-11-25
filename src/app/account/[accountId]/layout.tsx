@@ -38,7 +38,7 @@ function AccountLayoutContent({
       </FullSizePageHeader>
       <div className="flex flex-1 pt-0 overflow-hidden h-[calc(100vh-3.5rem)] bg-background">
           <div 
-            className="flex flex-col fixed top-[110px] left-0 h-[calc(100vh-110px)] flex-shrink-0 z-10 transition-all duration-300"
+            className="flex flex-col fixed top-[120px] left-0 h-[calc(100vh-120px)] flex-shrink-0 z-10 transition-all duration-300 bg-background"
             style={{ width: sidebarWidth }}
           >
             <Sidebar />

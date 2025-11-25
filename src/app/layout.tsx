@@ -98,6 +98,55 @@ export default function RootLayout({
     `}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // This script MUST run before React hydrates
+                // Get role from cookie or localStorage immediately
+                function getCookie(name) {
+                  const value = '; ' + document.cookie;
+                  const parts = value.split('; ' + name + '=');
+                  if (parts.length === 2) return parts.pop().split(';').shift();
+                  return null;
+                }
+                
+                const cookieRole = getCookie('user-role');
+                let role = cookieRole;
+                
+                if (role !== 'advisor' && role !== 'client') {
+                  // Fallback to localStorage
+                  try {
+                    role = localStorage.getItem('user-role');
+                  } catch (e) {
+                    role = 'advisor'; // Default fallback
+                  }
+                }
+                
+                // Default to advisor if still not valid
+                if (role !== 'advisor' && role !== 'client') {
+                  role = 'advisor';
+                }
+                
+                // Set data-role attribute so components can read it synchronously
+                // This must happen before React tries to render
+                document.documentElement.setAttribute('data-role', role);
+                
+                // Set theme immediately based on role
+                if (role === 'client') {
+                  document.documentElement.setAttribute('data-theme', 'wedbush-next');
+                  // Set client background color (Wedbush Next: #F1F5F9 = 241 245 249)
+                  document.documentElement.style.setProperty('--background', '241 245 249');
+                } else {
+                  // Advisor (Solace) theme - remove data-theme and use default background
+                  document.documentElement.removeAttribute('data-theme');
+                  // Set advisor background color (Solace: #F5F5F4 = 245 245 244)
+                  document.documentElement.style.setProperty('--background', '245 245 244');
+                }
+              })();
+            `,
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         {/* <div className="background-gradient-effect fixed inset-0 -z-10 overflow-hidden">

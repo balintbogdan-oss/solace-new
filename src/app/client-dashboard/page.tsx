@@ -194,8 +194,14 @@ export default function ClientDashboardPage() {
     return null;
   }
 
+  // Show skeleton if loading, but suppress hydration warning since
+  // Next.js may render Suspense boundary on server while we render skeleton on client
   if (loading) {
-    return <ClientDashboardSkeleton />;
+    return (
+      <div suppressHydrationWarning>
+        <ClientDashboardSkeleton />
+      </div>
+    );
   }
 
   return (
