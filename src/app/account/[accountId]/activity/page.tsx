@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LastUpdated } from '@/components/ui/last-updated';
 import { Input } from '@/components/ui/input';
+import { PageHeading } from '@/components/layout/PageHeading';
 import { 
   Select,
   SelectContent,
@@ -19,7 +20,10 @@ import {
   ArrowUp,
   ArrowDown,
   Search,
-  ChevronsUpDown
+  ChevronsUpDown,
+  SquarePercent,
+  BarChart3,
+  CalendarDays
 } from 'lucide-react';
 import { Activity } from '@/types/account';
 
@@ -241,11 +245,11 @@ const mockSummaryData = {
     total: 30000.00,
     deposits: {
       count: 1132,
-      amount: 1000000000.00
+      amount: 1000000.00
     },
     withdrawals: {
       count: 98,
-      amount: 90000000.00
+      amount: 90000.00
     }
   },
   totalIncome: {
@@ -402,8 +406,10 @@ function ActivityPageContent() {
   return (
     <div className="min-h-screen rounded-md space-y-4 md:space-y-4">
       {/* Page Title and Controls */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-serif text-foreground">Activity</h1>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="w-full md:w-auto">
+          <PageHeading>Activity</PageHeading>
+        </div>
         <div className="flex items-center gap-3">
           <Select value={timeframe} onValueChange={setTimeframe}>
             <SelectTrigger className="w-[140px]">
@@ -424,21 +430,26 @@ function ActivityPageContent() {
       </div>
 
       {/* Three Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {/* Net Flow Card */}
         <Card className="p-6 bg-card">
           <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Net flow</p>
-              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
-                {formatAmount(mockSummaryData.netFlow.total)}
-              </h3>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Net flow</p>
+                <h3 className="text-2xl font-medium text-foreground mt-1" style={{ fontFamily: 'var(--font-display)' }}>
+                  {formatAmount(mockSummaryData.netFlow.total)}
+                </h3>
+              </div>
+              <div className="w-10 h-10 bg-blue-500 rounded flex items-center justify-center flex-shrink-0">
+                <SquarePercent className="h-5 w-5 text-white" />
+              </div>
             </div>
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                  <ArrowDown className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#DBEAFE' }}>
+                  <ArrowDown className="h-3 w-3 text-muted-foreground" />
                 </div>
                 <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
@@ -451,8 +462,8 @@ function ActivityPageContent() {
               </div>
               
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
-                  <ArrowUp className="h-3 w-3 text-orange-600 dark:text-orange-400" />
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#DBEAFE' }}>
+                  <ArrowUp className="h-3 w-3 text-muted-foreground" />
                 </div>
                 <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
@@ -476,18 +487,23 @@ function ActivityPageContent() {
         {/* Total Income Card */}
         <Card className="p-6 bg-card">
           <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Total income</p>
-              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
-                {formatAmount(mockSummaryData.totalIncome.total)}
-              </h3>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total income</p>
+                <h3 className="text-2xl font-medium text-foreground mt-1" style={{ fontFamily: 'var(--font-display)' }}>
+                  {formatAmount(mockSummaryData.totalIncome.total)}
+                </h3>
+              </div>
+              <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#8C7023' }}>
+                <BarChart3 className="h-5 w-5 text-white" />
+              </div>
             </div>
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
-                    Dividend income · {mockSummaryData.totalIncome.dividendIncome.count} transactions
+                    Dividend income - {mockSummaryData.totalIncome.dividendIncome.count} transactions
                   </span>
                   <div className="text-sm font-medium text-green-600 dark:text-green-400">
                     +{formatAmount(mockSummaryData.totalIncome.dividendIncome.amount)}
@@ -518,11 +534,16 @@ function ActivityPageContent() {
         {/* Upcoming Actions Card */}
         <Card className="p-6 bg-card">
           <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Upcoming actions</p>
-              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
-                {mockSummaryData.upcomingActions.total} events
-              </h3>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Upcoming actions</p>
+                <h3 className="text-2xl font-medium text-foreground mt-1" style={{ fontFamily: 'var(--font-display)' }}>
+                  {mockSummaryData.upcomingActions.total} events
+                </h3>
+              </div>
+              <div className="w-10 h-10 bg-blue-500 rounded flex items-center justify-center flex-shrink-0">
+                <CalendarDays className="h-5 w-5 text-white" />
+              </div>
             </div>
             
             <div className="space-y-2">
@@ -806,7 +827,7 @@ function ActivityPageSkeleton() {
       </div>
 
       {/* Three Summary Cards Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="p-6 bg-card">
             <div className="space-y-4">

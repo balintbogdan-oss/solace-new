@@ -3,16 +3,23 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { HelpCircle, ChevronDown, User, Settings, LogOut } from 'lucide-react';
+import { HelpCircle, ChevronDown, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import { useUserRole } from '@/contexts/UserRoleContext';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 
 export function HeaderClient() {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { switchRole } = useUserRole();
+  const { theme, setTheme } = useTheme();
   const isWealthActive = pathname === '/client-dashboard';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -177,6 +184,29 @@ export function HeaderClient() {
                       App Settings
                     </Link>
                   </Button>
+
+                  {/* Theme Toggle */}
+                  {mounted && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setTheme(theme === 'dark' ? 'light' : 'dark');
+                      }}
+                      className="w-full justify-start text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 gap-2"
+                    >
+                      {theme === 'dark' ? (
+                        <>
+                          <Sun className="h-4 w-4" />
+                          Light mode
+                        </>
+                      ) : (
+                        <>
+                          <Moon className="h-4 w-4" />
+                          Dark mode
+                        </>
+                      )}
+                    </Button>
+                  )}
                   
                   {/* Logout */}
                   <Button

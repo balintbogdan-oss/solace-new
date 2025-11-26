@@ -18,6 +18,7 @@ import {
 } from '@/styles/fonts'
 import { validateEnvironment } from '@/lib/env-validation'
 import { Toaster } from 'sonner'
+import { ClientFooter } from '@/components/layout/ClientFooter'
 
 // All fonts are now imported from the fonts definitions file
 
@@ -166,6 +167,7 @@ export default function RootLayout({
                   <div className="w-full">
                   {children}
                   </div>
+                  <ClientFooter />
                   <Toaster position="top-right" />
                 </NavigationProvider>
               </AppearanceProvider>

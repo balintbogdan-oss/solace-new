@@ -11,11 +11,13 @@ import {
   Info,
   ChevronRight,
   Calendar,
-  BarChart3
+  BarChart3,
+  History
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { PageLoading } from '@/components/ui/page-loading';
+import { PageHeading } from '@/components/layout/PageHeading';
 
 function BalancesPageContent() {
   const { data: accountData, loading, error, refreshData } = useAccountData();
@@ -49,7 +51,8 @@ function BalancesPageContent() {
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   };
 
-  if (loading) {
+  // Don't block on loading if we have cached data - show data immediately
+  if (loading && !accountData) {
     return (
       <div className="w-full">
         <div className="flex flex-col gap-4">
@@ -129,14 +132,17 @@ function BalancesPageContent() {
     <div className="w-full">
       <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Balances</h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="w-full md:w-auto">
+            <PageHeading className="text-slate-900 dark:text-slate-100">Balances</PageHeading>
+          </div>
           <div className="flex gap-2">
-            <Button variant="secondary" className="h-9">
+            <Button variant="secondary">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button variant="secondary" className="h-9">
+            <Button variant="secondary">
+              <History className="w-4 h-4 mr-2" />
               View History
             </Button>
           </div>

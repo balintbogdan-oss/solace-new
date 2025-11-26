@@ -468,11 +468,11 @@ export function AccountClientContentHardcoded({ accountId }: AccountClientConten
             <h2 className="text-2xl font-serif ">Holdings</h2>
             <div className="flex items-center space-x-2">
               <Button variant="secondary">
-                <FileText className="mr-2 h-5 w-5" />
+                <FileText className="mr-2 h-4 w-4" />
                 Export
               </Button>
               <Button variant="secondary">
-                <History className="mr-2 h-5 w-5" />
+                <History className="mr-2 h-4 w-4" />
                 View History
               </Button>
             </div>
