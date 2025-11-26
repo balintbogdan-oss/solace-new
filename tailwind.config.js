@@ -17,6 +17,13 @@ module.exports = {
         "2xl": "1400px",
       },
     },
+    screens: {
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1140px',  // Custom breakpoint for better layout at 1148px
+      '2xl': '1536px',
+    },
     extend: {
       backgroundColor: {
         'card-blend': 'rgba(255, 255, 255, 0.5)', // Light mode fallback

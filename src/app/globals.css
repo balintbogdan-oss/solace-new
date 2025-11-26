@@ -82,6 +82,9 @@
     
     /* Muted color for Wedbush Next theme */
     --muted: 249 249 250; /* #F9F9FA */
+    
+    /* Muted foreground color for Wedbush Next theme */
+    --muted-foreground: #69778C;
   }
 
   .dark {

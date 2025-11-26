@@ -222,8 +222,24 @@ export async function getMarketDataForSymbol(symbol: string): Promise<MarketData
   return marketData.length > 0 ? marketData[0] : null;
 }
 
-// Get all available securities (equities and mutual funds)
+// Global cache for all securities
+let cachedAllSecurities: Security[] | null = null;
+let allSecuritiesPromise: Promise<Security[]> | null = null;
+
+// Get all available securities (equities and mutual funds) - cached globally
 export async function getAllStocks(): Promise<Security[]> {
+  // Return cached data if available
+  if (cachedAllSecurities) {
+    return cachedAllSecurities;
+  }
+  
+  // Return existing promise if already loading
+  if (allSecuritiesPromise) {
+    return allSecuritiesPromise;
+  }
+  
+  // Start loading
+  allSecuritiesPromise = (async () => {
   const equitiesData = await loadEquitiesMarketData();
   const mutualFundsData = await loadMutualFundsMarketData();
   
@@ -273,7 +289,18 @@ export async function getAllStocks(): Promise<Security[]> {
     allSecurities = [...allSecurities, ...mutualFunds];
   }
   
-  return allSecurities;
+    cachedAllSecurities = allSecurities;
+    return allSecurities;
+  })();
+  
+  try {
+    const result = await allSecuritiesPromise;
+    allSecuritiesPromise = null;
+    return result;
+  } catch (error) {
+    allSecuritiesPromise = null;
+    throw error;
+  }
 }
 
 // Get options for a specific underlying symbol

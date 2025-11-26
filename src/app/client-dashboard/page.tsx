@@ -211,12 +211,13 @@ export default function ClientDashboardPage() {
   }
 
   // During SSR, return null to match what Next.js expects (Suspense boundary)
-  // After mount, show skeleton if loading
+  // After mount, show skeleton only if loading AND we don't have data
   if (!mounted) {
     return null;
   }
 
-  if (loading) {
+  // Don't block on loading if we have cached data - show data immediately
+  if (loading && householdGroups.length === 0 && nonHouseholdAccounts.length === 0) {
     return <ClientDashboardSkeleton />;
   }
 
