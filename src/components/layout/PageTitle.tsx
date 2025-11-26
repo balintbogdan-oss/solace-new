@@ -15,7 +15,8 @@ import { Account } from "@/lib/mock-data";
 import { usePageHeaderContext } from '@/contexts/PageHeaderContext'; // Import the context hook
 import { cn, formatAccountType } from "@/lib/utils"; // Import cn for conditional classes and formatAccountType
 import { useUserRole } from '@/contexts/UserRoleContext';
-import React from 'react'; // Ensure React is imported for Fragment
+import React, { useState } from 'react'; // Ensure React is imported for Fragment
+import { AccountDetailsDrawer } from './AccountDetailsDrawer';
 
 
 export interface PageTitleProps {
@@ -57,6 +58,7 @@ export function FullSizePageTitle({
 }: PageTitleProps) {
   const router = useRouter();
   const { role } = useUserRole();
+  const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false);
 
   const handleOpenChange = (open: boolean) => {
     setIsDropdownOpen?.(open);
@@ -103,19 +105,54 @@ export function FullSizePageTitle({
   const rightPanelSections = useMemo(() => {
     if (!clientAccounts || clientAccounts.length === 0) return [];
     
-    // Show all accounts in a single section
-    const allAccountsSection = {
-      title: 'ACCOUNTS',
-      accounts: clientAccounts,
-      icon: Landmark,
-      summary: {
-        title: clientName ? `All ${clientName}'s accounts` : 'All accounts',
-        count: clientAccounts.length,
-      },
-    };
-
-    return [allAccountsSection];
-  }, [clientAccounts, clientName]);
+    // Group accounts by household
+    const householdGroups = new Map<string, { householdName: string; accounts: typeof clientAccounts }>();
+    const nonHouseholdAccounts: typeof clientAccounts = [];
+    
+    clientAccounts.forEach(account => {
+      // Check if account has householdId (from Account type)
+      const accountWithHousehold = account as typeof account & { householdId?: string; household?: { id: string; name: string } };
+      if (accountWithHousehold.householdId && accountWithHousehold.household) {
+        const householdId = accountWithHousehold.householdId;
+        if (!householdGroups.has(householdId)) {
+          householdGroups.set(householdId, {
+            householdName: accountWithHousehold.household.name,
+            accounts: []
+          });
+        }
+        householdGroups.get(householdId)!.accounts.push(account);
+      } else {
+        nonHouseholdAccounts.push(account);
+      }
+    });
+    
+    const sections: Array<{
+      title: string;
+      accounts: typeof clientAccounts;
+      icon: typeof Home;
+      summary?: { title: string; count: number };
+    }> = [];
+    
+    // Add household sections
+    householdGroups.forEach((group) => {
+      sections.push({
+        title: group.householdName.toUpperCase().replace(/\s+/g, ' '),
+        accounts: group.accounts,
+        icon: Home,
+      });
+    });
+    
+    // Add non-household section
+    if (nonHouseholdAccounts.length > 0) {
+      sections.push({
+        title: 'NON-HOUSEHOLD',
+        accounts: nonHouseholdAccounts,
+        icon: User,
+      });
+    }
+    
+    return sections;
+  }, [clientAccounts]);
 
 
   // Show dropdown if we have accounts (for both advisors and clients)
@@ -148,7 +185,7 @@ export function FullSizePageTitle({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-auto p-0 hover:bg-muted/50 dark:hover:bg-muted/30 rounded-md px-2 py-1 transition-colors"
+                  className="h-auto p-0 hover:bg-muted/50 dark:hover:bg-muted/30 rounded-md px-2 py-1 transition-colors relative z-[60]"
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-shrink-0">
@@ -178,19 +215,33 @@ export function FullSizePageTitle({
                       <span className="font-semibold text-gray-900 dark:text-white text-sm font-medium flex-shrink-0">
                         {(() => {
                           const account = clientAccounts.find(acc => acc.id === accountId);
-                          return account?.type ? formatAccountType(account.type) : 'Individual';
+                          // Show account type (formatted) and account name
+                          if (account) {
+                            const accountTypeLabel = account.type === 'joint_jtwros' ? 'Joint account' :
+                                                   account.type === 'trust' ? 'Personal trust' :
+                                                   account.type === 'individual' || account.type === 'ira' ? 'Single account' :
+                                                   formatAccountType(account.type);
+                            return accountTypeLabel;
+                          }
+                          return title;
                         })()}
                       </span>
                       <span className="text-gray-400 dark:text-gray-500 flex-shrink-0">•</span>
-                      <span className="text-gray-500 dark:text-gray-500 text-sm truncate min-w-0">{title}</span>
+                      <span className="text-gray-500 dark:text-gray-500 text-sm truncate min-w-0">
+                        {(() => {
+                          const account = clientAccounts.find(acc => acc.id === accountId);
+                          return account?.name || '';
+                        })()}
+                      </span>
                     </div>
                     <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[650px] flex p-0" style={{ zIndex: 51 }}>
+              <DropdownMenuContent align="start" className={cn("flex p-0", role === 'client' ? "w-[400px]" : "w-[650px]")} style={{ zIndex: 51 }}>
                 <div className="flex w-full">
-                  {/* Left Panel */}
+                  {/* Left Panel - Only show for advisors */}
+                  {role !== 'client' && (
                   <div className="w-[250px] bg-stone-50 dark:bg-stone-900/80 p-2 space-y-1 border-r border-stone-200 dark:border-stone-800">
                     <div className="px-2 py-2 text-xs text-muted-foreground flex items-center gap-2">
                       <User className="h-4 w-4" />
@@ -212,8 +263,9 @@ export function FullSizePageTitle({
                       </button>
                     ))}
                   </div>
+                  )}
                   {/* Right Panel */}
-                  <div className="flex-1 space-y-2 overflow-y-auto pr-2 pl-1 py-2">
+                  <div className={cn("space-y-2 overflow-y-auto py-2", role === 'client' ? "flex-1 px-2" : "flex-1 pr-2 pl-1")}>
                     {rightPanelSections.map((section, idx) => (
                       <div key={idx}>
                         <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground mb-2 px-2 pt-2">
@@ -222,12 +274,6 @@ export function FullSizePageTitle({
                           </div>
                           <span className="font-semibold tracking-wider">{section.title}</span>
                         </div>
-                        {section.summary && (
-                          <div className="px-3 pb-2">
-                             <h4 className="font-semibold text-foreground">{section.summary.title}</h4>
-                             <p className="text-sm text-muted-foreground">{section.summary.count} accounts</p>
-                          </div>
-                        )}
                         <div className="flex flex-col gap-1">
                           {section.accounts.map(account => (
                              <DropdownMenuItem
@@ -237,7 +283,7 @@ export function FullSizePageTitle({
                                   router.push(`/account/${account.id}`);
                                   setIsDropdownOpen?.(false);
                                 }}
-                               className={cn("cursor-pointer flex flex-col items-start rounded-md p-2", accountId === account.id && "bg-muted")}
+                               className={cn("cursor-pointer flex flex-col items-start rounded-md p-2", accountId === account.id && "bg-blue-50 dark:bg-blue-950/30")}
                              >
                               <div className="flex w-full justify-between items-center">
                                   <div className="flex flex-col min-w-0 flex-1">
@@ -249,8 +295,8 @@ export function FullSizePageTitle({
                                       <span className="font-normal text-sm text-muted-foreground truncate">{account.name}</span>
                                   </div>
                                   {accountId === account.id && (
-                                      <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0 ml-2">
-                                         <Check className="h-4 w-4 text-amber-800" />
+                                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 ml-2">
+                                         <Check className="h-4 w-4 text-white" />
                                       </div>
                                   )}
                               </div>
@@ -264,11 +310,23 @@ export function FullSizePageTitle({
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* View details link - only show on account pages */}
-            <Link href={`/account/${accountId}`} className="ml-auto text-primary hover:text-primary/80 font-medium">
+            {/* View details button - only show on account pages */}
+            <button 
+              onClick={() => setIsDetailsDrawerOpen(true)}
+              className="ml-auto text-primary hover:text-primary/80 font-medium"
+            >
               View details
-            </Link>
+            </button>
           </>
+        )}
+        
+        {/* Account Details Drawer */}
+        {accountId && (
+          <AccountDetailsDrawer
+            isOpen={isDetailsDrawerOpen}
+            onOpenChange={setIsDetailsDrawerOpen}
+            accountId={accountId}
+          />
         )}
     </div>
   );

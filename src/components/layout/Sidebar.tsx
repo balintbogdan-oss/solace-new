@@ -187,7 +187,7 @@ export function Sidebar() { // Removed props
     return (
       <nav className={cn(
         "px-4 hidden md:block flex-shrink-0 min-h-[calc(100vh-116px)] rounded-md transition-all duration-300",
-        "w-[260px] bg-background"
+        "w-[260px]"
       )}>
         <div className="flex flex-col h-full">
           <div className={cn("flex items-center", "justify-between", "pt-6 pb-1")}>

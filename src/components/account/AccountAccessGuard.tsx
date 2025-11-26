@@ -17,32 +17,44 @@ export function AccountAccessGuard({ accountId, children }: AccountAccessGuardPr
   const [loading, setLoading] = useState(true);
 
   const verifyClientAccess = useCallback(async () => {
-    try {
-      // Get the current client ID (in production, this would come from auth)
-      const currentClientId = 'client-1'; // TODO: Get from auth context
-      
-      // Get account data
-      const accountData = await localDataService.getAccountData(accountId);
-      
-      if (!accountData) {
-        setHasAccess(false);
-        setLoading(false);
-        return;
-      }
-
-      // Check if the account belongs to the current client
-      if (accountData.clientId === currentClientId) {
-        setHasAccess(true);
-      } else {
-        setHasAccess(false);
-        // Redirect to client dashboard
-        router.push('/client-dashboard');
-      }
-    } catch (error) {
-      console.error('Error verifying account access:', error);
-      setHasAccess(false);
-    } finally {
-      setLoading(false);
+    // For clients, assume access initially and verify in background
+    // This allows the page to render immediately with skeleton
+    // Don't set loading to false here - let it stay false so children render immediately
+    setHasAccess(true);
+    setLoading(false); // Set immediately so children render
+    
+    // Verify access in background (non-blocking) - don't block render
+    // Use requestIdleCallback or setTimeout to ensure it doesn't block
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(async () => {
+        try {
+          const currentClientId = 'client-1';
+          const accountData = await localDataService.getAccountData(accountId);
+          if (!accountData || accountData.clientId !== currentClientId) {
+            setHasAccess(false);
+            if (accountData && accountData.clientId !== currentClientId) {
+              router.push('/client-dashboard');
+            }
+          }
+        } catch (error) {
+          console.error('Error verifying account access:', error);
+        }
+      });
+    } else {
+      setTimeout(async () => {
+        try {
+          const currentClientId = 'client-1';
+          const accountData = await localDataService.getAccountData(accountId);
+          if (!accountData || accountData.clientId !== currentClientId) {
+            setHasAccess(false);
+            if (accountData && accountData.clientId !== currentClientId) {
+              router.push('/client-dashboard');
+            }
+          }
+        } catch (error) {
+          console.error('Error verifying account access:', error);
+        }
+      }, 0);
     }
   }, [accountId, router]);
 

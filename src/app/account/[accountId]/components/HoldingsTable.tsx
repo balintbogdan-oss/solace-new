@@ -509,7 +509,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                 // Render header cell based on column type
                 if (columnId === 'actions') {
                   return (
-                    <th key={columnId} className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-40 bg-muted px-4 text-left font-medium">
+                    <th key={columnId} className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-30 bg-muted px-4 text-left font-medium">
                       Actions
                     </th>
                   );
@@ -519,7 +519,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   return (
                     <th
                       key={columnId}
-                      className={`px-4 py-2 dark:text-white border-b border-r cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap sticky z-40 bg-muted text-left font-medium ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}
+                      className={`px-4 py-2 dark:text-white border-b border-r cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap sticky z-30 bg-muted text-left font-medium ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}
                       style={{ left: '56px' }}
                     >
                       <button className="flex items-center gap-1 bg-transparent w-full font-medium" onClick={() => handleSort('symbol')}>
@@ -584,7 +584,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   // Render cell based on column type
                   if (columnId === 'actions') {
                     return (
-                      <td key={columnId} className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-40 border-b px-4 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">
+                      <td key={columnId} className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-30 border-b px-4 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" aria-label="Actions">
@@ -614,7 +614,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                     return (
                       <td
                         key={columnId}
-                        className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-40 border-b border-r bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30"
+                        className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-30 border-b border-r bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30"
                         style={{ left: '56px' }}
                         onClick={() => onStockClick?.(row.symbol)}
                       >

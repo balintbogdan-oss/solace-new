@@ -27,6 +27,8 @@ export function DynamicPageTitle({
     marketValue: string;
     fdicSweep: string;
     availableMargin: string;
+    householdId?: string;
+    household?: { id: string; name: string };
   }>>([]);
   const [accountsLoading, setAccountsLoading] = useState(true);
 
@@ -49,6 +51,8 @@ export function DynamicPageTitle({
             marketValue: acc.balances?.totalValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
             fdicSweep: "0",
             availableMargin: acc.balances?.buyingPower?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+            householdId: acc.householdId,
+            household: acc.household,
           }));
           setClientAccounts(accounts);
         }
@@ -106,6 +110,8 @@ export function DynamicPageTitle({
     marketValue: accountData.balances?.totalValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
     fdicSweep: "0",
     availableMargin: accountData.balances?.buyingPower?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
+    householdId: accountData.householdId,
+    household: accountData.household,
   }];
 
   return (

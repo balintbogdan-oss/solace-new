@@ -121,66 +121,96 @@ export function AccountDataProvider({
       }
 
       console.log('Fetching fresh account data for', accountId);
+      
+      // Load account data first (critical path)
       const accountData = await localDataService.getAccountData(accountId);
       
-      // Load mock data and market data
-      const [mockData, marketData] = await Promise.all([
-        loadMockData(),
-        loadMarketData()
-      ]);
+      // Load mock data immediately (fast)
+      const mockData = await loadMockData();
       
+      // Set data immediately with empty market data, then load market data in background
       if (accountData) {
-        // Merge mock data and market data with account data
-        const enhancedAccountData = {
+        const initialAccountData = {
           ...accountData,
-          marketData: marketData,
+          marketData: [],
           realizedGL: mockData.realizedGL,
           commissions: mockData.commissions
         };
-        setData(enhancedAccountData);
-        // Cache the data
-        accountDataCache.set(accountId, { data: enhancedAccountData, timestamp: Date.now() });
-      } else {
-        // Create empty account data for new accounts with mock data
-        const emptyAccountData: AccountData = {
-          accountId,
-          accountName: 'New Account',
-          accountType: 'individual',
-          clientId: 'unknown',
-          client: {
-            id: 'unknown',
-            firstName: 'Unknown',
-            lastName: 'Client',
-            createdAt: new Date().toISOString(),
-            lastUpdated: new Date().toISOString()
-          },
-          isPrimary: false,
-          securities: [],
-          holdings: [],
-          marketData: marketData,
-          trades: [],
-          activities: [],
-          balances: {
-            cash: 0,
-            margin: 0,
-            buyingPower: 0,
-            totalValue: 0,
-            investedValue: 0,
-            realizedGL: 0,
-            unrealizedGL: 0,
-            lastUpdated: new Date().toISOString()
-          },
-          realizedGL: mockData.realizedGL,
-          unrealizedGL: [],
-          commissions: mockData.commissions,
-          lastUpdated: new Date().toISOString()
-        };
-        setData(emptyAccountData);
-        // Cache the empty data
-        accountDataCache.set(accountId, { data: emptyAccountData, timestamp: Date.now() });
-        // Save empty data (no-op for local data service)
-        await localDataService.saveAccountData();
+        setData(initialAccountData);
+        setLoading(false); // Show content immediately
+        
+        // Load market data in background (non-blocking)
+        setTimeout(async () => {
+          try {
+            const marketData = await loadMarketData();
+            const enhancedAccountData = {
+              ...accountData,
+              marketData: marketData,
+              realizedGL: mockData.realizedGL,
+              commissions: mockData.commissions
+            };
+            setData(enhancedAccountData);
+            accountDataCache.set(accountId, { data: enhancedAccountData, timestamp: Date.now() });
+          } catch (err) {
+            console.error('Error loading market data in background:', err);
+          }
+        }, 0);
+        return;
       }
+      
+      // If no account data, create empty account immediately (non-blocking)
+      const emptyAccountData: AccountData = {
+        accountId,
+        accountName: 'New Account',
+        accountType: 'individual',
+        clientId: 'unknown',
+        client: {
+          id: 'unknown',
+          firstName: 'Unknown',
+          lastName: 'Client',
+          createdAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        },
+        isPrimary: false,
+        securities: [],
+        holdings: [],
+        marketData: [], // Start with empty, load in background
+        trades: [],
+        activities: [],
+        balances: {
+          cash: 0,
+          margin: 0,
+          buyingPower: 0,
+          totalValue: 0,
+          investedValue: 0,
+          realizedGL: 0,
+          unrealizedGL: 0,
+          lastUpdated: new Date().toISOString()
+        },
+        realizedGL: mockData.realizedGL,
+        unrealizedGL: [],
+        commissions: mockData.commissions,
+        lastUpdated: new Date().toISOString()
+      };
+      setData(emptyAccountData);
+      setLoading(false); // Show content immediately
+      // Cache the empty data
+      accountDataCache.set(accountId, { data: emptyAccountData, timestamp: Date.now() });
+      
+      // Load market data in background (non-blocking)
+      setTimeout(async () => {
+        try {
+          const marketData = await loadMarketData();
+          const updatedAccountData = {
+            ...emptyAccountData,
+            marketData: marketData
+          };
+          setData(updatedAccountData);
+          accountDataCache.set(accountId, { data: updatedAccountData, timestamp: Date.now() });
+        } catch (err) {
+          console.error('Error loading market data in background:', err);
+        }
+      }, 0);
     } catch (err) {
       console.error('Error loading account data:', err);
       setError('Failed to load account data');
@@ -317,14 +347,19 @@ export function AccountDataProvider({
 
     return data.holdings.map(holding => {
       const security = data.securities.find(s => s.symbol === holding.symbol);
-      const marketData = data.marketData?.find(md => md.symbol === holding.symbol);
+      // Match market data case-insensitively
+      const marketData = data.marketData?.find(md => 
+        md.symbol.toUpperCase() === holding.symbol.toUpperCase()
+      );
       
       // Always calculate from current market data (not stored values)
+      // If market data not found, skip this holding's unrealized G/L calculation
       const currentPrice = marketData?.currentPrice || 0;
       const marketValue = holding.quantity * currentPrice;
       const investedValue = holding.quantity * holding.avgPrice;
-      const unrealizedGL = marketValue - investedValue;
-      const unrealizedGLPercent = investedValue > 0 ? (unrealizedGL / investedValue) * 100 : 0;
+      // Only calculate unrealized G/L if we have valid market data
+      const unrealizedGL = marketData ? (marketValue - investedValue) : 0;
+      const unrealizedGLPercent = investedValue > 0 && marketData ? (unrealizedGL / investedValue) * 100 : 0;
       
       
       return {
@@ -981,10 +1016,13 @@ export function AccountDataProvider({
     return positions;
   }, [data?.activities, data?.marketData, data?.securities]);
 
-  // Load data on mount and generate historical activities if needed
+  // Load data on mount and when accountId changes
   useEffect(() => {
+    // Reset loading state immediately when accountId changes to show skeleton
+    setLoading(true);
+    setData(null);
     loadData();
-  }, [loadData]);
+  }, [accountId, loadData]);
 
   // Generate historical activities after data is loaded
   useEffect(() => {

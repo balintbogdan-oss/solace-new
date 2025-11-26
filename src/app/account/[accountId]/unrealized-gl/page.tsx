@@ -30,7 +30,7 @@ import {
 // import type { UnrealizedPosition } from '@/types/account';
 
 export default function UnrealizedGLPage() {
-  const { data: accountData, loading, error, refreshData } = useAccountData();
+  const { refreshData } = useAccountData(); // Only need refreshData for LastUpdated component
   const [searchTerm] = useState('');
   const [yearFilter, setYearFilter] = useState('2025');
   
@@ -167,76 +167,8 @@ export default function UnrealizedGLPage() {
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="w-full">
-        <div className="flex flex-col gap-4">
-          {/* Header Skeleton */}
-          <div className="flex justify-between items-center">
-            <div className="h-8 w-40 bg-muted rounded animate-pulse"></div>
-            <div className="flex gap-2">
-              <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
-              <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
-            </div>
-          </div>
-
-          {/* Summary Card Skeleton */}
-          <Card className="p-6 bg-card">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="space-y-2">
-                  <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
-                  <div className="h-7 w-40 bg-muted rounded animate-pulse"></div>
-                  {i === 5 && <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>}
-                </div>
-              ))}
-            </div>
-            <div className="h-4 w-48 bg-muted rounded animate-pulse mt-4"></div>
-          </Card>
-
-          {/* All Tax Lots Section Skeleton */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="h-6 w-32 bg-muted rounded animate-pulse"></div>
-              <div className="h-10 w-40 bg-muted rounded animate-pulse"></div>
-            </div>
-
-            {/* Table Skeleton */}
-            <div className="overflow-x-auto">
-              <div className="w-full min-w-[1600px]">
-                {/* Table Header Skeleton */}
-                <div className="flex border-b mb-2">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                    <div key={i} className="flex-1 px-6 py-3">
-                      <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
-                    </div>
-                  ))}
-                </div>
-                {/* Table Rows Skeleton */}
-                {[1, 2, 3, 4, 5].map((row) => (
-                  <div key={row} className="flex border-b py-3">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((col) => (
-                      <div key={col} className="flex-1 px-6">
-                        <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !accountData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">
-        Error loading unrealized G/L data: {error || 'No data available'}
-      </div>
-    );
-  }
+  // This page uses hardcoded data, so we don't need to wait for account data
+  // Only show error if there's a critical error (but we don't check for it since we use hardcoded data)
 
   return (
     <TooltipProvider>
