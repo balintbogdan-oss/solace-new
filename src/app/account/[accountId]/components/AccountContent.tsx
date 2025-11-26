@@ -31,6 +31,7 @@ import { STOCK_DATA } from '@/components/trade/StockDetailPanel' // Keep STOCK_D
 import { SecurityHeader } from '@/components/trade/SecurityHeader'
 import { useAccountData } from '@/contexts/AccountDataContext'
 import { getChartColorByIndex } from '@/lib/chartColors'
+import { PageHeading } from '@/components/layout/PageHeading'
 
 
 type TradeMode = 'buy' | 'sell' | null
@@ -229,7 +230,8 @@ export function AccountContent({ accountId }: AccountContentProps) {
     };
   }, [accountData, getHoldingsWithDetails]);
 
-  if (loading) {
+  // Don't block on loading if we have cached data - show data immediately
+  if (loading && !accountData) {
     return (
       <div className="rounded-md space-y-4 md:space-y-4">
         {/* Holdings Title Skeleton */}
@@ -251,84 +253,88 @@ export function AccountContent({ accountId }: AccountContentProps) {
     );
   }
 
-  if (error || !accountData) {
+  if (error && !accountData) {
     return <div className="min-h-screen flex items-center justify-center text-red-500">Error loading account data</div>;
   }
 
   return (
     <div className="rounded-md space-y-4 md:space-y-4">
          {/* Holdings Title and Action Buttons */}
-         <div className="w-full flex justify-between items-center">
-            <h2 className="text-2xl font-serif ">Holdings</h2>
-            <div className="flex items-center space-x-2">
+         <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="w-full sm:w-auto">
+              <PageHeading as="h2" className="text-xl sm:text-2xl">Holdings</PageHeading>
+            </div>
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
               <Button variant="secondary">
-                <FileText className="mr-2 h-5 w-5" />
+                <FileText className="mr-2 h-4 w-4" />
                 Export
               </Button>
               <Button variant="secondary">
-                <History className="mr-2 h-5 w-5" />
+                <History className="mr-2 h-4 w-4" />
                 View History
               </Button>
             </div>
           </div>
-      <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-4">
-     
-        <Card className="md:col-span-2 min-w-0 flex flex-col items-start overflow-hidden rounded-2xl p-0">
-          <div className="flex-1 w-full p-4 sm:p-6 flex flex-col justify-between items-start gap-4">
-            <div className="w-full flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 lg:gap-0">
-              {/* Left side: Portfolio value and G/L */}
-              <div className="flex-1 flex flex-col items-start gap-4 w-full lg:w-auto">
-                <div className="flex flex-col items-start gap-2 w-full">
-                  <div className="flex flex-col items-start gap-1 px-px">
-                    <div className="text-sm font-medium text-card-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Portfolio market value</div>
-                    {(() => {
-                      const value = portfolioData?.portfolioValue || '$0.00';
-                      const match = value.match(/^\$([\d,]+)\.(\d{2})$/);
-                      if (match) {
-                        return (
-                          <h3 className="flex items-start leading-none">
-                            <span className="text-xl sm:text-2xl font-medium text-foreground tracking-[-0.24px] leading-[32px] sm:leading-[40px]" style={{ fontFamily: 'var(--font-family-headers, "Source Serif 4")' }}>
-                              ${match[1]}.
-                            </span>
-                            <span className="text-base sm:text-lg font-medium text-foreground leading-6 h-[28px] sm:h-[35px] flex items-end" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
-                              {match[2]}
-                            </span>
-                          </h3>
-                        );
-                      }
-                      return <h3 className="text-xl sm:text-2xl font-medium text-foreground">{value}</h3>;
-                    })()}
-                  </div>
-                  <div className="flex flex-col items-start gap-2 w-full">
-                    <div className="flex items-center gap-1.5 w-full">
-                      <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Today&apos;s unrealized G/L</div>
-                      <div className="flex items-center gap-1">
-                        <div className={`text-sm font-medium leading-6 whitespace-nowrap ${portfolioData?.todaysGL.isPositive ? 'text-positive-foreground' : 'text-negative-foreground'}`} style={{ fontFamily: 'var(--font-family, "Inter")' }}>
-                          {portfolioData?.todaysGL.amount} ({portfolioData?.todaysGL.percentage})
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 w-full">
-                      <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total unrealized G/L</div>
-                      <div className="flex items-center gap-1">
-                        <div className={`text-sm font-medium leading-6 whitespace-nowrap ${portfolioData?.totalGL.isPositive ? 'text-positive-foreground' : 'text-negative-foreground'}`} style={{ fontFamily: 'var(--font-family, "Inter")' }}>
-                          {portfolioData?.totalGL.amount} ({portfolioData?.totalGL.percentage})
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      <div className="w-full flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-4">
+        <Card className="lg:col-span-2 min-w-0 flex flex-col items-start overflow-hidden rounded-2xl p-0">
+          <div className="flex-1 w-full p-4 sm:p-6 flex flex-col justify-between items-start gap-4 sm:gap-6">
+            <div className="w-full flex flex-col gap-4 sm:gap-6">
+              {/* Portfolio market value - full width */}
+              <div className="flex flex-col items-start gap-1 px-px">
+                <div className="text-sm font-medium text-muted-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Portfolio market value</div>
+                {(() => {
+                  const value = portfolioData?.portfolioValue || '$0.00';
+                  const match = value.match(/^\$([\d,]+)\.(\d{2})$/);
+                  if (match) {
+                    return (
+                      <h3 className="flex items-start leading-none">
+                        <span className="text-xl sm:text-2xl lg:text-3xl font-medium text-foreground tracking-[-0.24px] leading-[28px] sm:leading-[36px] lg:leading-[40px]" style={{ fontFamily: 'var(--font-family-headers, "Source Serif 4")' }}>
+                          ${match[1]}.
+                        </span>
+                        <span className="text-base sm:text-lg lg:text-xl font-medium text-foreground leading-6 h-[24px] sm:h-[32px] lg:h-[35px] flex items-end" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
+                          {match[2]}
+                        </span>
+                      </h3>
+                    );
+                  }
+                  return <h3 className="text-xl sm:text-2xl lg:text-3xl font-medium text-foreground">{value}</h3>;
+                })()}
               </div>
               
-              {/* Right side: Long and Short market values */}
-              <div className="flex flex-col items-start lg:items-end justify-end gap-2 w-full lg:w-auto lg:min-w-[267px]">
-                <div className="w-full lg:w-auto flex items-center justify-between lg:justify-end gap-4">
-                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Long market value</div>
-                  <div className="text-sm font-medium text-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.long.amount}</div>
+              {/* Metrics grid - 1 column on mobile, 2 columns on larger screens */}
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-2">
+                {/* Left Column */}
+                <div className="flex flex-col gap-2">
+                  {/* Today's unrealized G/L */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                    <div className="text-sm font-medium text-card-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Today&apos;s unrealized G/L</div>
+                    <div className="text-sm font-medium text-positive-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
+                      {portfolioData?.todaysGL.amount} ({portfolioData?.todaysGL.percentage})
+                    </div>
+                  </div>
+                  
+                  {/* Total unrealized G/L */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                    <div className="text-sm font-medium text-card-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total unrealized G/L</div>
+                    <div className="text-sm font-medium text-positive-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
+                      {portfolioData?.totalGL.amount} ({portfolioData?.totalGL.percentage})
+                    </div>
+                  </div>
                 </div>
-                <div className="w-full lg:w-auto flex items-center justify-between lg:justify-end gap-4">
-                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Short market value</div>
-                  <div className="text-sm font-medium text-negative-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.short.amount}</div>
+                
+                {/* Right Column */}
+                <div className="flex flex-col gap-2">
+                  {/* Long market value */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                    <div className="text-sm font-medium text-card-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Long market value</div>
+                    <div className="text-sm font-medium text-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.long.amount}</div>
+                  </div>
+                  
+                  {/* Short market value */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                    <div className="text-sm font-medium text-card-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Short market value</div>
+                    <div className="text-sm font-medium text-negative-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.short.amount}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -339,34 +345,34 @@ export function AccountContent({ accountId }: AccountContentProps) {
             </div>
             
             {/* Bottom row: Available cash, FDIC Sweep, Margin balance, Funds available, Total account value */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 md:gap-0 rounded-lg">
-              <div className="flex flex-col items-start gap-4 py-3 px-0">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-4 xl:gap-0 rounded-lg">
+              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
-                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Available cash</div>
-                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.availableCash}</div>
+                  <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Available cash</div>
+                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.availableCash}</div>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-4 py-3 px-0">
+              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
-                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>FDIC Sweep</div>
-                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.fdicSweep}</div>
+                  <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>FDIC Sweep</div>
+                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.fdicSweep}</div>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-4 py-3 px-0">
+              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
-                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Margin balance</div>
-                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.marginBalance}</div>
+                  <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Margin balance</div>
+                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.marginBalance}</div>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-4 py-3 px-0">
+              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
                   <div className="flex items-center gap-1">
-                    <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Funds available</div>
+                    <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Funds available</div>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent flex-shrink-0">
-                            <Info className="w-3.5 h-3.5 text-card-foreground" />
+                          <button className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded flex items-center justify-center hover:bg-accent flex-shrink-0">
+                            <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground" />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -375,18 +381,18 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.fundsAvailable}</div>
+                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.fundsAvailable}</div>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-4 py-3 px-0">
+              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
                   <div className="flex items-center gap-1">
-                    <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total account value</div>
+                    <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total account value</div>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent flex-shrink-0">
-                            <Info className="w-3.5 h-3.5 text-card-foreground" />
+                          <button className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded flex items-center justify-center hover:bg-accent flex-shrink-0">
+                            <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground" />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -395,7 +401,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.totalAccountValue}</div>
+                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.totalAccountValue}</div>
                 </div>
               </div>
             </div>
@@ -403,8 +409,8 @@ export function AccountContent({ accountId }: AccountContentProps) {
           
           {/* Footer with updated timestamp */}
           <div className="w-full px-4 sm:px-6 py-2 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-            <div className="flex-1 flex items-center gap-1.5">
-              <div className="text-xs font-normal text-card-foreground leading-5 tracking-[0.12px]">
+            <div className="flex-1 flex items-center gap-1.5 flex-wrap">
+              <div className="text-xs font-normal text-card-foreground leading-5 tracking-[0.12px] break-words">
                 Updated {new Date().toLocaleString('en-US', { 
                   month: '2-digit', 
                   day: '2-digit', 
@@ -421,14 +427,14 @@ export function AccountContent({ accountId }: AccountContentProps) {
           </div>
         </Card>
 
-        <Card className="px-6 pt-6 pb-3 flex flex-col items-center gap-6">
+        <Card className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 flex flex-col items-center gap-4 sm:gap-6">
           <div className="w-full flex justify-between items-center">
-            <span className="text-sm font-medium text-card-foreground">Asset allocation</span>
-            <button className="text-sm font-medium text-primary leading-6 tracking-tight hover:underline">Expand view</button>
+            <span className="text-xs sm:text-sm font-medium text-card-foreground">Asset allocation</span>
+            <button className="text-xs sm:text-sm font-medium text-primary leading-6 tracking-tight hover:underline">Expand view</button>
           </div>
           
           {/* Chart container - centered */}
-          <div className="w-48 h-48 relative flex items-center justify-center">
+          <div className="w-full flex items-center justify-center min-h-[160px] sm:min-h-[192px]">
             <DonutChart 
               data={portfolioData?.assetAllocation || []} 
               portfolioValue={portfolioData ? parseFloat(portfolioData.portfolioValue.replace(/[$,]/g, '')) : 0}

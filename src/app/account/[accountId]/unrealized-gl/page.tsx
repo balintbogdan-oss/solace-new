@@ -26,6 +26,7 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from '@/components/ui/tooltip';
+import { PageHeading } from '@/components/layout/PageHeading';
 // Import kept solely for type reference in comments; avoid unused var error
 // import type { UnrealizedPosition } from '@/types/account';
 
@@ -175,8 +176,10 @@ export default function UnrealizedGLPage() {
       <div className="w-full">
         <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Unrealized G/L</h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="w-full md:w-auto">
+            <PageHeading className="text-slate-900 dark:text-slate-100">Unrealized G/L</PageHeading>
+          </div>
           <div className="flex gap-2">
             <Select value={yearFilter} onValueChange={setYearFilter}>
               <SelectTrigger className="w-20 h-9">
@@ -197,7 +200,7 @@ export default function UnrealizedGLPage() {
 
         {/* Summary Section */}
         <Card className="p-6 bg-card">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
               <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>

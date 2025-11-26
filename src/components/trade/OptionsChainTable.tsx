@@ -136,12 +136,6 @@ export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTra
   const [currentPrice, setCurrentPrice] = React.useState(235); // Default for AAPL
   const [viewMode, setViewMode] = React.useState<'list' | 'straddle'>('straddle');
   
-  // Debug logging
-  console.log('🎯 OptionsChainTable props:', { symbol, selectedAction, currentOptionTrade });
-  console.log('🎯 selectedAction type:', typeof selectedAction, 'value:', selectedAction);
-  console.log('🎯 selectedAction === "sellToOpen":', selectedAction === 'sellToOpen');
-  console.log('🎯 selectedAction === "buyToOpen":', selectedAction === 'buyToOpen');
-  
   React.useEffect(() => {
     // Get current price based on symbol
     if (symbol === 'AAPL') setCurrentPrice(235);
@@ -167,19 +161,6 @@ export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTra
                (selectedAction === 'sellToOpen' && action === 'sell')  // Highlight bid for sellToOpen
              );
       
-      // Debug logging
-      if (strike <= 200 && optionType === 'call') {
-        console.log('🔍 Checking cell (segmented control + current trade):', { 
-          strike, 
-          optionType, 
-          action, 
-          selectedAction,
-          currentOptionTradeStrike: currentOptionTrade.strikePrice,
-          currentOptionTradeType: currentOptionTrade.optionType,
-          isActive
-        });
-      }
-      
       return isActive;
     }
     
@@ -189,8 +170,6 @@ export function OptionsChainTable({ symbol, onOptionTradeClick, currentOptionTra
              currentOptionTrade.optionType === optionType && 
              currentOptionTrade.action === action;
       
-      // Debug logging
-      console.log('🔍 Checking cell (current trade only):', { strike, optionType, action, isActive });
       return isActive;
     }
     

@@ -67,10 +67,8 @@ export default function TradeSymbolPage() {
           '52W Low': realMarketData.fiftyTwoWeekLow || 0
         }
       };
-      console.log('📊 TradePage - Created stockInfo:', stockInfo);
       return stockInfo;
     } else {
-      console.log('❌ TradePage - No real market data found, using mock data for', upperSymbol);
       // Fallback to mock data if not found
       const mockData = STOCK_DATA[upperSymbol] || STOCK_DATA.AAPL;
       return mockData;
@@ -124,7 +122,6 @@ export default function TradeSymbolPage() {
       };
       return mutualFundInfo;
     } else {
-      console.log('❌ TradePage - No real market data found, using mock data for mutual fund', upperSymbol);
       // Fallback to mock data if not found - return null to use default mock data in component
       return null;
     }
@@ -167,22 +164,14 @@ export default function TradeSymbolPage() {
   // Update selected account ID when URL path changes (only if not already set)
   useEffect(() => {
     const newAccountId = params?.accountId as string;
-    console.log('🔍 TradeSymbolPage - Account ID from URL:', newAccountId);
     if (newAccountId && newAccountId !== selectedAccountId) {
       setSelectedAccountId(newAccountId);
     }
   }, [params?.accountId, selectedAccountId]);
 
-
-
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [currentOptionTradeDetails, setCurrentOptionTradeDetails] = useState<OptionTradeDetails | null>(null);
   const [selectedOptionAction, setSelectedOptionAction] = useState<'buyToOpen' | 'sellToOpen' | null>(null);
-  
-  // Debug logging for selectedOptionAction changes
-  useEffect(() => {
-    console.log('🎯 selectedOptionAction changed:', selectedOptionAction);
-  }, [selectedOptionAction]);
 
   if (!stock && !mutualFund) {
     return <div>Loading data or symbol not found...</div>;
@@ -196,15 +185,11 @@ export default function TradeSymbolPage() {
 
   const handleTradeActionClick = (tradeSymbol: string, action: TradeMode) => {
     if (!symbol) return;
-    console.log(`Trade action triggered for ${tradeSymbol}: ${action}`);
-    console.log(`Current pageViewMode: ${pageViewMode}`);
-    console.log(`Resetting option trade details`);
     setCurrentTradeMode(action);
     setCurrentOptionTradeDetails(null); // Reset option trade details for equity trades
     
     // If we have an account from the URL, use it directly
     if (accountIdFromPath) {
-      console.log(`🔍 TradeSymbolPage - Using account from URL:`, accountIdFromPath);
       setSelectedAccountId(accountIdFromPath);
     } else {
       // Otherwise, show account selection modal
@@ -248,7 +233,6 @@ export default function TradeSymbolPage() {
   };
 
   const handleAddToWatchlist = () => {
-    console.log(`${isWatchlisted ? 'Removing from' : 'Adding to'} watchlist...`);
     setIsWatchlisted(!isWatchlisted);
     // TODO: Implement actual API call
   };
@@ -373,13 +357,6 @@ export default function TradeSymbolPage() {
 
         {/* Column 3: Right Content (Trade Execution or Placeholder) */}
         <div className="lg:col-span-1 rounded-md">
-          {(() => {
-            console.log('🔍 TradeSymbolPage - Rendering check:');
-            console.log('  - selectedAccountId:', selectedAccountId);
-            console.log('  - currentTradeMode:', currentTradeMode);
-            console.log('  - Should show panel:', selectedAccountId && currentTradeMode);
-            return null;
-          })()}
           {selectedAccountId && currentTradeMode ? (
             <div className="bg-white border p-6 rounded-lg shadow-md">
             <TradeExecutionPanel

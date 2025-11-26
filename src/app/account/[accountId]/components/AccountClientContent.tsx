@@ -229,7 +229,8 @@ export function AccountContent({ accountId }: AccountContentProps) {
     };
   }, [accountData, getHoldingsWithDetails]);
 
-  if (loading) {
+  // Don't block on loading if we have cached data - show data immediately
+  if (loading && !accountData) {
     return (
       <div className="rounded-md space-y-4 md:space-y-4">
         {/* Holdings Title Skeleton */}
@@ -251,7 +252,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
     );
   }
 
-  if (error || !accountData) {
+  if (error && !accountData) {
     return <div className="min-h-screen flex items-center justify-center text-red-500">Error loading account data</div>;
   }
 
@@ -262,11 +263,11 @@ export function AccountContent({ accountId }: AccountContentProps) {
             <h2 className="text-2xl font-serif ">Holdings</h2>
             <div className="flex items-center space-x-2">
               <Button variant="secondary">
-                <FileText className="mr-2 h-5 w-5" />
+                <FileText className="mr-2 h-4 w-4" />
                 Export
               </Button>
               <Button variant="secondary">
-                <History className="mr-2 h-5 w-5" />
+                <History className="mr-2 h-4 w-4" />
                 View History
               </Button>
             </div>
@@ -280,7 +281,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
               <div className="flex-1 flex flex-col justify-start items-start gap-4">
                 <div className="flex flex-col justify-start items-start gap-2">
                   <div className="flex flex-col justify-start items-start gap-1">
-                    <div className="text-sm font-medium text-card-foreground">Portfolio market value</div>
+                    <div className="text-sm font-medium text-muted-foreground">Portfolio market value</div>
                     {(() => {
                       const value = portfolioData?.portfolioValue || '$0.00';
                       const match = value.match(/^\$([\d,]+)\.(\d{2})$/);
@@ -364,7 +365,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent">
-                            <Info className="w-3 h-3 text-card-foreground" />
+                            <Info className="w-3 h-3 text-muted-foreground" />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -384,7 +385,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent">
-                            <Info className="w-3 h-3 text-card-foreground" />
+                            <Info className="w-3 h-3 text-muted-foreground" />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
