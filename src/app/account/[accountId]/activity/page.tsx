@@ -428,10 +428,10 @@ function ActivityPageContent() {
     } else {
       // Default sort by date (most recent first)
       filtered = filtered.sort((a: Activity, b: Activity) => {
-        const timeA = new Date(a.lastUpdated || a.date).getTime();
-        const timeB = new Date(b.lastUpdated || b.date).getTime();
+      const timeA = new Date(a.lastUpdated || a.date).getTime();
+      const timeB = new Date(b.lastUpdated || b.date).getTime();
         return timeB - timeA;
-      });
+    });
     }
 
     return filtered;

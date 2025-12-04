@@ -36,75 +36,51 @@
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "AMZN",
-          "quantity": 80,
-          "avgPrice": 150,
+          "symbol": "VTSAX",
+          "quantity": 500,
+          "avgPrice": 110,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "TSLA",
-          "quantity": 200,
-          "avgPrice": 250,
+          "symbol": "VFIAX",
+          "quantity": 300,
+          "avgPrice": 450,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "META",
-          "quantity": 120,
-          "avgPrice": 320,
+          "symbol": "AAPL250916C1064",
+          "quantity": 500,
+          "avgPrice": 2.89,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "NVDA",
+          "symbol": "MSFT250916P4000",
+          "quantity": 300,
+          "avgPrice": 3.20,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "US10YTREAS",
+          "quantity": 100,
+          "avgPrice": 98.50,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CORPBOND1",
           "quantity": 50,
-          "avgPrice": 500,
+          "avgPrice": 102.25,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
           "symbol": "JPM",
-          "quantity": 300,
+          "quantity": 200,
           "avgPrice": 150,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
           "symbol": "V",
-          "quantity": 200,
+          "quantity": 150,
           "avgPrice": 250,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "JNJ",
-          "quantity": 150,
-          "avgPrice": 160,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "WMT",
-          "quantity": 250,
-          "avgPrice": 160,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "PG",
-          "quantity": 180,
-          "avgPrice": 150,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "MA",
-          "quantity": 100,
-          "avgPrice": 400,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "DIS",
-          "quantity": 200,
-          "avgPrice": 100,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "NFLX",
-          "quantity": 150,
-          "avgPrice": 450,
           "lastUpdated": "2025-01-08T08:05:00Z"
         }
       ],
@@ -228,6 +204,54 @@
           "sector": "Communication Services",
           "type": "equity",
           "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "VTSAX",
+          "cusip": "VTSAX00",
+          "description": "Vanguard Total Stock Market Index Fund Admiral Shares",
+          "sector": "Mutual Fund",
+          "type": "mutual_fund",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "VFIAX",
+          "cusip": "VFIAX00",
+          "description": "Vanguard 500 Index Fund Admiral Shares",
+          "sector": "Mutual Fund",
+          "type": "mutual_fund",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AAPL250916C1064",
+          "cusip": "AAPL250916C1064",
+          "description": "AAPL Call Option $106.40 Sep 16 2025",
+          "sector": "Options",
+          "type": "option",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT250916P4000",
+          "cusip": "MSFT250916P4000",
+          "description": "MSFT Put Option $400.00 Sep 16 2025",
+          "sector": "Options",
+          "type": "option",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "US10YTREAS",
+          "cusip": "912828ZT0",
+          "description": "US Treasury Note 10-Year 2.875%",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CORPBOND1",
+          "cusip": "38141GXZ2",
+          "description": "Goldman Sachs Corporate Bond 4.25% 2030",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
+          "lastUpdated": "2025-01-08T08:05:00Z"
         }
       ],
       "trades": [],
@@ -239,7 +263,7 @@
     {
       "accountId": "1PB29147",
       "accountName": "Michael Johnson & Alexa Johnson JTWROS",
-      "accountType": "joint_jtwros",
+      "accountType": "community_property",
       "clientId": "client-1",
       "householdId": "household-1",
       "isPrimary": false,
@@ -255,7 +279,7 @@
       "holdings": [
         {
           "symbol": "AAPL",
-          "quantity": 120,
+          "quantity": 100,
           "avgPrice": 170,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
@@ -266,62 +290,26 @@
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "GOOGL",
-          "quantity": 60,
-          "avgPrice": 142,
+          "symbol": "VTSAX",
+          "quantity": 800,
+          "avgPrice": 105,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "AMZN",
-          "quantity": 50,
-          "avgPrice": 152,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "TSLA",
-          "quantity": 100,
-          "avgPrice": 255,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "META",
-          "quantity": 70,
-          "avgPrice": 325,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "NVDA",
+          "symbol": "GOOGL250916C1500",
           "quantity": 30,
-          "avgPrice": 510,
+          "avgPrice": 4.50,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "US30YTREAS",
+          "quantity": 150,
+          "avgPrice": 96.75,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
           "symbol": "JPM",
-          "quantity": 150,
-          "avgPrice": 152,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "V",
-          "quantity": 120,
-          "avgPrice": 252,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "JNJ",
           "quantity": 100,
-          "avgPrice": 162,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "WMT",
-          "quantity": 140,
-          "avgPrice": 162,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "PG",
-          "quantity": 110,
           "avgPrice": 152,
           "lastUpdated": "2025-01-08T08:05:00Z"
         }
@@ -340,6 +328,38 @@
           "cusip": "594918104",
           "description": "Microsoft Corporation",
           "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "VTSAX",
+          "cusip": "VTSAX00",
+          "description": "Vanguard Total Stock Market Index Fund Admiral Shares",
+          "sector": "Mutual Fund",
+          "type": "mutual_fund",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL250916C1500",
+          "cusip": "GOOGL250916C1500",
+          "description": "GOOGL Call Option $150.00 Sep 16 2025",
+          "sector": "Options",
+          "type": "option",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "US30YTREAS",
+          "cusip": "912810TM0",
+          "description": "US Treasury Bond 30-Year 3.0%",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "cusip": "46625H100",
+          "description": "JPMorgan Chase & Co.",
+          "sector": "Financial Services",
           "type": "equity",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
@@ -449,122 +469,56 @@
       "holdings": [
         {
           "symbol": "AAPL",
-          "quantity": 500,
+          "quantity": 300,
           "avgPrice": 175,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
           "symbol": "MSFT",
-          "quantity": 400,
+          "quantity": 200,
           "avgPrice": 390,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "GOOGL",
+          "symbol": "VFIAX",
+          "quantity": 1200,
+          "avgPrice": 440,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "FXAIX",
+          "quantity": 900,
+          "avgPrice": 175,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AAPL250916P1100",
+          "quantity": 40,
+          "avgPrice": 5.75,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA250916C5500",
+          "quantity": 35,
+          "avgPrice": 8.25,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "US5YTREAS",
           "quantity": 300,
-          "avgPrice": 145,
+          "avgPrice": 99.25,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "AMZN",
-          "quantity": 250,
-          "avgPrice": 155,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "TSLA",
-          "quantity": 400,
-          "avgPrice": 260,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "META",
-          "quantity": 350,
-          "avgPrice": 330,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "NVDA",
+          "symbol": "MUNIBOND1",
           "quantity": 200,
-          "avgPrice": 520,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "JPM",
-          "quantity": 600,
-          "avgPrice": 155,
+          "avgPrice": 101.50,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
           "symbol": "V",
-          "quantity": 500,
+          "quantity": 150,
           "avgPrice": 255,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "JNJ",
-          "quantity": 450,
-          "avgPrice": 165,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "WMT",
-          "quantity": 550,
-          "avgPrice": 165,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "PG",
-          "quantity": 480,
-          "avgPrice": 155,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "MA",
-          "quantity": 350,
-          "avgPrice": 410,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "DIS",
-          "quantity": 500,
-          "avgPrice": 105,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "NFLX",
-          "quantity": 400,
-          "avgPrice": 460,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "BAC",
-          "quantity": 800,
-          "avgPrice": 35,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "XOM",
-          "quantity": 600,
-          "avgPrice": 110,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "CVX",
-          "quantity": 550,
-          "avgPrice": 150,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "HD",
-          "quantity": 300,
-          "avgPrice": 380,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "UNH",
-          "quantity": 200,
-          "avgPrice": 520,
           "lastUpdated": "2025-01-08T08:05:00Z"
         }
       ],
@@ -582,6 +536,62 @@
           "cusip": "594918104",
           "description": "Microsoft Corporation",
           "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "VFIAX",
+          "cusip": "VFIAX00",
+          "description": "Vanguard 500 Index Fund Admiral Shares",
+          "sector": "Mutual Fund",
+          "type": "mutual_fund",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "FXAIX",
+          "cusip": "FXAIX00",
+          "description": "Fidelity 500 Index Fund",
+          "sector": "Mutual Fund",
+          "type": "mutual_fund",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AAPL250916P1100",
+          "cusip": "AAPL250916P1100",
+          "description": "AAPL Put Option $110.00 Sep 16 2025",
+          "sector": "Options",
+          "type": "option",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA250916C5500",
+          "cusip": "NVDA250916C5500",
+          "description": "NVDA Call Option $550.00 Sep 16 2025",
+          "sector": "Options",
+          "type": "option",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "US5YTREAS",
+          "cusip": "912828YV2",
+          "description": "US Treasury Note 5-Year 2.5%",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MUNIBOND1",
+          "cusip": "64966QFK5",
+          "description": "New York City Municipal Bond 3.5% 2035",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "cusip": "92826C839",
+          "description": "Visa Inc.",
+          "sector": "Financial Services",
           "type": "equity",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
@@ -755,110 +765,44 @@
       "holdings": [
         {
           "symbol": "AAPL",
-          "quantity": 150,
+          "quantity": 80,
           "avgPrice": 175,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "MSFT",
-          "quantity": 100,
-          "avgPrice": 390,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
           "symbol": "GOOGL",
-          "quantity": 75,
+          "quantity": 50,
           "avgPrice": 145,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "AMZN",
-          "quantity": 60,
-          "avgPrice": 155,
+          "symbol": "VTSAX",
+          "quantity": 400,
+          "avgPrice": 108,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "TSLA",
-          "quantity": 150,
-          "avgPrice": 260,
+          "symbol": "TSLA250916C2500",
+          "quantity": 20,
+          "avgPrice": 6.50,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "META",
-          "quantity": 90,
-          "avgPrice": 330,
+          "symbol": "CORPBOND2",
+          "quantity": 100,
+          "avgPrice": 100.75,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "NVDA",
-          "quantity": 40,
-          "avgPrice": 520,
+          "symbol": "US2YTREAS",
+          "quantity": 200,
+          "avgPrice": 99.50,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
           "symbol": "JPM",
-          "quantity": 200,
+          "quantity": 75,
           "avgPrice": 155,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "V",
-          "quantity": 150,
-          "avgPrice": 255,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "JNJ",
-          "quantity": 120,
-          "avgPrice": 165,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "WMT",
-          "quantity": 180,
-          "avgPrice": 165,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "PG",
-          "quantity": 140,
-          "avgPrice": 155,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "MA",
-          "quantity": 80,
-          "avgPrice": 410,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "DIS",
-          "quantity": 150,
-          "avgPrice": 105,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "NFLX",
-          "quantity": 120,
-          "avgPrice": 460,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "BAC",
-          "quantity": 250,
-          "avgPrice": 35,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "XOM",
-          "quantity": 180,
-          "avgPrice": 110,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "CVX",
-          "quantity": 160,
-          "avgPrice": 150,
           "lastUpdated": "2025-01-08T08:05:00Z"
         }
       ],
@@ -872,14 +816,6 @@
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "MSFT",
-          "cusip": "594918104",
-          "description": "Microsoft Corporation",
-          "sector": "Technology",
-          "type": "equity",
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
           "symbol": "GOOGL",
           "cusip": "02079K305",
           "description": "Alphabet Inc. Class A",
@@ -888,10 +824,42 @@
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "AMZN",
-          "cusip": "023135106",
-          "description": "Amazon.com Inc.",
-          "sector": "Consumer Discretionary",
+          "symbol": "VTSAX",
+          "cusip": "VTSAX00",
+          "description": "Vanguard Total Stock Market Index Fund Admiral Shares",
+          "sector": "Mutual Fund",
+          "type": "mutual_fund",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA250916C2500",
+          "cusip": "TSLA250916C2500",
+          "description": "TSLA Call Option $250.00 Sep 16 2025",
+          "sector": "Options",
+          "type": "option",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CORPBOND2",
+          "cusip": "68389XBK4",
+          "description": "Oracle Corporation Bond 3.8% 2028",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "US2YTREAS",
+          "cusip": "912828XB9",
+          "description": "US Treasury Note 2-Year 2.25%",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "cusip": "46625H100",
+          "description": "JPMorgan Chase & Co.",
+          "sector": "Financial Services",
           "type": "equity",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
@@ -1033,122 +1001,62 @@
       "holdings": [
         {
           "symbol": "AAPL",
-          "quantity": 350,
+          "quantity": 200,
           "avgPrice": 175,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
           "symbol": "MSFT",
-          "quantity": 280,
+          "quantity": 150,
           "avgPrice": 390,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "GOOGL",
-          "quantity": 220,
-          "avgPrice": 145,
+          "symbol": "VFIAX",
+          "quantity": 1500,
+          "avgPrice": 445,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "AMZN",
-          "quantity": 180,
-          "avgPrice": 155,
+          "symbol": "SWTSX",
+          "quantity": 1000,
+          "avgPrice": 75,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "TSLA",
-          "quantity": 300,
-          "avgPrice": 260,
+          "symbol": "META250916C5500",
+          "quantity": 45,
+          "avgPrice": 7.80,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "META",
+          "symbol": "AMZN250916P1800",
+          "quantity": 30,
+          "avgPrice": 4.25,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "US10YTREAS",
           "quantity": 250,
-          "avgPrice": 330,
+          "avgPrice": 97.50,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "NVDA",
+          "symbol": "CORPBOND3",
+          "quantity": 180,
+          "avgPrice": 103.25,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MUNIBOND2",
           "quantity": 150,
-          "avgPrice": 520,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "JPM",
-          "quantity": 450,
-          "avgPrice": 155,
+          "avgPrice": 100.50,
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
           "symbol": "V",
-          "quantity": 380,
+          "quantity": 200,
           "avgPrice": 255,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "JNJ",
-          "quantity": 320,
-          "avgPrice": 165,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "WMT",
-          "quantity": 400,
-          "avgPrice": 165,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "PG",
-          "quantity": 350,
-          "avgPrice": 155,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "MA",
-          "quantity": 250,
-          "avgPrice": 410,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "DIS",
-          "quantity": 380,
-          "avgPrice": 105,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "NFLX",
-          "quantity": 300,
-          "avgPrice": 460,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "BAC",
-          "quantity": 600,
-          "avgPrice": 35,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "XOM",
-          "quantity": 450,
-          "avgPrice": 110,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "CVX",
-          "quantity": 420,
-          "avgPrice": 150,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "HD",
-          "quantity": 220,
-          "avgPrice": 380,
-          "lastUpdated": "2025-01-08T08:05:00Z"
-        },
-        {
-          "symbol": "UNH",
-          "quantity": 150,
-          "avgPrice": 520,
           "lastUpdated": "2025-01-08T08:05:00Z"
         }
       ],
@@ -1170,51 +1078,59 @@
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "GOOGL",
-          "cusip": "02079K305",
-          "description": "Alphabet Inc. Class A",
-          "sector": "Technology",
-          "type": "equity",
+          "symbol": "VFIAX",
+          "cusip": "VFIAX00",
+          "description": "Vanguard 500 Index Fund Admiral Shares",
+          "sector": "Mutual Fund",
+          "type": "mutual_fund",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "AMZN",
-          "cusip": "023135106",
-          "description": "Amazon.com Inc.",
-          "sector": "Consumer Discretionary",
-          "type": "equity",
+          "symbol": "SWTSX",
+          "cusip": "SWTSX00",
+          "description": "Schwab Total Stock Market Index Fund",
+          "sector": "Mutual Fund",
+          "type": "mutual_fund",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "TSLA",
-          "cusip": "88160R101",
-          "description": "Tesla Inc.",
-          "sector": "Consumer Discretionary",
-          "type": "equity",
+          "symbol": "META250916C5500",
+          "cusip": "META250916C5500",
+          "description": "META Call Option $550.00 Sep 16 2025",
+          "sector": "Options",
+          "type": "option",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "META",
-          "cusip": "30303M102",
-          "description": "Meta Platforms Inc.",
-          "sector": "Technology",
-          "type": "equity",
+          "symbol": "AMZN250916P1800",
+          "cusip": "AMZN250916P1800",
+          "description": "AMZN Put Option $180.00 Sep 16 2025",
+          "sector": "Options",
+          "type": "option",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "NVDA",
-          "cusip": "67066G104",
-          "description": "NVIDIA Corporation",
-          "sector": "Technology",
-          "type": "equity",
+          "symbol": "US10YTREAS",
+          "cusip": "912828ZT0",
+          "description": "US Treasury Note 10-Year 2.875%",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {
-          "symbol": "JPM",
-          "cusip": "46625H100",
-          "description": "JPMorgan Chase & Co.",
-          "sector": "Financial Services",
-          "type": "equity",
+          "symbol": "CORPBOND3",
+          "cusip": "594918104",
+          "description": "Microsoft Corporation Bond 4.0% 2032",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MUNIBOND2",
+          "cusip": "13063DAM8",
+          "description": "California State Municipal Bond 3.25% 2030",
+          "sector": "Fixed Income",
+          "type": "fixed_income",
           "lastUpdated": "2025-01-08T08:05:00Z"
         },
         {

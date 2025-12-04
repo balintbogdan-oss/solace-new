@@ -398,8 +398,9 @@ export function AccountDataProvider({
       );
       
       // Always calculate from current market data (not stored values)
-      // If market data not found, skip this holding's unrealized G/L calculation
-      const currentPrice = marketData?.currentPrice || 0;
+      // If market data not found, use avgPrice as fallback (especially for options)
+      // This ensures holdings show up in asset allocation even without market data
+      const currentPrice = marketData?.currentPrice || holding.avgPrice || 0;
       const marketValue = holding.quantity * currentPrice;
       const investedValue = holding.quantity * holding.avgPrice;
       // Only calculate unrealized G/L if we have valid market data
@@ -419,8 +420,8 @@ export function AccountDataProvider({
         },
         marketData: marketData || {
           symbol: holding.symbol,
-          currentPrice: 0,
-          previousClose: 0,
+          currentPrice: holding.avgPrice || 0, // Use avgPrice as fallback
+          previousClose: holding.avgPrice || 0,
           dayChange: 0,
           dayChangePercent: 0,
           volume: 0,

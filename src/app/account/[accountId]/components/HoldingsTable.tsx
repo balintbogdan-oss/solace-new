@@ -17,7 +17,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
-import { Search, SlidersHorizontal, RefreshCcw, MoreHorizontal, ChevronsUpDown, Info, ArrowUp, ArrowDown, TrendingUp, RotateCcw, BarChart3, GripVertical } from 'lucide-react'
+import { Search, SlidersHorizontal, RefreshCcw, MoreHorizontal, ChevronsUpDown, Info, ArrowUp, ArrowDown, TrendingUp, RotateCcw, BarChart3, GripVertical, Maximize2 } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -50,7 +50,7 @@ import { CSS } from '@dnd-kit/utilities'
 
 import { HoldingWithDetails } from '@/types/account';
 
-type SortableColumn = keyof HoldingWithDetails | 'currentPrice' | 'sector' | 'description' | 'assetClass';
+type SortableColumn = keyof HoldingWithDetails | 'currentPrice' | 'sector' | 'description' | 'assetClass' | 'accountType' | 'longShort' | 'closingPrice' | 'priceChange' | 'investedValue' | 'callPut' | 'maturityDate' | 'yield' | 'todaysGL';
 
 interface ColumnDefinition {
   id: string;
@@ -67,18 +67,26 @@ interface HoldingsTableProps {
   accountId?: string;
 }
 
-// Column definitions
+// Column definitions - default order as specified
 const COLUMN_DEFINITIONS: ColumnDefinition[] = [
   { id: 'actions', label: 'Actions', sortKey: null, defaultVisible: true, alwaysVisible: true },
   { id: 'symbol', label: 'Symbol/CUSIP', sortKey: 'symbol', defaultVisible: true, alwaysVisible: true },
+  { id: 'description', label: 'Description', sortKey: 'description', defaultVisible: true },
   { id: 'assetClass', label: 'Asset class', sortKey: 'assetClass', defaultVisible: true },
   { id: 'quantity', label: 'Quantity', sortKey: 'quantity', defaultVisible: true },
+  { id: 'accountType', label: 'Account type', sortKey: null, defaultVisible: true },
+  { id: 'longShort', label: 'L/S', sortKey: null, defaultVisible: true },
+  { id: 'currentPrice', label: 'LTP', sortKey: 'currentPrice', defaultVisible: true },
+  { id: 'closingPrice', label: 'Closing price', sortKey: null, defaultVisible: true },
+  { id: 'avgPrice', label: 'Avg buy price', sortKey: 'avgPrice', defaultVisible: true },
+  { id: 'priceChange', label: 'Price change', sortKey: null, defaultVisible: true },
   { id: 'marketValue', label: 'Market Value', sortKey: 'marketValue', defaultVisible: true },
-  { id: 'description', label: 'Description', sortKey: 'description', defaultVisible: true },
-  { id: 'unrealizedGL', label: 'Unrealized G/L', sortKey: 'unrealizedGL', defaultVisible: true },
-  { id: 'unrealizedGLPercent', label: 'Unrealized G/L %', sortKey: 'unrealizedGLPercent', defaultVisible: true },
-  { id: 'currentPrice', label: 'Current Price', sortKey: 'currentPrice', defaultVisible: true },
-  { id: 'avgPrice', label: 'Avg Price', sortKey: 'avgPrice', defaultVisible: true },
+  { id: 'investedValue', label: 'Invested Value', sortKey: null, defaultVisible: true },
+  { id: 'callPut', label: 'Call/Put', sortKey: null, defaultVisible: false },
+  { id: 'maturityDate', label: 'Maturity Date', sortKey: null, defaultVisible: false },
+  { id: 'yield', label: '% Yield', sortKey: null, defaultVisible: false },
+  { id: 'unrealizedGL', label: 'Total Unrealized G/L', sortKey: 'unrealizedGL', defaultVisible: true },
+  { id: 'todaysGL', label: "Today's G/L", sortKey: null, defaultVisible: true },
 ];
 
 const STORAGE_KEY = 'holdings-table-columns';
@@ -303,34 +311,46 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
   // Function to determine asset class based on security
   const getAssetClass = (holding: HoldingWithDetails): string => {
     const symbol = holding.symbol?.toUpperCase() || '';
-    const description = holding.security?.description?.toLowerCase() || '';
+    const description = (holding.security?.description || '').toLowerCase();
+    const securityType = (holding.security as { type?: string })?.type?.toLowerCase() || '';
+    const sector = (holding.security?.sector || '').toLowerCase();
     
-    // Check for mutual funds
-    if (description.includes('mutual fund') || description.includes('fund') || 
-        symbol.includes('MF') || description.includes('vanguard') || 
-        description.includes('fidelity') || description.includes('t rowe')) {
+    // First check the security type field if available
+    if (securityType === 'mutual_fund' || sector === 'mutual fund') {
+      return 'Mutual Funds';
+    }
+    if (securityType === 'option' || sector === 'options') {
+      return 'Options';
+    }
+    if (securityType === 'fixed_income' || sector === 'fixed income') {
+      return 'Fixed Income';
+    }
+    
+    // Check for mutual funds - specific fund symbols or explicit fund names
+    if (symbol === 'VTSAX' || symbol === 'VFIAX' || symbol === 'VTSMX' ||
+        symbol === 'FXAIX' || symbol === 'SWTSX' ||
+        description.includes('index fund') || description.includes('mutual fund') ||
+        description.includes('vanguard total') || description.includes('fidelity 500')) {
       return 'Mutual Funds';
     }
     
-    // Check for options
-    if (description.includes('call') || description.includes('put') || 
-        description.includes('option') || symbol.includes('C') || symbol.includes('P')) {
+    // Check for options - symbol patterns with date and C/P for call/put
+    if (symbol.length > 8 && /\d{6}[CP]\d+/.test(symbol)) {
       return 'Options';
     }
     
-    // Check for fixed income
+    // Check for fixed income - bonds, treasuries, CDs
     if (description.includes('bond') || description.includes('treasury') || 
-        description.includes('note') || description.includes('cd') || 
-        description.includes('fixed income') || symbol.includes('T')) {
+        description.includes(' note ') || description.includes('certificate of deposit')) {
       return 'Fixed Income';
     }
     
     // Check for annuities
-    if (description.includes('annuity') || description.includes('pension')) {
+    if (description.includes('annuity')) {
       return 'Annuities';
     }
     
-    // Default to Equities for stocks
+    // Default to Equities for stocks - most common case
     return 'Equities';
   };
 
@@ -458,6 +478,10 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
         </Select>
 
         <div className="ml-auto flex gap-2">
+          <Button variant="outline">
+            <Maximize2 className="w-4 h-4" />
+            Expand
+          </Button>
           <Popover open={isCustomizeDialogOpen} onOpenChange={setIsCustomizeDialogOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline">
@@ -645,18 +669,48 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                         </span>
                       );
                       break;
-                    case 'unrealizedGLPercent':
-                      cellContent = (
-                        <span className={`${(row.unrealizedGLPercent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
-                          {(row.unrealizedGLPercent || 0) >= 0 ? '+' : '-'}{Math.abs(row.unrealizedGLPercent || 0).toFixed(2)}%
-                        </span>
-                      );
-                      break;
                     case 'currentPrice':
                       cellContent = `$${(row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
                       break;
                     case 'avgPrice':
                       cellContent = `$${(row.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                      break;
+                    case 'accountType':
+                      cellContent = 'Cash'; // Default account type
+                      break;
+                    case 'longShort':
+                      cellContent = 'Long'; // Default to Long
+                      break;
+                    case 'closingPrice':
+                      cellContent = `$${(row.marketData?.previousClose || row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                      break;
+                    case 'priceChange':
+                      const change = row.marketData?.dayChange || 0;
+                      cellContent = (
+                        <span className={`${change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                          {change >= 0 ? '+' : '-'}${Math.abs(change).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      );
+                      break;
+                    case 'investedValue':
+                      cellContent = `$${((row.avgPrice || 0) * row.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                      break;
+                    case 'callPut':
+                      cellContent = '-';
+                      break;
+                    case 'maturityDate':
+                      cellContent = '-';
+                      break;
+                    case 'yield':
+                      cellContent = '-';
+                      break;
+                    case 'todaysGL':
+                      const todayGL = (row.marketData?.dayChange || 0) * row.quantity;
+                      cellContent = (
+                        <span className={`${todayGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                          {todayGL >= 0 ? '+' : '-'}${Math.abs(todayGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      );
                       break;
                     default:
                       cellContent = null;

@@ -14,6 +14,7 @@ import {
 } from './components';
 import { useClientDashboardData } from './hooks/useClientDashboardData';
 import { calculateAssetAllocation } from './utils/assetAllocation';
+import { formatAccountType } from '@/lib/utils';
 
 export default function ClientDashboardPage() {
   const router = useRouter();
@@ -127,21 +128,11 @@ export default function ClientDashboardPage() {
       }
       if (selectedAccounts.length === 1) {
         const account = selectedAccounts[0];
-        const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
-                           account.accountType === 'trust' ? 'Personal trust' :
-                           account.accountType === 'individual' ? 'Single account' :
-                           account.accountType === 'ira' ? 'Single account' :
-                           'Account';
-        return accountType;
+        return formatAccountType(account.accountType);
       }
       if (selectedAccounts.length === 2) {
         const account = selectedAccounts[0];
-        const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
-                           account.accountType === 'trust' ? 'Personal trust' :
-                           account.accountType === 'individual' ? 'Single account' :
-                           account.accountType === 'ira' ? 'Single account' :
-                           'Account';
-        return `${accountType} +1 more`;
+        return `${formatAccountType(account.accountType)} +1 more`;
       }
       return `${selectedAccounts.length} accounts`;
     }

@@ -116,22 +116,67 @@ export function AccountContent({ accountId }: AccountContentProps) {
     // TODO: Implement actual API call
   };
 
-  // Helper function to get sector colors using chart color system
-  const getSectorColor = (sector: string) => {
-    // Map sectors to chart color indices (cycling through 1-6)
-    const sectorMap: Record<string, number> = {
-      'Technology': 1,
-      'Financial Services': 2,
-      'Consumer Discretionary': 3,
-      'Automotive': 4,
-      'Healthcare': 5,
-      'Energy': 6,
-      'Utilities': 1,
-      'Real Estate': 2
+  // Helper function to get asset type colors using chart color system
+  const getAssetTypeColor = (assetType: string) => {
+    // Map asset types to chart color indices (cycling through 1-6)
+    const assetTypeMap: Record<string, number> = {
+      'Equities': 1,
+      'Mutual Funds': 2,
+      'Options': 3,
+      'Fixed Income': 4,
+      'Cash': 5,
+      'Annuities': 6,
+      'Others': 1
     };
     
-    const colorIndex = sectorMap[sector] || 1;
+    const colorIndex = assetTypeMap[assetType] || 1;
     return getChartColorByIndex(colorIndex);
+  };
+
+  // Helper function to determine asset type from holding
+  const getAssetType = (holding: ReturnType<typeof getHoldingsWithDetails>[0]): string => {
+    const symbol = holding.symbol?.toUpperCase() || '';
+    const description = (holding.security?.description || '').toLowerCase();
+    const securityType = (holding.security as { type?: string })?.type?.toLowerCase() || '';
+    const sector = (holding.security?.sector || '').toLowerCase();
+    
+    // First check the security type field if available
+    if (securityType === 'mutual_fund' || sector === 'mutual fund') {
+      return 'Mutual Funds';
+    }
+    if (securityType === 'option' || sector === 'options') {
+      return 'Options';
+    }
+    if (securityType === 'fixed_income' || sector === 'fixed income') {
+      return 'Fixed Income';
+    }
+    
+    // Check for mutual funds - specific fund symbols or explicit fund names
+    if (symbol === 'VTSAX' || symbol === 'VFIAX' || symbol === 'VTSMX' ||
+        symbol === 'FXAIX' || symbol === 'SWTSX' ||
+        description.includes('index fund') || description.includes('mutual fund') ||
+        description.includes('vanguard total') || description.includes('fidelity 500')) {
+      return 'Mutual Funds';
+    }
+    
+    // Check for options - symbol patterns with date and C/P for call/put
+    if (symbol.length > 8 && /\d{6}[CP]\d+/.test(symbol)) {
+      return 'Options';
+    }
+    
+    // Check for fixed income - bonds, treasuries, CDs
+    if (description.includes('bond') || description.includes('treasury') || 
+        description.includes(' note ') || description.includes('certificate of deposit')) {
+      return 'Fixed Income';
+    }
+    
+    // Check for annuities
+    if (description.includes('annuity')) {
+      return 'Annuities';
+    }
+    
+    // Default to Equities for stocks - most common case
+    return 'Equities';
   };
 
   // Calculate dynamic data from accountData
@@ -171,17 +216,18 @@ export function AccountContent({ accountId }: AccountContentProps) {
     }, 0);
     const todaysUnrealizedGLPercent = totalValue > 0 ? (todaysUnrealizedGL / totalValue) * 100 : 0;
 
-    // Calculate asset allocation from holdings
+    // Calculate asset allocation from holdings by asset type
     const assetAllocation = holdingsWithDetails.reduce((acc, holding) => {
       const marketValue = holding.marketValue || 0;
-      const existing = acc.find(item => item.name === holding.security.sector);
+      const assetType = getAssetType(holding);
+      const existing = acc.find(item => item.name === assetType);
       if (existing) {
         existing.value += marketValue;
       } else {
         acc.push({
-          name: holding.security.sector,
+          name: assetType,
           value: marketValue,
-          color: getSectorColor(holding.security.sector)
+          color: getAssetTypeColor(assetType)
         });
       }
       return acc;
@@ -223,11 +269,16 @@ export function AccountContent({ accountId }: AccountContentProps) {
       marginBalance: `$${(balances.margin || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       fundsAvailable: `$${(balances.buyingPower || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       totalAccountValue: `$${safeTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-      assetAllocation: assetAllocation.map(item => ({
-        ...item,
-        value: safeTotalValue > 0 ? Math.round((item.value / safeTotalValue) * 100) : 0
-      }))
+      assetAllocation: assetAllocation
+        .filter(item => item.value > 0) // Only include segments with actual value
+        .map(item => ({
+          ...item,
+          // Keep actual market values for the pie chart (not percentages)
+          // This ensures all segments are visible even if small
+          value: item.value
+        }))
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountData, getHoldingsWithDetails]);
 
   // Don't block on loading if we have cached data - show data immediately
@@ -291,7 +342,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                         <span className="text-xl sm:text-2xl lg:text-3xl font-medium text-foreground tracking-[-0.24px] leading-[28px] sm:leading-[36px] lg:leading-[40px]" style={{ fontFamily: 'var(--font-family-headers, "Source Serif 4")' }}>
                           ${match[1]}.
                         </span>
-                        <span className="text-base sm:text-lg lg:text-xl font-medium text-foreground leading-6 h-[24px] sm:h-[32px] lg:h-[35px] flex items-end" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
+                        <span className="text-base sm:text-lg lg:text-xl font-medium text-foreground leading-6 flex items-end" style={{ fontFamily: 'var(--font-family, "Inter")', transform: 'translateY(10px)', marginBottom: '10px' }}>
                           {match[2]}
                         </span>
                       </h3>
@@ -307,7 +358,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                 <div className="flex flex-col gap-2">
                   {/* Today's unrealized G/L */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
-                    <div className="text-sm font-medium text-card-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Today&apos;s unrealized G/L</div>
+                    <div className="text-sm font-medium text-muted-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Today&apos;s unrealized G/L</div>
                     <div className="text-sm font-medium text-positive-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
                       {portfolioData?.todaysGL.amount} ({portfolioData?.todaysGL.percentage})
                     </div>
@@ -315,7 +366,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                   
                   {/* Total unrealized G/L */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
-                    <div className="text-sm font-medium text-card-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total unrealized G/L</div>
+                    <div className="text-sm font-medium text-muted-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total unrealized G/L</div>
                     <div className="text-sm font-medium text-positive-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
                       {portfolioData?.totalGL.amount} ({portfolioData?.totalGL.percentage})
                     </div>
@@ -326,13 +377,13 @@ export function AccountContent({ accountId }: AccountContentProps) {
                 <div className="flex flex-col gap-2">
                   {/* Long market value */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
-                    <div className="text-sm font-medium text-card-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Long market value</div>
+                    <div className="text-sm font-medium text-muted-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Long market value</div>
                     <div className="text-sm font-medium text-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.long.amount}</div>
                   </div>
                   
                   {/* Short market value */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
-                    <div className="text-sm font-medium text-card-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Short market value</div>
+                    <div className="text-sm font-medium text-muted-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Short market value</div>
                     <div className="text-sm font-medium text-negative-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.short.amount}</div>
                   </div>
                 </div>
@@ -443,17 +494,12 @@ export function AccountContent({ accountId }: AccountContentProps) {
           
           {/* Legend - centered with flex-wrap */}
           <div className="w-full flex justify-center items-center gap-4 flex-wrap">
-            {(portfolioData?.assetAllocation || []).slice(0, 2).map((item) => (
+            {(portfolioData?.assetAllocation || []).map((item) => (
               <div key={item.name} className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded flex-shrink-0" style={{ backgroundColor: item.color }}></span>
                 <span className="text-xs font-medium text-card-foreground leading-5 tracking-tight">{item.name}</span>
               </div>
             ))}
-            {(portfolioData?.assetAllocation || []).length > 2 && (
-              <div className="text-xs font-medium text-card-foreground leading-5 tracking-tight">
-                +{(portfolioData?.assetAllocation || []).length - 2} more
-              </div>
-            )}
           </div>
         </Card>
       </div>

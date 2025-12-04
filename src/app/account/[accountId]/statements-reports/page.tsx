@@ -765,7 +765,7 @@ export default function StatementsReportsPage() {
                     <label className="text-sm text-muted-foreground invisible">Action</label>
                     <Button className="bg-primary hover:bg-primary/90" onClick={handleGenerateQuicken}>
                       Generate Quicken file
-                    </Button>
+                  </Button>
                   </div>
                 </div>
               </div>

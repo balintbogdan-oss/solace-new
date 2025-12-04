@@ -138,9 +138,10 @@ export async function getMarketDataForSymbols(symbols: string[]): Promise<Market
   // Using local data only
   // Go straight to loading from JSON files
   
-  // Load from local JSON files - check both equities and mutual funds
+  // Load from local JSON files - check equities, mutual funds, and options
   const equitiesData = await loadEquitiesMarketData();
   const mutualFundsData = await loadMutualFundsMarketData();
+  const optionsData = await loadOptionsMarketData();
   
   let allSecurities: unknown[] = [];
   
@@ -150,6 +151,43 @@ export async function getMarketDataForSymbols(symbols: string[]): Promise<Market
   
   if (mutualFundsData && (mutualFundsData as { mutualFunds?: unknown[] }).mutualFunds) {
     allSecurities = [...allSecurities, ...(mutualFundsData as { mutualFunds: unknown[] }).mutualFunds];
+  }
+  
+  // Add options data - transform options structure to match MarketData format
+  if (optionsData && (optionsData as { options?: unknown[] }).options) {
+    const options = (optionsData as { options: unknown[] }).options.map((option: unknown) => {
+      const o = option as {
+        symbol: string;
+        last?: number;
+        bid?: number;
+        ask?: number;
+        volume?: number;
+        openInterest?: number;
+        previousClose?: number;
+        dayChange?: number;
+        dayChangePercent?: number;
+        lastUpdated?: string;
+      };
+      // Transform options data to match equities/mutual funds structure
+      return {
+        symbol: o.symbol,
+        currentPrice: o.last || o.ask || o.bid || 0,
+        previousClose: o.previousClose || o.last || 0,
+        dayChange: o.dayChange || 0,
+        dayChangePercent: o.dayChangePercent || 0,
+        volume: o.volume || 0,
+        marketCap: 0, // Options don't have market cap
+        open: o.bid || o.last || 0,
+        high: o.ask || o.last || 0,
+        low: o.bid || o.last || 0,
+        fiftyTwoWeekHigh: 0,
+        fiftyTwoWeekLow: 0,
+        sector: 'Options',
+        description: '',
+        lastUpdated: o.lastUpdated || new Date().toISOString()
+      };
+    });
+    allSecurities = [...allSecurities, ...options];
   }
   
   if (allSecurities.length === 0) {

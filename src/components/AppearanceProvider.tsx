@@ -359,7 +359,10 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
 
     const updateClientTheme = () => {
       const isDarkMode = document.documentElement.classList.contains('dark');
-      
+
+      // Update data-role attribute
+      document.documentElement.setAttribute('data-role', role);
+
       // Set data-theme attribute based on role
       if (role === 'client') {
         document.documentElement.setAttribute('data-theme', 'wedbush-next');
@@ -385,9 +388,48 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
         document.documentElement.style.setProperty('--webush-avatar-bg', webushColors.avatarBg);
         document.documentElement.style.setProperty('--webush-welcome-banner', webushColors.welcomeBanner);
         document.documentElement.style.setProperty('--webush-accent-cyan', webushColors.accentCyan);
+
+        // Set client background color based on mode
+        if (isDarkMode) {
+          document.documentElement.style.setProperty('--background', '15 23 42'); // slate-900
+        } else {
+          document.documentElement.style.setProperty('--background', '241 245 249'); // slate-100
+        }
       } else {
         // Remove data-theme for advisor (Solace theme)
         document.documentElement.removeAttribute('data-theme');
+        
+        // Reset CSS variables to advisor defaults
+        // Reset primary color to use settings (will be set by the primary color useEffect)
+        const primaryColorRgb = (() => {
+          const hex = appearanceSettings.primaryColor;
+          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+          if (result) {
+            const r = parseInt(result[1], 16);
+            const g = parseInt(result[2], 16);
+            const b = parseInt(result[3], 16);
+            return `${r} ${g} ${b}`;
+          }
+          return '142 85 4'; // Default brown color
+        })();
+        document.documentElement.style.setProperty('--primary', primaryColorRgb);
+        
+        // Remove Webush-specific CSS variables
+        document.documentElement.style.removeProperty('--webush-primary');
+        document.documentElement.style.removeProperty('--webush-header-bg');
+        document.documentElement.style.removeProperty('--webush-avatar-bg');
+        document.documentElement.style.removeProperty('--webush-welcome-banner');
+        document.documentElement.style.removeProperty('--webush-accent-cyan');
+        
+        // Reset header background
+        document.documentElement.style.removeProperty('--header-bg');
+        
+        // Set advisor background color based on mode
+        if (isDarkMode) {
+          document.documentElement.style.setProperty('--background', '4 4 4'); // near black
+        } else {
+          document.documentElement.style.setProperty('--background', '245 245 244'); // stone-100
+        }
       }
     };
 
@@ -402,7 +444,7 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
     });
 
     return () => observer.disconnect();
-  }, [role, roleHydrated]);
+  }, [role, roleHydrated, appearanceSettings.primaryColor]);
 
   return <>{children}</>;
 }

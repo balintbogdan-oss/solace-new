@@ -334,11 +334,7 @@ export function FullSizePageTitle({
                           const account = clientAccounts.find(acc => acc.id === accountId);
                           // Show account type (formatted) and account name
                           if (account) {
-                            const accountTypeLabel = account.type === 'joint_jtwros' ? 'Joint account' :
-                                                   account.type === 'trust' ? 'Personal trust' :
-                                                   account.type === 'individual' || account.type === 'ira' ? 'Single account' :
-                                                   formatAccountType(account.type);
-                            return accountTypeLabel;
+                            return formatAccountType(account.type);
                           }
                           return title;
                         })()}

@@ -170,7 +170,7 @@ export function HeaderClient() {
                       Profile & Settings
                     </Link>
                   </Button>
-                  
+
                   {/* Theme Toggle */}
                   {mounted && (
                     <Button

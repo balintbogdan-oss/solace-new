@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { AccountData } from '@/types/account';
 import { HouseholdGroup } from './types';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatAccountType } from '@/lib/utils';
 import { ChevronUp, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 interface AccountsSectionProps {
@@ -29,19 +29,6 @@ export function AccountsSection({
   onRefresh,
   onSeeMoreDetails,
 }: AccountsSectionProps) {
-  const getAccountTypeLabel = (accountType: string) => {
-    switch (accountType) {
-      case 'joint_jtwros':
-        return 'Joint account';
-      case 'trust':
-        return 'Personal trust';
-      case 'individual':
-      case 'ira':
-        return 'Single account';
-      default:
-        return 'Account';
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -124,7 +111,7 @@ export function AccountsSection({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                             <span className="text-sm font-medium text-foreground">
-                              {getAccountTypeLabel(account.accountType)}
+                              {formatAccountType(account.accountType)}
                             </span>
                             {account.isPrimary && (
                               <span 
@@ -247,7 +234,7 @@ export function AccountsSection({
                     >
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-medium text-foreground">
-                          Single account
+                          {formatAccountType(account.accountType)}
                         </span>
                         <p className="text-sm text-muted-foreground truncate">
                           {account.accountId} • {account.accountName}

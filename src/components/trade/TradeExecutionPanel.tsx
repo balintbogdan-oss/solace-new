@@ -9,6 +9,7 @@ import { ArrowLeft, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react'
 import { AccountSelectionModal } from './AccountSelectionModal'
 import { cn, formatAccountType } from '@/lib/utils'
 import { useAccountData } from '@/contexts/AccountDataContext'
+import { useUserRole } from '@/contexts/UserRoleContext'
 import { MarketDataOverlay } from './MarketDataOverlay'
 import { OptionsMarketDataOverlay } from './OptionsMarketDataOverlay'
 import { MutualFundMarketDataOverlay } from './MutualFundMarketDataOverlay'
@@ -183,6 +184,10 @@ export function TradeExecutionPanel({
   // --- Account Data Context ---
   const { data: accountData, addHolding, removeHolding, addTrade, updateBalances, executeTrade } = useAccountData();
   const marketData = accountData?.marketData;
+  
+  // --- User Role Context ---
+  const { role } = useUserRole();
+  const isClient = role === 'client';
 
   // Check if user is holding the specific option
   // Derived info retained for future UX, but not used in the current flow
@@ -534,13 +539,17 @@ export function TradeExecutionPanel({
       if (isOptionTrade) {
         const optionPrice = getOptionPrice();
         const baseCost = quantity * optionPrice * 100;
-        return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
+        // Only include commission for advisors
+        const commissionToUse = isClient ? 0 : commission;
+        return tradeMode === 'buy' ? baseCost + commissionToUse : baseCost - commissionToUse;
       }
       
       // For all other cases (equities), use the standard calculation with commission
       const baseCost = quantity * priceToUse;
-      return tradeMode === 'buy' ? baseCost + commission : baseCost - commission;
-  }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType, isMutualFund, transactionType, dollarAmount, getOptionPrice]);
+      // Only include commission for advisors
+      const commissionToUse = isClient ? 0 : commission;
+      return tradeMode === 'buy' ? baseCost + commissionToUse : baseCost - commissionToUse;
+  }, [quantity, marketPrice, commission, tradeMode, isOptionTrade, currentLimitPrice, orderType, isMutualFund, transactionType, dollarAmount, getOptionPrice, isClient]);
 
   // Calculate maximum quantity based on buying power
   const maxQuantity = useMemo(() => {
@@ -661,14 +670,16 @@ export function TradeExecutionPanel({
       if (!network) {
         errors.push('Network is required for mutual fund orders');
       }
-      if (!solicited) {
+      // Solicited only required for advisors
+      if (!isClient && !solicited) {
         errors.push('Solicited is required for mutual fund orders');
       }
     } else {
       if (quantity <= 0) {
         errors.push('Quantity must be greater than 0');
       }
-      if (!equitySolicited) {
+      // Solicited only required for advisors
+      if (!isClient && !equitySolicited) {
         errors.push('Solicited is required for equity and options orders');
       }
     }
@@ -686,11 +697,11 @@ export function TradeExecutionPanel({
     }
     
     return errors;
-  }, [showValidation, quantity, tradeMode, availableQuantity, estimatedCost, buyingPower, maxQuantity, isMutualFund, transactionType, dollarAmount, network, solicited, equitySolicited]);
+  }, [showValidation, quantity, tradeMode, availableQuantity, estimatedCost, buyingPower, maxQuantity, isMutualFund, transactionType, dollarAmount, network, solicited, equitySolicited, isClient]);
 
   const canSubmit = validationErrors.length === 0 && (
-    (isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0 && network && solicited) || 
-    (!isMutualFund || transactionType === 'shares') && quantity > 0 && equitySolicited
+    (isMutualFund && transactionType === 'even-dollar' && dollarAmount > 0 && network && (isClient || solicited)) || 
+    (!isMutualFund || transactionType === 'shares') && quantity > 0 && (isClient || equitySolicited)
   );
 
   // --- Trading Functions ---
@@ -700,6 +711,8 @@ export function TradeExecutionPanel({
     try {
       const priceToUse = orderType === 'limit' ? currentLimitPrice : marketPrice;
       const tradeValue = quantity * priceToUse;
+      // Commission only applies to advisors, not clients
+      const commissionToUse = isClient ? 0 : commission;
       
       if (tradeMode === 'buy') {
         // Add or update holding
@@ -714,13 +727,13 @@ export function TradeExecutionPanel({
             quantity: quantity,
             price: priceToUse,
             totalValue: tradeValue,
-            commission: commission,
+            commission: commissionToUse,
             holdingUpdates: {
               quantity: newQuantity,
               avgPrice: newAvgPrice
             },
             balanceUpdates: {
-              cash: availableCash - tradeValue - (isMutualFund ? 0 : commission)
+              cash: availableCash - tradeValue - (isMutualFund ? 0 : commissionToUse)
             }
           });
         } else {
@@ -746,7 +759,7 @@ export function TradeExecutionPanel({
             quantity: quantity,
             price: priceToUse,
             totalValue: tradeValue,
-            commission: commission,
+            commission: commissionToUse,
             date: new Date().toISOString().split('T')[0],
             time: new Date().toTimeString().split(' ')[0],
             longShort: 'Long'
@@ -763,7 +776,7 @@ export function TradeExecutionPanel({
             quantity: quantity,
             price: priceToUse,
             totalValue: tradeValue,
-            commission: commission,
+            commission: commissionToUse,
             date: new Date().toISOString().split('T')[0],
             time: new Date().toTimeString().split(' ')[0],
             longShort: 'Long'
@@ -792,7 +805,7 @@ export function TradeExecutionPanel({
             
             // Update cash balance and add trade record separately
             await updateBalances({
-              cash: availableCash + tradeValue - (isMutualFund ? 0 : commission)
+              cash: availableCash + tradeValue - (isMutualFund ? 0 : commissionToUse)
             });
             
             await addTrade({
@@ -803,7 +816,7 @@ export function TradeExecutionPanel({
               quantity: quantity,
               price: priceToUse,
               totalValue: tradeValue,
-              commission: commission,
+              commission: commissionToUse,
               date: new Date().toISOString().split('T')[0],
               time: new Date().toTimeString().split(' ')[0],
               longShort: 'Long'
@@ -816,12 +829,12 @@ export function TradeExecutionPanel({
               quantity: quantity,
               price: priceToUse,
               totalValue: tradeValue,
-              commission: commission,
+              commission: commissionToUse,
               holdingUpdates: {
                 quantity: newQuantity
               },
               balanceUpdates: {
-                cash: availableCash + tradeValue - (isMutualFund ? 0 : commission)
+                cash: availableCash + tradeValue - (isMutualFund ? 0 : commissionToUse)
               }
             });
           }
@@ -1280,8 +1293,8 @@ export function TradeExecutionPanel({
                </div>
              )}
            </div>
-           {/* Commission field - only for non-mutual funds */}
-           {!isMutualFund && renderFormRow('Commission', (
+           {/* Commission field - only for non-mutual funds and advisors only */}
+           {!isMutualFund && !isClient && renderFormRow('Commission', (
              <div className="flex items-center gap-2 justify-end">
                <Select value={commissionType} onValueChange={(v) => setCommissionType(v as CommissionType)}>
                  <SelectTrigger className="w-[140px] h-8 text-xs">
@@ -1368,8 +1381,8 @@ export function TradeExecutionPanel({
              </div>
            )}
 
-           {/* Settlement Type - ACAPS specific - Only for equities, not mutual funds */}
-           {!isOptionTrade && !isMutualFund && renderFormRow('Settlement Type', (
+           {/* Settlement Type - ACAPS specific - Only for equities, not mutual funds, advisors only */}
+           {!isOptionTrade && !isMutualFund && !isClient && renderFormRow('Settlement Type', (
              <Select value={settlementType} onValueChange={(v) => setSettlementType(v)}>
                <SelectTrigger className="w-[140px] h-8 text-xs">
                   <SelectValue />
@@ -1381,8 +1394,8 @@ export function TradeExecutionPanel({
              </Select>
            ))}
 
-           {/* Solicited - Required for equities and options */}
-           {!isMutualFund && renderFormRow('Solicited', (
+           {/* Solicited - Required for equities and options, advisors only */}
+           {!isMutualFund && !isClient && renderFormRow('Solicited', (
              <Select value={equitySolicited} onValueChange={setEquitySolicited}>
                <SelectTrigger className="w-[140px] h-8 text-xs">
                  <SelectValue placeholder="Select..." />
@@ -1465,7 +1478,8 @@ export function TradeExecutionPanel({
                    </SelectContent>
                  </Select>
                ))}
-               {renderFormRow('Solicited', (
+               {/* Solicited - advisors only */}
+               {!isClient && renderFormRow('Solicited', (
                  <Select value={solicited} onValueChange={setSolicited}>
                    <SelectTrigger className="min-w-[140px] h-8 text-xs">
                      <SelectValue placeholder="Select..." />
@@ -1476,14 +1490,15 @@ export function TradeExecutionPanel({
                    </SelectContent>
                  </Select>
                ))}
-             </>
-           )}
+            </>
+          )}
 
-           <details className="pt-2 group" open={isAdvancedOpen} onToggle={(e) => setIsAdvancedOpen(e.currentTarget.open)}>
-             <summary className="list-none flex items-center justify-center text-sm text-primary hover:underline cursor-pointer py-2">
-               {isAdvancedOpen ? 'Hide' : 'Show'} Advanced Options
-               <ChevronDown className={cn("w-4 h-4 ml-1 transition-transform", isAdvancedOpen && "rotate-180")} />
-             </summary>
+          {role !== 'client' && (
+            <details className="pt-2 group" open={isAdvancedOpen} onToggle={(e) => setIsAdvancedOpen(e.currentTarget.open)}>
+              <summary className="list-none flex items-center justify-center text-sm text-primary hover:underline cursor-pointer py-2">
+                {isAdvancedOpen ? 'Hide' : 'Show'} Advanced Options
+                <ChevronDown className={cn("w-4 h-4 ml-1 transition-transform", isAdvancedOpen && "rotate-180")} />
+              </summary>
              <div className="mt-2 rounded-md space-y-2">
                {/* Mutual Fund specific advanced options */}
                {isMutualFund ? (
@@ -1599,8 +1614,8 @@ export function TradeExecutionPanel({
                          </Select>
                        ))}
                        {renderFormRow('Breakpoint Amt', (
-                         <div className="flex items-center w-[140px] h-8 text-xs border border-input rounded-md px-3 py-1 bg-gray-100 dark:bg-gray-800">
-                           <span className="text-gray-400 mr-1">$</span>
+                         <div className="flex items-center w-[140px] h-8 text-xs border border-input rounded-md px-3 py-1 bg-muted">
+                           <span className="text-muted-foreground mr-1">$</span>
                            <Input
                              value={breakpointAmount}
                              onChange={(e) => setBreakpointAmount(e.target.value)}
@@ -1617,7 +1632,7 @@ export function TradeExecutionPanel({
                            value={loiNumberDate}
                            onChange={(e) => setLoiNumberDate(e.target.value)}
                            placeholder=""
-                           className="w-[140px] h-8 text-xs bg-gray-100 dark:bg-gray-800 text-gray-400 border-gray-300 dark:border-gray-600"
+                           className="w-[140px] h-8 text-xs bg-muted text-muted-foreground border-border"
                            disabled
                          />
                        ))}
@@ -1640,7 +1655,7 @@ export function TradeExecutionPanel({
                        ))}
                        {renderFormRow('Related Acct Type', (
                          <Select value={relatedAccountType} onValueChange={setRelatedAccountType} disabled>
-                           <SelectTrigger className="w-[140px] h-8 text-xs bg-gray-100 dark:bg-gray-800 text-gray-400 border-gray-300 dark:border-gray-600">
+                           <SelectTrigger className="w-[140px] h-8 text-xs bg-muted text-muted-foreground border-border">
                              <SelectValue />
                            </SelectTrigger>
                            <SelectContent>
@@ -1656,7 +1671,7 @@ export function TradeExecutionPanel({
                            value={accountNumber}
                            onChange={(e) => setAccountNumber(e.target.value)}
                            placeholder=""
-                           className="w-[140px] h-8 text-xs bg-gray-100 dark:bg-gray-800 text-gray-400 border-gray-300 dark:border-gray-600"
+                           className="w-[140px] h-8 text-xs bg-muted text-muted-foreground border-border"
                            disabled
                          />
                        ))}
@@ -1665,13 +1680,13 @@ export function TradeExecutionPanel({
                            value={fundSymbolCusip}
                            onChange={(e) => setFundSymbolCusip(e.target.value)}
                            placeholder=""
-                           className="w-[140px] h-8 text-xs bg-gray-100 dark:bg-gray-800 text-gray-400 border-gray-300 dark:border-gray-600"
+                           className="w-[140px] h-8 text-xs bg-muted text-muted-foreground border-border"
                            disabled
                          />
                        ))}
                        {renderFormRow('Discretion', (
                          <Select value={mutualFundDiscretion} onValueChange={setMutualFundDiscretion} disabled>
-                           <SelectTrigger className="w-[140px] h-8 text-xs bg-gray-100 dark:bg-gray-800 text-gray-400 border-gray-300 dark:border-gray-600">
+                           <SelectTrigger className="w-[140px] h-8 text-xs bg-muted text-muted-foreground border-border">
                              <SelectValue />
                            </SelectTrigger>
                            <SelectContent>
@@ -1889,6 +1904,7 @@ export function TradeExecutionPanel({
                )}
              </div>
            </details>
+          )}
 
            <div className="flex items-center justify-between text-sm font-medium border-t pt-3 mt-2">
              <span>Estimated {tradeMode === 'buy' ? 'Cost' : 'Proceeds'}</span>
@@ -1923,7 +1939,7 @@ export function TradeExecutionPanel({
  const renderOrderReview = () => (
      <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <button onClick={handleBackToEntry} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+        <button onClick={handleBackToEntry} className="p-1 hover:bg-muted rounded-full transition-colors">
           <ArrowLeft className="w-4 h-4 text-muted-foreground" />
         </button>
         <h3 className="text-2xl font-normal">Review Order</h3>
@@ -2015,8 +2031,8 @@ export function TradeExecutionPanel({
              </div>
            </div>
          )}
-         {!isMutualFund && renderFormRow('Commission Type', <span className="font-medium capitalize text-right">{commissionType}</span>)}
-         {!isMutualFund && renderFormRow('Commission Est.', <span className="font-medium text-right">${commission.toFixed(2)}</span>)}
+         {!isMutualFund && !isClient && renderFormRow('Commission Type', <span className="font-medium capitalize text-right">{commissionType}</span>)}
+         {!isMutualFund && !isClient && renderFormRow('Commission Est.', <span className="font-medium text-right">${commission.toFixed(2)}</span>)}
          {!isMutualFund && renderFormRow('Solicited', <span className="font-medium text-right">{equitySolicited}</span>)}
          {/* Show tax allocation method only for stock sells with Cash or Margin accounts */}
          {!isOptionTrade && tradeMode === 'sell' && (accountType === 'Cash' || accountType === 'Margin') && renderFormRow('Tax Allocation', <span className="font-medium text-right">{taxAllocationMethod.replace(/([A-Z])/g, ' $1').trim()}</span>)}
@@ -2049,11 +2065,12 @@ export function TradeExecutionPanel({
            </>
          )}
 
-         <details className="pt-2 group" open={isReviewAdvancedOpen} onToggle={(e) => setIsReviewAdvancedOpen(e.currentTarget.open)}>
-           <summary className="list-none flex items-center justify-center text-xs text-primary hover:underline cursor-pointer py-2">
-              {isReviewAdvancedOpen ? 'Hide' : 'Show'} Advanced Details
-              <ChevronDown className={cn("w-3 h-3 ml-1 transition-transform", isReviewAdvancedOpen && "rotate-180")} />
-            </summary>
+         {role !== 'client' && (
+           <details className="pt-2 group" open={isReviewAdvancedOpen} onToggle={(e) => setIsReviewAdvancedOpen(e.currentTarget.open)}>
+             <summary className="list-none flex items-center justify-center text-xs text-primary hover:underline cursor-pointer py-2">
+                {isReviewAdvancedOpen ? 'Hide' : 'Show'} Advanced Details
+                <ChevronDown className={cn("w-3 h-3 ml-1 transition-transform", isReviewAdvancedOpen && "rotate-180")} />
+              </summary>
            <div className="mt-1 space-y-1">
               {!isMutualFund && renderFormRow('Time in Force', <span className="font-medium uppercase text-right">{timeInForce}</span>)}
               {!isMutualFund && timeInForce === 'gtd' && goodTillDate && renderFormRow('Good Till Date', <span className="font-medium text-right">{new Date(goodTillDate).toLocaleDateString()}</span>)}
@@ -2113,6 +2130,7 @@ export function TradeExecutionPanel({
               )}
            </div>
          </details>
+         )}
 
          <div className="flex items-center justify-between text-sm font-medium border-t pt-3 mt-2">
              <span>Estimated {tradeMode === 'buy' ? 'Cost' : 'Proceeds'}</span>
@@ -2133,8 +2151,8 @@ export function TradeExecutionPanel({
                      "ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                      "resize-none",
                      notesError 
-                       ? "border-[hsl(var(--negative))] bg-gray-100 dark:bg-neutral-800" 
-                       : "border-input bg-gray-100 dark:bg-neutral-800"
+                       ? "border-[hsl(var(--negative))] bg-muted" 
+                       : "border-input bg-muted"
                  )}
              />
              {notesError && (
@@ -2333,7 +2351,10 @@ export function TradeExecutionPanel({
          <Button variant="secondary" className="w-full" onClick={handleNewOrder}>
            Place New Order
          </Button>
-         <Button variant="outline" className="w-full" onClick={() => { /* Navigate to orders */ }}>
+         <Button variant="outline" className="w-full" onClick={() => {
+           router.push(`/account/${accountId}/trade`);
+           onClose?.();
+         }}>
            View Order Status
          </Button>
        </div>

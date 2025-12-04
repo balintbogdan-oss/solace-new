@@ -61,12 +61,13 @@ export function calculateAssetAllocation(selectedAccounts: AccountData[]) {
   }
 
   // Map asset classes to colors in the correct order
+  // Use actual market values for the pie chart (not percentages) to ensure all segments are visible
   const assetClassOrder = ['Mutual funds', 'Equities', 'Options', 'Fixed income', 'Annuities', 'Other'];
   const data = assetClassOrder
     .filter(className => allocationMap.has(className))
     .map((className, index) => ({
       name: className,
-      value: Math.round((allocationMap.get(className)! / totalValue) * 100),
+      value: allocationMap.get(className)!, // Use actual market value, not percentage
       color: getChartColor(index + 1)
     }))
     .filter(item => item.value > 0); // Only include non-zero allocations
@@ -76,7 +77,7 @@ export function calculateAssetAllocation(selectedAccounts: AccountData[]) {
     if (!assetClassOrder.includes(className)) {
       data.push({
         name: className,
-        value: Math.round((value / totalValue) * 100),
+        value: value, // Use actual market value, not percentage
         color: getChartColor(6)
       });
     }

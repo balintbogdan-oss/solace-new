@@ -57,18 +57,18 @@ export function AccountSwitcher({
   const rightPanelSections = useMemo(() => {
     if (!clientAccounts || clientAccounts.length === 0) return [];
     
-    if (role === 'advisor') {
-      // Advisor view: show all accounts in a single section
-      return [{
-        title: 'ACCOUNTS',
-        accounts: clientAccounts,
-        icon: Landmark,
+      if (role === 'advisor') {
+        // Advisor view: show all accounts in a single section
+        return [{
+          title: 'ACCOUNTS',
+          accounts: clientAccounts,
+          icon: Landmark,
         isHousehold: false,
-        summary: {
-          title: clientName ? `All ${clientName}'s accounts` : 'All accounts',
-          count: clientAccounts.length,
-        },
-      }];
+          summary: {
+            title: clientName ? `All ${clientName}'s accounts` : 'All accounts',
+            count: clientAccounts.length,
+          },
+        }];
     }
     
     // Client view: group accounts by household from clientAccounts prop
@@ -91,40 +91,40 @@ export function AccountSwitcher({
       }
     });
     
-    const sections: Array<{
-      title: string;
-      accounts: Account[];
-      icon: typeof Landmark;
-      isHousehold: boolean;
-      householdName?: string;
-      summary?: {
+      const sections: Array<{
         title: string;
-        count: number;
-      };
-    }> = [];
+        accounts: Account[];
+        icon: typeof Landmark;
+      isHousehold: boolean;
+        householdName?: string;
+        summary?: {
+          title: string;
+          count: number;
+        };
+      }> = [];
 
-    // Add household sections
+      // Add household sections
     householdsMap.forEach(group => {
-      sections.push({
-        title: group.household.name.toUpperCase(),
-        accounts: group.accounts,
-        icon: Home,
-        isHousehold: true,
-        householdName: group.household.name,
+        sections.push({
+          title: group.household.name.toUpperCase(),
+          accounts: group.accounts,
+          icon: Home,
+          isHousehold: true,
+          householdName: group.household.name,
+        });
       });
-    });
 
     // Add non-household section
     if (nonHousehold.length > 0) {
-      sections.push({
+        sections.push({
         title: 'NON-HOUSEHOLD',
         accounts: nonHousehold,
         icon: Building2,
         isHousehold: false,
-      });
-    }
+        });
+      }
 
-    return sections;
+      return sections;
   }, [clientAccounts, clientName, role]);
 
   // Show dropdown if we have accounts (for both advisors and clients)
@@ -187,7 +187,7 @@ export function AccountSwitcher({
         <DropdownMenuContent align="start" sideOffset={8} className="w-[650px] flex p-0" style={{ zIndex: 9999 }}>
           <div className="flex w-full">
             {/* Left Panel */}
-            <div className="w-[250px] bg-stone-50 dark:bg-slate-800 p-2 space-y-1 border-r border-stone-200 dark:border-slate-700">
+            <div className="w-[250px] bg-card p-2 space-y-1 border-r border-border">
               <div className="px-2 py-2 text-xs text-muted-foreground flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span>CLIENT & HOUSEHOLD</span>
@@ -198,7 +198,7 @@ export function AccountSwitcher({
                   onClick={() => router.push(`/clients/${clientId}`)}
                   className={cn(
                     "w-full text-left rounded-md p-2 flex items-center justify-between transition-colors",
-                    "bg-stone-200/60 dark:bg-slate-700/80" 
+                    "bg-muted/60 hover:bg-muted/80" 
                   )}
                 >
                   <div className="flex flex-col">
