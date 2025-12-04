@@ -133,16 +133,29 @@ export default function RootLayout({
                 // This must happen before React tries to render
                 document.documentElement.setAttribute('data-role', role);
                 
+                // Check if dark mode is active
+                var isDarkMode = document.documentElement.classList.contains('dark') || 
+                  (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && 
+                   !document.documentElement.classList.contains('light'));
+                
                 // Set theme immediately based on role
                 if (role === 'client') {
                   document.documentElement.setAttribute('data-theme', 'wedbush-next');
-                  // Set client background color (Wedbush Next: #F1F5F9 = 241 245 249)
-                  document.documentElement.style.setProperty('--background', '241 245 249');
+                  // Set client background color based on mode
+                  if (isDarkMode) {
+                    document.documentElement.style.setProperty('--background', '15 23 42'); // slate-900
+                  } else {
+                    document.documentElement.style.setProperty('--background', '241 245 249'); // slate-100
+                  }
                 } else {
                   // Advisor (Solace) theme - remove data-theme and use default background
                   document.documentElement.removeAttribute('data-theme');
-                  // Set advisor background color (Solace: #F5F5F4 = 245 245 244)
-                  document.documentElement.style.setProperty('--background', '245 245 244');
+                  // Set advisor background color based on mode
+                  if (isDarkMode) {
+                    document.documentElement.style.setProperty('--background', '4 4 4'); // near black
+                  } else {
+                    document.documentElement.style.setProperty('--background', '245 245 244'); // stone-100
+                  }
                 }
               })();
             `,

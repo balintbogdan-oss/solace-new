@@ -1,8 +1,8 @@
 'use client'; // Required for useContext
 
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Check, User, Landmark, Home, ChevronRight, ChevronDown } from 'lucide-react'
+import { Check, User, Landmark, Home, ChevronRight, ChevronDown, Building2 } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,8 +16,6 @@ import { cn, formatAccountType } from "@/lib/utils"; // Import cn for conditiona
 import { useUserRole } from '@/contexts/UserRoleContext';
 import React from 'react'; // Ensure React is imported for Fragment
 import { AccountDetailsDrawer } from './AccountDetailsDrawer';
-import { useAccountData } from '@/contexts/AccountDataContext';
-import { localDataService } from '@/services/localDataService';
 
 
 export interface AccountSwitcherProps {
@@ -39,67 +37,7 @@ export function AccountSwitcher({
 }: AccountSwitcherProps) {
   const router = useRouter();
   const { role } = useUserRole();
-  const { data: accountData } = useAccountData();
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false);
-  const [householdGroups, setHouseholdGroups] = useState<Array<{
-    household: { id: string; name: string };
-    accounts: Account[];
-  }>>([]);
-  const [nonHouseholdAccounts, setNonHouseholdAccounts] = useState<Account[]>([]);
-
-  // Fetch household data for client view - memoized and only when needed
-  useEffect(() => {
-    // Don't fetch if we already have clientAccounts prop (passed from parent)
-    if (clientAccounts && clientAccounts.length > 0) {
-      // Use the provided clientAccounts instead of fetching
-      return;
-    }
-    
-    const fetchHouseholdData = async () => {
-      if (role !== 'client' || !accountData) return;
-      
-      try {
-        // Get all client accounts with household info
-        const clientData = await localDataService.getClientData(accountData.clientId);
-        if (!clientData) return;
-
-        // Group accounts by household
-        const householdsMap = new Map<string, { household: { id: string; name: string }; accounts: Account[] }>();
-        const nonHousehold: Account[] = [];
-
-        for (const acc of clientData.accounts) {
-          const account: Account = {
-            id: acc.accountId,
-            name: acc.accountName,
-            type: acc.accountType,
-            investedValue: acc.balances?.investedValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
-            marketValue: acc.balances?.totalValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
-            fdicSweep: "0",
-            availableMargin: acc.balances?.buyingPower?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
-          };
-
-          if (acc.householdId && acc.household) {
-            if (!householdsMap.has(acc.householdId)) {
-              householdsMap.set(acc.householdId, {
-                household: { id: acc.household.id, name: acc.household.name },
-                accounts: []
-              });
-            }
-            householdsMap.get(acc.householdId)!.accounts.push(account);
-          } else {
-            nonHousehold.push(account);
-          }
-        }
-
-        setHouseholdGroups(Array.from(householdsMap.values()));
-        setNonHouseholdAccounts(nonHousehold);
-      } catch (error) {
-        console.error('Error fetching household data:', error);
-      }
-    };
-
-    fetchHouseholdData();
-  }, [role, accountData, clientAccounts]);
 
   const handleOpenChange = (open: boolean) => {
     setIsDropdownOpen?.(open);
@@ -117,68 +55,77 @@ export function AccountSwitcher({
 
   // For client view: group by household, for advisor: show all accounts
   const rightPanelSections = useMemo(() => {
-    // If clientAccounts are provided, use them directly (for advisor view or when already fetched)
-    if (clientAccounts && clientAccounts.length > 0 && (role !== 'client' || (householdGroups.length === 0 && nonHouseholdAccounts.length === 0))) {
-      if (role === 'advisor') {
-        // Advisor view: show all accounts in a single section
-        return [{
-          title: 'ACCOUNTS',
-          accounts: clientAccounts,
-          icon: Landmark,
-          summary: {
-            title: clientName ? `All ${clientName}'s accounts` : 'All accounts',
-            count: clientAccounts.length,
-          },
-        }];
+    if (!clientAccounts || clientAccounts.length === 0) return [];
+    
+    if (role === 'advisor') {
+      // Advisor view: show all accounts in a single section
+      return [{
+        title: 'ACCOUNTS',
+        accounts: clientAccounts,
+        icon: Landmark,
+        isHousehold: false,
+        summary: {
+          title: clientName ? `All ${clientName}'s accounts` : 'All accounts',
+          count: clientAccounts.length,
+        },
+      }];
+    }
+    
+    // Client view: group accounts by household from clientAccounts prop
+    const householdsMap = new Map<string, { household: { id: string; name: string }; accounts: Account[] }>();
+    const nonHousehold: Account[] = [];
+    
+    clientAccounts.forEach(account => {
+      const accountWithHousehold = account as Account & { householdId?: string; household?: { id: string; name: string } };
+      if (accountWithHousehold.householdId && accountWithHousehold.household) {
+        const householdId = accountWithHousehold.householdId;
+        if (!householdsMap.has(householdId)) {
+          householdsMap.set(householdId, {
+            household: { id: accountWithHousehold.household.id, name: accountWithHousehold.household.name },
+            accounts: []
+          });
+        }
+        householdsMap.get(householdId)!.accounts.push(account);
       } else {
-        // Client view with provided accounts but no household data yet - show as single section
-        return [{
-          title: 'MY ACCOUNTS',
-          accounts: clientAccounts,
-          icon: Landmark,
-        }];
+        nonHousehold.push(account);
       }
-    }
+    });
     
-    // Client view: use household groups if available
-    if (role === 'client' && (householdGroups.length > 0 || nonHouseholdAccounts.length > 0)) {
-      const sections: Array<{
+    const sections: Array<{
+      title: string;
+      accounts: Account[];
+      icon: typeof Landmark;
+      isHousehold: boolean;
+      householdName?: string;
+      summary?: {
         title: string;
-        accounts: Account[];
-        icon: typeof Landmark;
-        isHousehold?: boolean;
-        householdName?: string;
-        summary?: {
-          title: string;
-          count: number;
-        };
-      }> = [];
+        count: number;
+      };
+    }> = [];
 
-      // Add household sections
-      householdGroups.forEach(group => {
-        sections.push({
-          title: group.household.name.toUpperCase(),
-          accounts: group.accounts,
-          icon: Home,
-          isHousehold: true,
-          householdName: group.household.name,
-        });
+    // Add household sections
+    householdsMap.forEach(group => {
+      sections.push({
+        title: group.household.name.toUpperCase(),
+        accounts: group.accounts,
+        icon: Home,
+        isHousehold: true,
+        householdName: group.household.name,
       });
+    });
 
-      // Add "MY ACCOUNTS" section for non-household accounts
-      if (nonHouseholdAccounts.length > 0) {
-        sections.push({
-          title: 'MY ACCOUNTS',
-          accounts: nonHouseholdAccounts,
-          icon: Landmark,
-        });
-      }
-
-      return sections;
+    // Add non-household section
+    if (nonHousehold.length > 0) {
+      sections.push({
+        title: 'NON-HOUSEHOLD',
+        accounts: nonHousehold,
+        icon: Building2,
+        isHousehold: false,
+      });
     }
-    
-    return [];
-  }, [clientAccounts, clientName, role, householdGroups, nonHouseholdAccounts]);
+
+    return sections;
+  }, [clientAccounts, clientName, role]);
 
   // Show dropdown if we have accounts (for both advisors and clients)
   const showDropdown = clientAccounts.length > 0;
@@ -240,7 +187,7 @@ export function AccountSwitcher({
         <DropdownMenuContent align="start" sideOffset={8} className="w-[650px] flex p-0" style={{ zIndex: 9999 }}>
           <div className="flex w-full">
             {/* Left Panel */}
-            <div className="w-[250px] bg-stone-50 dark:bg-stone-900/80 p-2 space-y-1 border-r border-stone-200 dark:border-stone-800">
+            <div className="w-[250px] bg-stone-50 dark:bg-slate-800 p-2 space-y-1 border-r border-stone-200 dark:border-slate-700">
               <div className="px-2 py-2 text-xs text-muted-foreground flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span>CLIENT & HOUSEHOLD</span>
@@ -251,7 +198,7 @@ export function AccountSwitcher({
                   onClick={() => router.push(`/clients/${clientId}`)}
                   className={cn(
                     "w-full text-left rounded-md p-2 flex items-center justify-between transition-colors",
-                    "bg-stone-200/60 dark:bg-stone-800/80" 
+                    "bg-stone-200/60 dark:bg-slate-700/80" 
                   )}
                 >
                   <div className="flex flex-col">
@@ -297,8 +244,8 @@ export function AccountSwitcher({
                             <span className="font-normal text-sm text-muted-foreground truncate">{account.name}</span>
                           </div>
                           {accountId === account.id && (
-                            <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0 ml-2">
-                              <Check className="h-4 w-4 text-amber-800" />
+                            <div className="w-6 h-6 rounded-full bg-amber-200 dark:bg-blue-500 flex items-center justify-center flex-shrink-0 ml-2">
+                              <Check className="h-4 w-4 text-amber-800 dark:text-white" />
                             </div>
                           )}
                         </div>
@@ -364,7 +311,7 @@ export function AccountSwitcher({
           </div>
           
           {/* Desktop Layout */}
-          <div className="hidden lg:flex items-center gap-2 min-w-0">
+          <div className="hidden lg:flex items-center gap-2 min-w-0 flex-1 w-full">
             {/* Home breadcrumb - always show */}
             <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 flex-shrink-0">
               <Home className="h-4 w-4 flex-shrink-0" />

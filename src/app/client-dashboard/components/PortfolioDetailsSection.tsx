@@ -65,7 +65,7 @@ export function PortfolioDetailsSection({
             <Button
               variant={activeFilter === 'all' ? 'outline' : 'active'}
               size="sm"
-              className={`flex items-center gap-2 text-sm flex-shrink-0 ${activeFilter === 'all' ? '!bg-white' : ''}`}
+              className={`flex items-center gap-2 text-sm flex-shrink-0 ${activeFilter === 'all' ? '!bg-card' : ''}`}
             >
               <span className="hidden sm:inline">{getDropdownButtonLabel()}</span>
               <span className="sm:hidden">Filter</span>

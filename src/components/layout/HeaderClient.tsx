@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { HelpCircle, ChevronDown, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { HelpCircle, ChevronDown, User, LogOut, Sun, Moon } from 'lucide-react';
 import { useUserRole } from '@/contexts/UserRoleContext';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -171,20 +171,6 @@ export function HeaderClient() {
                     </Link>
                   </Button>
                   
-                  <Button
-                    variant="ghost"
-                    asChild
-                    className="w-full justify-start text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 gap-2"
-                  >
-                    <Link
-                      href="/settings"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      <Settings className="h-4 w-4" />
-                      App Settings
-                    </Link>
-                  </Button>
-
                   {/* Theme Toggle */}
                   {mounted && (
                     <Button

@@ -21,6 +21,8 @@ import {
   ArrowDown,
   Search,
   ChevronsUpDown,
+  ChevronUp,
+  ChevronDown,
   SquarePercent,
   BarChart3,
   CalendarDays
@@ -269,6 +271,9 @@ const mockSummaryData = {
   }
 };
 
+type SortField = 'date' | 'type' | 'action' | 'symbol' | 'description' | 'quantity' | 'buyPrice' | 'amount' | 'settleDate' | 'transactionType' | 'accountType' | 'tradeNumber';
+type SortDirection = 'asc' | 'desc' | null;
+
 function ActivityPageContent() {
   const [activeTab, setActiveTab] = useState<'all' | 'cashflow' | 'ira'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -276,6 +281,26 @@ function ActivityPageContent() {
   const [accountTypeFilter, setAccountTypeFilter] = useState('');
   const [, setLastRefresh] = useState<Date>(new Date());
   const [timeframe, setTimeframe] = useState('Last 30 days');
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+
+  // Handle column sort
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // Cycle through: asc -> desc -> null
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortDirection(null);
+        setSortField(null);
+      } else {
+        setSortDirection('asc');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
 
   // Handle refresh
   const handleRefresh = useCallback(async () => {
@@ -339,13 +364,78 @@ function ActivityPageContent() {
       filtered = filtered.filter((activity: Activity) => activity.accountType === mappedAccountType);
     }
 
-    return filtered.sort((a: Activity, b: Activity) => {
-      // Use lastUpdated timestamp for proper chronological sorting
-      const timeA = new Date(a.lastUpdated || a.date).getTime();
-      const timeB = new Date(b.lastUpdated || b.date).getTime();
-      return timeB - timeA; // Most recent first
-    });
-  }, [activeTab, searchTerm, activityTypeFilter, accountTypeFilter]);
+    // Apply sorting
+    if (sortField && sortDirection) {
+      filtered = [...filtered].sort((a: Activity, b: Activity) => {
+        let aVal: string | number = '';
+        let bVal: string | number = '';
+        
+        switch (sortField) {
+          case 'date':
+            aVal = new Date(a.date).getTime();
+            bVal = new Date(b.date).getTime();
+            break;
+          case 'type':
+            aVal = a.type.toLowerCase();
+            bVal = b.type.toLowerCase();
+            break;
+          case 'action':
+            aVal = (a.action || '').toLowerCase();
+            bVal = (b.action || '').toLowerCase();
+            break;
+          case 'symbol':
+            aVal = (a.symbol || '').toLowerCase();
+            bVal = (b.symbol || '').toLowerCase();
+            break;
+          case 'description':
+            aVal = a.description.toLowerCase();
+            bVal = b.description.toLowerCase();
+            break;
+          case 'quantity':
+            aVal = a.quantity || 0;
+            bVal = b.quantity || 0;
+            break;
+          case 'buyPrice':
+            aVal = a.buyPrice || 0;
+            bVal = b.buyPrice || 0;
+            break;
+          case 'amount':
+            aVal = a.amount;
+            bVal = b.amount;
+            break;
+          case 'settleDate':
+            aVal = a.settleDate ? new Date(a.settleDate).getTime() : 0;
+            bVal = b.settleDate ? new Date(b.settleDate).getTime() : 0;
+            break;
+          case 'transactionType':
+            aVal = (a.transactionType || '').toLowerCase();
+            bVal = (b.transactionType || '').toLowerCase();
+            break;
+          case 'accountType':
+            aVal = (a.accountType || '').toLowerCase();
+            bVal = (b.accountType || '').toLowerCase();
+            break;
+          case 'tradeNumber':
+            aVal = (a.tradeNumber || '').toLowerCase();
+            bVal = (b.tradeNumber || '').toLowerCase();
+            break;
+        }
+        
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    } else {
+      // Default sort by date (most recent first)
+      filtered = filtered.sort((a: Activity, b: Activity) => {
+        const timeA = new Date(a.lastUpdated || a.date).getTime();
+        const timeB = new Date(b.lastUpdated || b.date).getTime();
+        return timeB - timeA;
+      });
+    }
+
+    return filtered;
+  }, [activeTab, searchTerm, activityTypeFilter, accountTypeFilter, sortField, sortDirection]);
 
   const formatAmount = (amount: number) => {
     const isNegative = amount < 0;
@@ -402,6 +492,28 @@ function ActivityPageContent() {
 
   // Calculate net total
   const netTotal = processedActivities.reduce((sum, activity) => sum + activity.amount, 0);
+
+  // Render sortable header
+  const renderSortHeader = (field: SortField, label: string) => {
+    const isActive = sortField === field;
+    return (
+      <th 
+        className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[80px] cursor-pointer hover:bg-muted/50 transition-colors"
+        onClick={() => handleSort(field)}
+      >
+        <div className="flex items-center gap-1">
+          {label}
+          {isActive && sortDirection === 'asc' ? (
+            <ChevronUp className="h-4 w-4 text-foreground" />
+          ) : isActive && sortDirection === 'desc' ? (
+            <ChevronDown className="h-4 w-4 text-foreground" />
+          ) : (
+            <ChevronsUpDown className="h-4 w-4 opacity-50" />
+          )}
+        </div>
+      </th>
+    );
+  };
 
   return (
     <div className="min-h-screen rounded-md space-y-4 md:space-y-4">
@@ -665,78 +777,18 @@ function ActivityPageContent() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[80px]">
-                    <div className="flex items-center gap-1">
-                      Date
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
-                    <div className="flex items-center gap-1">
-                      Activity type
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[80px]">
-                    <div className="flex items-center gap-1">
-                      Action
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
-                    <div className="flex items-center gap-1">
-                      Symbol/CUSIP
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[200px]">
-                    <div className="flex items-center gap-1">
-                      Description
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[100px]">
-                    <div className="flex items-center gap-1">
-                      Quantity
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[100px]">
-                    <div className="flex items-center gap-1">
-                      Buy price
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
-                    <div className="flex items-center gap-1">
-                      Amount
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[100px]">
-                    <div className="flex items-center gap-1">
-                      Settle date
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[140px]">
-                    <div className="flex items-center gap-1">
-                      Transaction type
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
-                    <div className="flex items-center gap-1">
-                      Account type
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
-                    <div className="flex items-center gap-1">
-                      Trade number
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
+                  {renderSortHeader('date', 'Date')}
+                  {renderSortHeader('type', 'Activity type')}
+                  {renderSortHeader('action', 'Action')}
+                  {renderSortHeader('symbol', 'Symbol/CUSIP')}
+                  {renderSortHeader('description', 'Description')}
+                  {renderSortHeader('quantity', 'Quantity')}
+                  {renderSortHeader('buyPrice', 'Buy price')}
+                  {renderSortHeader('amount', 'Amount')}
+                  {renderSortHeader('settleDate', 'Settle date')}
+                  {renderSortHeader('transactionType', 'Transaction type')}
+                  {renderSortHeader('accountType', 'Account type')}
+                  {renderSortHeader('tradeNumber', 'Trade number')}
                 </tr>
               </thead>
               <tbody>

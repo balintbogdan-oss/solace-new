@@ -21,9 +21,11 @@ import {
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { PDFViewer } from '@/components/ui/pdf-viewer'
 import { format } from 'date-fns'
-import { Download, Eye, ChevronDown, Search, Calendar, ExternalLink } from 'lucide-react'
+import { Download, Eye, ChevronDown, Search, Calendar, ExternalLink, Loader2, CheckCircle2 } from 'lucide-react'
+import Image from 'next/image'
+import { toast } from 'sonner'
 
-type TabType = 'monthly-statements' | 'tax-statements' | 'trade-confirmations' | 'open-order-confirmations' | 'shareholder-documents' | 'quickdirect'
+type TabType = 'monthly-statements' | 'tax-statements' | 'trade-confirmations' | 'open-order-confirmations' | 'shareholder-documents' | 'quicken'
 
 export default function StatementsReportsPage() {
   const [selectedYear, setSelectedYear] = useState('2025')
@@ -121,8 +123,50 @@ export default function StatementsReportsPage() {
     { id: 'trade-confirmations', label: 'Trade confirmations' },
     { id: 'open-order-confirmations', label: 'Open order confirmations' },
     { id: 'shareholder-documents', label: 'Shareholder documents' },
-    { id: 'quickdirect', label: 'QuickDirect' },
+    { id: 'quicken', label: 'Quicken' },
   ]
+
+  // Handle Quicken file generation with toast
+  const handleGenerateQuicken = async () => {
+    const toastId = toast(
+      <div className="flex items-center gap-3">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <div>
+          <div className="font-medium">Quicken - All Data Export</div>
+          <div className="text-sm text-muted-foreground">Preparing...</div>
+        </div>
+      </div>,
+      { duration: Infinity }
+    );
+
+    // Simulate preparing phase
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    toast(
+      <div className="flex items-center gap-3">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <div>
+          <div className="font-medium">Quicken - All Data Export</div>
+          <div className="text-sm text-muted-foreground">Exporting...</div>
+        </div>
+      </div>,
+      { id: toastId, duration: Infinity }
+    );
+
+    // Simulate exporting phase
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    toast(
+      <div className="flex items-center gap-3">
+        <CheckCircle2 className="h-5 w-5 text-green-500" />
+        <div>
+          <div className="font-medium">Quicken - All Data Export</div>
+          <div className="text-sm text-muted-foreground">Export complete</div>
+        </div>
+      </div>,
+      { id: toastId, duration: 4000 }
+    );
+  }
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -155,14 +199,14 @@ export default function StatementsReportsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Month</span>
+                        <span>Month</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap">
-                      <span className="text-xs">Download/View</span>
+                    <th className="text-right px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      <span>Download/View</span>
                     </th>
                   </tr>
                 </thead>
@@ -250,11 +294,11 @@ export default function StatementsReportsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap">
-                      <span className="text-xs">Name</span>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      <span>Name</span>
                     </th>
-                    <th className="text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap">
-                      <span className="text-xs">Download/View</span>
+                    <th className="text-right px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      <span>Download/View</span>
                     </th>
                   </tr>
                 </thead>
@@ -352,26 +396,26 @@ export default function StatementsReportsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Date</span>
+                        <span>Date</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Symbol</span>
+                        <span>Symbol</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Description</span>
+                        <span>Description</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap">
-                      <span className="text-xs">Download/View</span>
+                    <th className="text-right px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      <span>Download/View</span>
                     </th>
                   </tr>
                 </thead>
@@ -474,26 +518,26 @@ export default function StatementsReportsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Date</span>
+                        <span>Date</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Symbol</span>
+                        <span>Symbol</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Description</span>
+                        <span>Description</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap">
-                      <span className="text-xs">Download/View</span>
+                    <th className="text-right px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      <span>Download/View</span>
                     </th>
                   </tr>
                 </thead>
@@ -582,33 +626,33 @@ export default function StatementsReportsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Date</span>
+                        <span>Date</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Symbol/CUSIP</span>
+                        <span>Symbol/CUSIP</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Issuer</span>
+                        <span>Issuer</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Type</span>
+                        <span>Type</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
-                    <th className="text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
+                    <th className="text-left px-6 py-3 text-sm font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50">
                       <button className="flex items-center gap-1 w-full">
-                        <span className="text-xs">Due date</span>
+                        <span>Due date</span>
                         <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       </button>
                     </th>
@@ -660,27 +704,27 @@ export default function StatementsReportsPage() {
           </Card>
         )
 
-      case 'quickdirect':
+      case 'quicken':
         return (
-          <div className="bg-white dark:bg-card rounded-lg p-8">
+          <Card className="p-8">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="text-xl font-semibold text-foreground mb-2">Generate Quicken export file</h3>
-                <p className="text-muted-foreground mb-6">Export your latest financial data for import into Quicken (.qfx format)</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">Quicken data export</h3>
+                <p className="text-muted-foreground mb-6">Choose a date range and download a .qfx file for Quicken to analyze your finances and track your net worth.</p>
                 
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium">Start date</label>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-muted-foreground">Start date</label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className={`w-32 h-9 justify-start text-left font-normal ${
+                          className={`w-36 h-9 justify-start text-left font-normal ${
                             !startDate && "text-muted-foreground"
                           }`}
                         >
-                          <Calendar className="mr-2 h-4 w-4" />
                           {startDate ? format(startDate, "MMM d, yyyy") : <span>Pick a date</span>}
+                          <Calendar className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -693,18 +737,18 @@ export default function StatementsReportsPage() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium">End date</label>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-muted-foreground">End date</label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className={`w-32 h-9 justify-start text-left font-normal ${
+                          className={`w-36 h-9 justify-start text-left font-normal ${
                             !endDate && "text-muted-foreground"
                           }`}
                         >
-                          <Calendar className="mr-2 h-4 w-4" />
                           {endDate ? format(endDate, "MMM d, yyyy") : <span>Pick a date</span>}
+                          <Calendar className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -717,18 +761,25 @@ export default function StatementsReportsPage() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <Button className="bg-primary hover:bg-primary/90">
-                    Generate Quicken File
-                  </Button>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-muted-foreground invisible">Action</label>
+                    <Button className="bg-primary hover:bg-primary/90" onClick={handleGenerateQuicken}>
+                      Generate Quicken file
+                    </Button>
+                  </div>
                 </div>
               </div>
               <div className="ml-8">
-                <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                  <span className="text-4xl font-bold text-gray-400">Q</span>
-                </div>
+                <Image 
+                  src="/images/quicken.svg" 
+                  alt="Quicken" 
+                  width={192}
+                  height={192}
+                  className="object-contain"
+                />
               </div>
             </div>
-          </div>
+          </Card>
         )
 
       default:
@@ -746,7 +797,7 @@ export default function StatementsReportsPage() {
 
         {/* Tabs */}
         <div className="flex space-x-8 border-b">
-          {tabs.filter(tab => tab.id !== 'quickdirect').map((tab) => (
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}

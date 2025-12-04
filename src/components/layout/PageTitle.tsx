@@ -276,7 +276,7 @@ export function FullSizePageTitle({
       </div>
       
       {/* Desktop Layout */}
-      <div className="hidden lg:flex items-center gap-2 min-w-0">
+      <div className="hidden lg:flex items-center gap-2 min-w-0 flex-1 w-full">
         {/* Home breadcrumb - always show */}
         <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 flex-shrink-0">
           <Home className="h-4 w-4 flex-shrink-0" />

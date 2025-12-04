@@ -151,6 +151,8 @@ export function Sidebar() { // Removed props
                       resetManualSetting();
                     }
                     router.push(fullHref);
+                    // Reset scroll position
+                    window.scrollTo(0, 0);
                   }
                 }
               }}

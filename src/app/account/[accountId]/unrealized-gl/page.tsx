@@ -257,7 +257,7 @@ export default function UnrealizedGLPage() {
                 <tr className="border-b">
                   <th className={`text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'lastUpdated' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center gap-1 w-full" onClick={() => handleSort('lastUpdated')}>
-                      <span className="text-xs">Date</span>
+                      <span className="text-sm">Date</span>
                       {sortColumn === 'lastUpdated' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -267,7 +267,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('quantity')}>
-                      <span className="text-xs">Quantity</span>
+                      <span className="text-sm">Quantity</span>
                       {sortColumn === 'quantity' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -277,7 +277,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-left px-6 py-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/50 border-r max-w-[200px] bg-muted ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center gap-1 w-full" onClick={() => handleSort('symbol')}>
-                      <span className="text-xs">Symbol/CUSIP</span>
+                      <span className="text-sm">Symbol/CUSIP</span>
                       {sortColumn === 'symbol' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -287,7 +287,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-left px-6 py-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/50 border-r max-w-[200px] bg-muted ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center gap-1 w-full" onClick={() => handleSort('description')}>
-                      <span className="text-xs">Description</span>
+                      <span className="text-sm">Description</span>
                       {sortColumn === 'description' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -297,7 +297,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-center px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'longShort' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center justify-center gap-1 w-full" onClick={() => handleSort('longShort')}>
-                      <span className="text-xs">L/S</span>
+                      <span className="text-sm">L/S</span>
                       {sortColumn === 'longShort' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -307,7 +307,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'unrealizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('unrealizedGL')}>
-                      <span className="text-xs">Total Unrealized G/L</span>
+                      <span className="text-sm">Total Unrealized G/L</span>
                       {sortColumn === 'unrealizedGL' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -317,7 +317,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'unrealizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('unrealizedGLPercent')}>
-                      <span className="text-xs">Total Unrealized G/L %</span>
+                      <span className="text-sm">Total Unrealized G/L %</span>
                       {sortColumn === 'unrealizedGLPercent' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -327,7 +327,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'avgPrice' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('avgPrice')}>
-                      <span className="text-xs">Buy Price</span>
+                      <span className="text-sm">Buy Price</span>
                       {sortColumn === 'avgPrice' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -337,7 +337,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'investedValue' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('investedValue')}>
-                      <span className="text-xs">Invested Value</span>
+                      <span className="text-sm">Invested Value</span>
                       {sortColumn === 'investedValue' ? (
                         sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
@@ -347,7 +347,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'currentPrice' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('currentPrice')}>
-                      <span className="text-xs">LTP</span>
+                      <span className="text-sm">LTP</span>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Info className="w-3 h-3 flex-shrink-0" />
@@ -365,7 +365,7 @@ export default function UnrealizedGLPage() {
                   </th>
                   <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 bg-muted ${sortColumn === 'marketValue' ? 'border-b-2 border-b-primary' : ''}`}>
                     <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('marketValue')}>
-                      <span className="text-xs">Market Value</span>
+                      <span className="text-sm">Market Value</span>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Info className="w-3 h-3 flex-shrink-0" />

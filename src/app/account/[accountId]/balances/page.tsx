@@ -14,12 +14,16 @@ import {
   BarChart3,
   History
 } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { PageLoading } from '@/components/ui/page-loading';
 import { PageHeading } from '@/components/layout/PageHeading';
 
 function BalancesPageContent() {
+  const params = useParams();
+  const accountId = params?.accountId as string;
   const { data: accountData, loading, error, refreshData } = useAccountData();
 
   const getCurrentTimestamp = () => {
@@ -205,24 +209,24 @@ function BalancesPageContent() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-b">
-                      <th className="text-left py-2 font-medium text-muted-foreground">Type</th>
-                      <th className="text-right py-2 font-medium text-muted-foreground">Balance</th>
-                      <th className="text-right py-2 font-medium text-muted-foreground">Market value</th>
+                    <tr className="border-b">
+                      <th className="text-left py-2 text-sm font-medium text-muted-foreground">Type</th>
+                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Balance</th>
+                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Market value</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Cash</td>
                       <td className="text-right font-medium">$15,000.00</td>
                       <td className="text-right font-medium">$45,000.00</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Long Margin</td>
                       <td className="text-right font-medium">$30,000.00</td>
                       <td className="text-right font-medium">$75,000.00</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Short Margin</td>
                       <td className="text-right">-</td>
                       <td className="text-right font-medium">-$15,000.00</td>
@@ -247,34 +251,34 @@ function BalancesPageContent() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-b">
-                      <th className="text-left py-2 font-medium text-muted-foreground">Type</th>
-                      <th className="text-right py-2 font-medium text-muted-foreground">Year to Date</th>
-                      <th className="text-right py-2 font-medium text-muted-foreground">Rolling 12 Months</th>
+                    <tr className="border-b">
+                      <th className="text-left py-2 text-sm font-medium text-muted-foreground">Type</th>
+                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Year to Date</th>
+                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Rolling 12 Months</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Deposits</td>
                       <td className="text-right font-medium">$50,000.00</td>
                       <td className="text-right font-medium">$75,000.00</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Withdrawals</td>
                       <td className="text-right font-medium">-$15,000.00</td>
                       <td className="text-right">-$25,000.00</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Interest</td>
                       <td className="text-right">$1,200.00</td>
                       <td className="text-right">$2,400.00</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Dividends</td>
                       <td className="text-right">$3,500.00</td>
                       <td className="text-right">$7,000.00</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Other Income/Expense</td>
                       <td className="text-right">$500.00</td>
                       <td className="text-right">$800.00</td>
@@ -300,34 +304,34 @@ function BalancesPageContent() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-b">
-                      <th className="text-left py-2 font-medium text-muted-foreground">Quarter</th>
-                      <th className="text-right py-2 font-medium text-muted-foreground">Total account value</th>
-                      <th className="text-right py-2 font-medium text-muted-foreground">QoQ</th>
+                    <tr className="border-b">
+                      <th className="text-left py-2 text-sm font-medium text-muted-foreground">Quarter</th>
+                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Total account value</th>
+                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">QoQ</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Q1 2025 (3/31/2025)</td>
                       <td className="text-right">$158,000</td>
                       <td className="text-right text-green-600">+5.3%</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Q4 2024 (12/31/2024)</td>
                       <td className="text-right">$150,000</td>
                       <td className="text-right text-green-600">+3.4%</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Q3 2024 (9/30/2024)</td>
                       <td className="text-right">$145,000</td>
                       <td className="text-right text-green-600">+3.6%</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Q2 2024 (6/30/2024)</td>
                       <td className="text-right">$140,000</td>
                       <td className="text-right text-green-600">+3.7%</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr>
                       <td className="py-2">Q1 2024 (3/31/2024)</td>
                       <td className="text-right">$135,000</td>
                       <td className="text-right text-green-600">+3.7%</td>
@@ -347,34 +351,34 @@ function BalancesPageContent() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-b">
-                      <th className="text-left py-2 font-medium text-muted-foreground">Type</th>
-                      <th className="text-right py-2 font-medium text-muted-foreground">Credit interest</th>
-                      <th className="text-right py-2 font-medium text-muted-foreground">Debit interest</th>
+                    <tr className="border-b">
+                      <th className="text-left py-2 text-sm font-medium text-muted-foreground">Type</th>
+                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Credit interest</th>
+                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Debit interest</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Rate Schedule</td>
                       <td className="text-right">FRM</td>
                       <td className="text-right">FRG</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Rate</td>
                       <td className="text-right">3%</td>
                       <td className="text-right">9%</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Daily Balance</td>
                       <td className="text-right">$4,728,401.13</td>
                       <td className="text-right">$5,190,704.00</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr className="border-b">
                       <td className="py-2">Daily Interest</td>
                       <td className="text-right">$388.64</td>
                       <td className="text-right">$1,279.90</td>
                     </tr>
-                    <tr className="border-b border-b">
+                    <tr>
                       <td className="py-2">MTD Interest</td>
                       <td className="text-right">$2,046.75</td>
                       <td className="text-right">$2,781.96</td>
@@ -396,7 +400,10 @@ function BalancesPageContent() {
               <h3 className="text-lg font-medium mb-4">Income overview</h3>
               <Card className="text-sm shadow-none p-0">
                 <div>
-                  <div className="flex items-center justify-between py-6 border-l-4 border-l-blue-600 px-4 border-b ">
+                  <Link 
+                    href={`/account/${accountId}/balances/projected-income`}
+                    className="flex items-center justify-between py-6 border-l-4 border-l-blue-600 px-4 border-b hover:bg-muted/50 transition-colors"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
                         <BarChart3 className="w-4 h-4 text-blue-600" />
@@ -407,11 +414,14 @@ function BalancesPageContent() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium ">$17,373.04</span>
+                      <span className="font-medium">$17,373.04</span>
                       <ChevronRight className="w-4 h-4 text-gray-400" />
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between py-6 border-l-4 border-l-blue-600 px-4 ">
+                  </Link>
+                  <Link 
+                    href={`/account/${accountId}/balances/pending-income`}
+                    className="flex items-center justify-between py-6 border-l-4 border-l-blue-600 px-4 hover:bg-muted/50 transition-colors"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
                         <Calendar className="w-4 h-4 text-blue-600" />
@@ -425,9 +435,8 @@ function BalancesPageContent() {
                       <span className="font-medium">$2,072.42</span>
                       <ChevronRight className="w-4 h-4 text-gray-400" />
                     </div>
-                  </div>
-                  <div className="px-2 pb-2 ">
-                    
+                  </Link>
+                  <div className="px-2 pb-2">
                     <LastUpdated 
                       timestamp={`Updated ${getCurrentTimestamp()}`} onRefresh={refreshData} 
                     />

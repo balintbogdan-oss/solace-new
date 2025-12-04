@@ -51,7 +51,7 @@ function AccountLayoutContent({
         isDropdownOpen={isDropdownOpen}
         setIsDropdownOpen={setIsDropdownOpen}
       />
-      <div className="flex flex-1 overflow-hidden pt-[54px] h-[calc(100vh-3.5rem-54px)] sm:h-[calc(100vh-4rem-54px)] bg-background">
+      <div className="flex flex-1 pt-[54px] min-h-[calc(100vh-3.5rem-54px)] sm:min-h-[calc(100vh-4rem-54px)] bg-background">
           <div 
             className={cn(
               "flex flex-col fixed top-[120px] left-0 h-[calc(100vh-120px)] flex-shrink-0 z-10 transition-all duration-300",
@@ -63,7 +63,7 @@ function AccountLayoutContent({
           </div>
           <main 
             className={cn(
-              "flex-1 min-w-0 overflow-y-auto h-full",
+              "flex-1 min-w-0",
               "px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8"
             )}
             style={{ marginLeft: isLargeScreen ? sidebarWidth : '0px' }}
