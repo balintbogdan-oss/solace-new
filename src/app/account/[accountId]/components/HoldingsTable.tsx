@@ -82,9 +82,9 @@ const COLUMN_DEFINITIONS: ColumnDefinition[] = [
   { id: 'priceChange', label: 'Price change', sortKey: null, defaultVisible: true },
   { id: 'marketValue', label: 'Market Value', sortKey: 'marketValue', defaultVisible: true },
   { id: 'investedValue', label: 'Invested Value', sortKey: null, defaultVisible: true },
-  { id: 'callPut', label: 'Call/Put', sortKey: null, defaultVisible: false },
-  { id: 'maturityDate', label: 'Maturity Date', sortKey: null, defaultVisible: false },
-  { id: 'yield', label: '% Yield', sortKey: null, defaultVisible: false },
+  { id: 'callPut', label: 'Call/Put', sortKey: null, defaultVisible: true },
+  { id: 'maturityDate', label: 'Maturity Date', sortKey: null, defaultVisible: true },
+  { id: 'yield', label: '% Yield', sortKey: null, defaultVisible: true },
   { id: 'unrealizedGL', label: 'Total Unrealized G/L', sortKey: 'unrealizedGL', defaultVisible: true },
   { id: 'todaysGL', label: "Today's G/L", sortKey: null, defaultVisible: true },
 ];
@@ -99,19 +99,22 @@ function loadColumnPreferences(): { order: string[]; visibility: Record<string, 
     };
   }
   
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch {
-    // Ignore errors
-  }
-  
+  // For now, always use default order to ensure consistency
+  // Users can still customize via the UI, but we start with the correct default
   return {
     order: COLUMN_DEFINITIONS.map(col => col.id),
     visibility: Object.fromEntries(COLUMN_DEFINITIONS.map(col => [col.id, col.defaultVisible])),
   };
+  
+  // Commented out localStorage loading to ensure default order is always used
+  // try {
+  //   const stored = localStorage.getItem(STORAGE_KEY);
+  //   if (stored) {
+  //     return JSON.parse(stored);
+  //   }
+  // } catch {
+  //   // Ignore errors
+  // }
 }
 
 function saveColumnPreferences(order: string[], visibility: Record<string, boolean>) {
