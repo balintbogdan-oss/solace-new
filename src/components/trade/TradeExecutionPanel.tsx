@@ -1490,15 +1490,15 @@ export function TradeExecutionPanel({
                    </SelectContent>
                  </Select>
                ))}
-            </>
-          )}
+             </>
+           )}
 
           {role !== 'client' && (
-            <details className="pt-2 group" open={isAdvancedOpen} onToggle={(e) => setIsAdvancedOpen(e.currentTarget.open)}>
-              <summary className="list-none flex items-center justify-center text-sm text-primary hover:underline cursor-pointer py-2">
-                {isAdvancedOpen ? 'Hide' : 'Show'} Advanced Options
-                <ChevronDown className={cn("w-4 h-4 ml-1 transition-transform", isAdvancedOpen && "rotate-180")} />
-              </summary>
+           <details className="pt-2 group" open={isAdvancedOpen} onToggle={(e) => setIsAdvancedOpen(e.currentTarget.open)}>
+             <summary className="list-none flex items-center justify-center text-sm text-primary hover:underline cursor-pointer py-2">
+               {isAdvancedOpen ? 'Hide' : 'Show'} Advanced Options
+               <ChevronDown className={cn("w-4 h-4 ml-1 transition-transform", isAdvancedOpen && "rotate-180")} />
+             </summary>
              <div className="mt-2 rounded-md space-y-2">
                {/* Mutual Fund specific advanced options */}
                {isMutualFund ? (
@@ -2066,11 +2066,11 @@ export function TradeExecutionPanel({
          )}
 
          {role !== 'client' && (
-           <details className="pt-2 group" open={isReviewAdvancedOpen} onToggle={(e) => setIsReviewAdvancedOpen(e.currentTarget.open)}>
-             <summary className="list-none flex items-center justify-center text-xs text-primary hover:underline cursor-pointer py-2">
-                {isReviewAdvancedOpen ? 'Hide' : 'Show'} Advanced Details
-                <ChevronDown className={cn("w-3 h-3 ml-1 transition-transform", isReviewAdvancedOpen && "rotate-180")} />
-              </summary>
+         <details className="pt-2 group" open={isReviewAdvancedOpen} onToggle={(e) => setIsReviewAdvancedOpen(e.currentTarget.open)}>
+           <summary className="list-none flex items-center justify-center text-xs text-primary hover:underline cursor-pointer py-2">
+              {isReviewAdvancedOpen ? 'Hide' : 'Show'} Advanced Details
+              <ChevronDown className={cn("w-3 h-3 ml-1 transition-transform", isReviewAdvancedOpen && "rotate-180")} />
+            </summary>
            <div className="mt-1 space-y-1">
               {!isMutualFund && renderFormRow('Time in Force', <span className="font-medium uppercase text-right">{timeInForce}</span>)}
               {!isMutualFund && timeInForce === 'gtd' && goodTillDate && renderFormRow('Good Till Date', <span className="font-medium text-right">{new Date(goodTillDate).toLocaleDateString()}</span>)}

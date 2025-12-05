@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { HelpCircle, ChevronDown, User, LogOut, Sun, Moon } from 'lucide-react';
+import { HelpCircle, ChevronDown, User, LogOut, Sun, Moon, ExternalLink } from 'lucide-react';
 import { useUserRole } from '@/contexts/UserRoleContext';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -100,8 +100,14 @@ export function HeaderClient() {
           </div>
         </div>
 
-        {/* Right Section: Support, Profile */}
+        {/* Right Section: Wedbush Research, Support, Profile */}
         <div className="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
+          {/* Wedbush Research */}
+          <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white gap-1 sm:gap-2 px-2 sm:px-3">
+            <span className="hidden sm:inline text-white">Wedbush Research</span>
+            <ExternalLink className="h-4 w-4 flex-shrink-0 text-white" />
+          </Button>
+
           {/* Support */}
           <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white gap-1 sm:gap-2 px-2 sm:px-3">
             <HelpCircle className="h-4 w-4 flex-shrink-0 text-white" />

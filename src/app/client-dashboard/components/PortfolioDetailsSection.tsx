@@ -50,7 +50,7 @@ export function PortfolioDetailsSection({
         <DropdownMenu open={isAccountDropdownOpen} onOpenChange={onSetIsAccountDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <Button
-              variant={activeFilter === 'all' ? 'outline' : 'active'}
+              variant={activeFilter === 'all' ? 'outline' : 'secondary'}
               size="sm"
               className={`flex items-center gap-2 text-sm flex-shrink-0 ${activeFilter === 'all' ? '!bg-card' : ''}`}
             >

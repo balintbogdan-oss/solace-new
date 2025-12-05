@@ -272,11 +272,11 @@ export function AccountContent({ accountId }: AccountContentProps) {
       assetAllocation: assetAllocation
         .filter(item => item.value > 0) // Only include segments with actual value
         .map(item => ({
-          ...item,
+        ...item,
           // Keep actual market values for the pie chart (not percentages)
           // This ensures all segments are visible even if small
           value: item.value
-        }))
+      }))
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountData, getHoldingsWithDetails]);

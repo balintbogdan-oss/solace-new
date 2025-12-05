@@ -363,31 +363,31 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
       // Update data-role attribute
       document.documentElement.setAttribute('data-role', role);
 
-      // Set data-theme attribute based on role
-      if (role === 'client') {
-        document.documentElement.setAttribute('data-theme', 'wedbush-next');
-        
+    // Set data-theme attribute based on role
+    if (role === 'client') {
+      document.documentElement.setAttribute('data-theme', 'wedbush-next');
+      
         // Webush Next blue theme colors - lighter primary for dark mode
-        const webushColors = {
+      const webushColors = {
           primary: isDarkMode ? '96 165 250' : '44 84 201', // blue-400 in dark, blue-600 in light
-          headerBg: '4 19 64', // #041340 (wedbush-next-brand/950)
-          avatarBg: '30 58 138', // #1e3a8a (wedbush-next-brand/900)
-          welcomeBanner: '16 33 83', // #102153
-          accentCyan: '114 202 196', // #72cac4
-        };
+        headerBg: '4 19 64', // #041340 (wedbush-next-brand/950)
+        avatarBg: '30 58 138', // #1e3a8a (wedbush-next-brand/900)
+        welcomeBanner: '16 33 83', // #102153
+        accentCyan: '114 202 196', // #72cac4
+      };
 
-        // Apply primary blue color
-        document.documentElement.style.setProperty('--primary', webushColors.primary);
-        
-        // Apply header background
-        document.documentElement.style.setProperty('--header-bg', webushColors.headerBg);
-        
-        // Store Webush colors for use in components
-        document.documentElement.style.setProperty('--webush-primary', webushColors.primary);
-        document.documentElement.style.setProperty('--webush-header-bg', webushColors.headerBg);
-        document.documentElement.style.setProperty('--webush-avatar-bg', webushColors.avatarBg);
-        document.documentElement.style.setProperty('--webush-welcome-banner', webushColors.welcomeBanner);
-        document.documentElement.style.setProperty('--webush-accent-cyan', webushColors.accentCyan);
+      // Apply primary blue color
+      document.documentElement.style.setProperty('--primary', webushColors.primary);
+      
+      // Apply header background
+      document.documentElement.style.setProperty('--header-bg', webushColors.headerBg);
+      
+      // Store Webush colors for use in components
+      document.documentElement.style.setProperty('--webush-primary', webushColors.primary);
+      document.documentElement.style.setProperty('--webush-header-bg', webushColors.headerBg);
+      document.documentElement.style.setProperty('--webush-avatar-bg', webushColors.avatarBg);
+      document.documentElement.style.setProperty('--webush-welcome-banner', webushColors.welcomeBanner);
+      document.documentElement.style.setProperty('--webush-accent-cyan', webushColors.accentCyan);
 
         // Set client background color based on mode
         if (isDarkMode) {
@@ -395,9 +395,9 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
         } else {
           document.documentElement.style.setProperty('--background', '241 245 249'); // slate-100
         }
-      } else {
-        // Remove data-theme for advisor (Solace theme)
-        document.documentElement.removeAttribute('data-theme');
+    } else {
+      // Remove data-theme for advisor (Solace theme)
+      document.documentElement.removeAttribute('data-theme');
         
         // Reset CSS variables to advisor defaults
         // Reset primary color to use settings (will be set by the primary color useEffect)

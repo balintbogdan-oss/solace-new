@@ -9,8 +9,8 @@
       "isPrimary": true,
       "balances": {
         "cash": 52347.18,
-        "margin": 0,
-        "buyingPower": 52347.18,
+        "margin": 185000.00,
+        "buyingPower": 237347.18,
         "totalValue": 4237892.45,
         "investedValue": 4185545.27,
         "realizedGL": 52347.18,
@@ -223,7 +223,7 @@
         },
         {
           "symbol": "AAPL250916C1064",
-          "cusip": "AAPL250916C1064",
+          "cusip": "1234567",
           "description": "AAPL Call Option $106.40 Sep 16 2025",
           "sector": "Options",
           "type": "option",
@@ -231,7 +231,7 @@
         },
         {
           "symbol": "MSFT250916P4000",
-          "cusip": "MSFT250916P4000",
+          "cusip": "2345678",
           "description": "MSFT Put Option $400.00 Sep 16 2025",
           "sector": "Options",
           "type": "option",
@@ -341,7 +341,7 @@
         },
         {
           "symbol": "GOOGL250916C1500",
-          "cusip": "GOOGL250916C1500",
+          "cusip": "3456789",
           "description": "GOOGL Call Option $150.00 Sep 16 2025",
           "sector": "Options",
           "type": "option",
@@ -557,7 +557,7 @@
         },
         {
           "symbol": "AAPL250916P1100",
-          "cusip": "AAPL250916P1100",
+          "cusip": "4567890",
           "description": "AAPL Put Option $110.00 Sep 16 2025",
           "sector": "Options",
           "type": "option",
@@ -565,7 +565,7 @@
         },
         {
           "symbol": "NVDA250916C5500",
-          "cusip": "NVDA250916C5500",
+          "cusip": "5678901",
           "description": "NVDA Call Option $550.00 Sep 16 2025",
           "sector": "Options",
           "type": "option",
@@ -833,7 +833,7 @@
         },
         {
           "symbol": "TSLA250916C2500",
-          "cusip": "TSLA250916C2500",
+          "cusip": "6789012",
           "description": "TSLA Call Option $250.00 Sep 16 2025",
           "sector": "Options",
           "type": "option",
@@ -1095,7 +1095,7 @@
         },
         {
           "symbol": "META250916C5500",
-          "cusip": "META250916C5500",
+          "cusip": "7890123",
           "description": "META Call Option $550.00 Sep 16 2025",
           "sector": "Options",
           "type": "option",
@@ -1103,7 +1103,7 @@
         },
         {
           "symbol": "AMZN250916P1800",
-          "cusip": "AMZN250916P1800",
+          "cusip": "8901234",
           "description": "AMZN Put Option $180.00 Sep 16 2025",
           "sector": "Options",
           "type": "option",

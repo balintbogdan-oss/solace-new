@@ -119,7 +119,7 @@ export const sidebarSections: Record<string, SidebarSection> = {
 
   // Account section (Key changed to dynamic)
   '/account/[accountId]': {
-    label: 'Account',
+    label: 'Account overview',
     
     items: [
       { 

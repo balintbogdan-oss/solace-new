@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { ChevronsUpDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -59,16 +60,30 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   )
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+interface TableHeadProps extends React.ComponentProps<"th"> {
+  sortable?: boolean
+}
+
+function TableHead({ className, sortable = false, children, ...props }: TableHeadProps) {
   return (
     <th
       data-slot="table-head"
       className={cn(
         "text-muted-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap bg-muted [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        sortable && "cursor-pointer hover:bg-muted/50",
         className
       )}
       {...props}
-    />
+    >
+      {sortable ? (
+        <div className="flex items-center gap-1">
+          {children}
+          <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+        </div>
+      ) : (
+        children
+      )}
+    </th>
   )
 }
 
@@ -77,7 +92,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "p-2 align-middle whitespace-nowrap text-left [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] h-[54px]",
+        "p-2 align-middle whitespace-nowrap text-left font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] h-[54px]",
         className
       )}
       {...props}

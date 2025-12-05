@@ -69,6 +69,7 @@ module.exports = {
           DEFAULT: "rgb(var(--card) / <alpha-value>)",
           foreground: "rgb(var(--card-foreground) / <alpha-value>)",
         },
+        "button-weak": "var(--button-weak)",
         positive: "hsl(var(--positive))",
         negative: "hsl(var(--negative))",
         "chart-positive": "hsl(var(--chart-positive))",

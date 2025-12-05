@@ -66,6 +66,9 @@
     
     /* Sidebar accent color for Solace theme */
     --sidebar-accent: #E7E5E4;
+    
+    /* Button weak color for Solace theme (advisor) */
+    --button-weak: #F1F0EE;
   }
   
   /* Chart colors for Wedbush Next theme (client) */
@@ -85,6 +88,9 @@
     
     /* Muted foreground color for Wedbush Next theme */
     --muted-foreground: #334155;
+    
+    /* Button weak color for Wedbush Next theme (client) */
+    --button-weak: #EEEFF1;
   }
 
   .dark {

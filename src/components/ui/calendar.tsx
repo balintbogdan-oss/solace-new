@@ -29,7 +29,7 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+        "bg-card group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -41,7 +41,7 @@ function Calendar({
         ...formatters,
       }}
       classNames={{
-        root: cn("w-fit", defaultClassNames.root),
+        root: cn("w-auto min-w-[280px]", defaultClassNames.root),
         months: cn(
           "flex gap-4 flex-col md:flex-row relative",
           defaultClassNames.months
@@ -54,11 +54,13 @@ function Calendar({
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
           "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
+          captionLayout === "dropdown" && "hidden",
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
           "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
+          captionLayout === "dropdown" && "hidden",
           defaultClassNames.button_next
         ),
         month_caption: cn(
@@ -70,7 +72,10 @@ function Calendar({
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
-          "relative has-focus:border-ring border border-input shadow-xs has-focus:ring-ring/50 has-focus:ring-[3px] rounded-md",
+          "relative flex-1",
+          "[&:nth-of-type(1)]:order-2 [&:nth-of-type(2)]:order-1",
+          "[&>select]:appearance-none [&>select]:bg-button-weak [&>select]:text-black [&>select]:dark:text-white [&>select]:hover:bg-black/10 [&>select]:dark:hover:bg-accent [&>select]:border [&>select]:border-input [&>select]:shadow-sm [&>select]:flex [&>select]:items-center [&>select]:justify-between [&>select]:gap-2 [&>select]:rounded-md [&>select]:px-3 [&>select]:py-2 [&>select]:text-sm [&>select]:h-9 [&>select]:w-full [&>select]:cursor-pointer [&>select]:transition-[color,box-shadow] [&>select]:outline-none [&>select]:focus-visible:ring-ring/50 [&>select]:focus-visible:ring-[3px] [&>select]:disabled:cursor-not-allowed [&>select]:disabled:opacity-50 [&>select]:pr-8",
+          "[&>svg]:absolute [&>svg]:right-2 [&>svg]:top-1/2 [&>svg]:-translate-y-1/2 [&>svg]:pointer-events-none [&>svg]:opacity-50",
           defaultClassNames.dropdown_root
         ),
         dropdown: cn(
@@ -100,7 +105,10 @@ function Calendar({
           defaultClassNames.week_number
         ),
         day: cn(
-          "relative w-full h-full p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
+          "relative w-full h-full p-0 text-center [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
+          props.showWeekNumber
+            ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-md"
+            : "[&:first-child[data-selected=true]_button]:rounded-l-md",
           defaultClassNames.day
         ),
         range_start: cn(

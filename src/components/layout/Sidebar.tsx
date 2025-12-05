@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronDown, PanelLeftClose } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NavItem } from '@/lib/navigation'
 import { useNavigation } from '@/contexts/NavigationContext'
@@ -72,7 +72,7 @@ export function Sidebar() { // Removed props
         element: (
           <React.Fragment key={item.href}>
             {groupTitleElement}
-            <li>
+            <li className={cn(isMinimized && "flex justify-center")}>
               <button
                 onClick={() => {
                   if (isMinimized) {
@@ -84,11 +84,11 @@ export function Sidebar() { // Removed props
                   }
                 }}
                 className={cn(
-                  'flex items-center text-sm transition-colors',
-                  isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
+                  'flex items-center justify-center text-sm transition-colors',
+                  isMinimized ? 'w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
                   isActive
                     ? isMinimized 
-                      ? 'text-foreground dark:text-white' 
+                      ? 'text-gray-700 dark:text-gray-300' 
                       : 'text-gray-900 dark:text-gray-100'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50',
                   // Keep parent expanded if child is active
@@ -97,7 +97,7 @@ export function Sidebar() { // Removed props
                 style={isActive ? { backgroundColor: 'var(--sidebar-accent)' } : undefined}
                 title={isMinimized ? item.label : undefined}
               >
-                <div className={cn("flex items-center", isMinimized ? "gap-0" : "gap-3")}>
+                <div className={cn("flex items-center justify-center", isMinimized ? "gap-0" : "gap-3")}>
                   {Icon && <Icon className="w-4 h-4" />}
                   {!isMinimized && <span>{item.label}</span>}
                 </div>
@@ -132,7 +132,7 @@ export function Sidebar() { // Removed props
       element: (
         <React.Fragment key={item.href}>
           {groupTitleElement}
-          <li>
+          <li className={cn(isMinimized && "flex justify-center")}>
             <button
               onClick={() => {
                 if (isMinimized) {
@@ -157,18 +157,18 @@ export function Sidebar() { // Removed props
                 }
               }}
               className={cn(
-                'flex items-center text-sm transition-colors',
-                isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
+                'flex items-center justify-center text-sm transition-colors',
+                isMinimized ? 'w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
                 isActive
                   ? isMinimized 
-                    ? 'text-foreground dark:text-white' 
+                    ? 'text-gray-700 dark:text-gray-300' 
                     : 'text-gray-900 dark:text-gray-100'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50'
               )}
               style={isActive ? { backgroundColor: 'var(--sidebar-accent)' } : undefined}
               title={isMinimized ? item.label : undefined}
             >
-              <div className={cn("flex items-center", isMinimized ? "gap-0" : "gap-3")}>
+              <div className={cn("flex items-center justify-center", isMinimized ? "gap-0" : "gap-3")}>
                 {Icon && <Icon className="w-4 h-4" />}
                 {!isMinimized && <span>{item.label}</span>}
               </div>
@@ -217,36 +217,32 @@ export function Sidebar() { // Removed props
 
   return (
     <nav className={cn(
-      "px-4 hidden md:block flex-shrink-0 min-h-[calc(100vh-116px)] rounded-md transition-all duration-300",
-      isMinimized ? "w-[60px]" : "w-[260px]"
+      "hidden md:block flex-shrink-0 min-h-[calc(100vh-116px)] rounded-md transition-all duration-300",
+      isMinimized ? "w-[60px] px-0" : "w-[260px] px-4"
     )}>
       <div className="flex flex-col h-full">
         {/* Sidebar Header */}
-        <div className={cn("flex items-center", isMinimized ? "justify-center" : "justify-between", "pt-6 pb-1")}>
+        <div className={cn("flex items-center", isMinimized ? "justify-center w-full" : "justify-between", isMinimized ? "pt-6 pb-1" : "pt-6 pb-1")}>
           {!isMinimized && currentSectionLabel && (
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
+            <span className="text-xs text-muted-foreground">
               {currentSectionLabel}
             </span>
           )}
           <button
             onClick={toggleSidebar}
             className={cn(
-              "flex items-center text-sm transition-colors",
-              isMinimized ? "justify-center items-center w-10 h-10 rounded-lg hover:bg-gray-200/30 dark:hover:bg-gray-200/10" : "p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+              "flex items-center justify-center text-sm transition-colors",
+              isMinimized ? "w-10 h-10 rounded-lg hover:bg-gray-200/30 dark:hover:bg-gray-200/10 text-gray-700 dark:text-gray-300" : "p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             )}
             title={isMinimized ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {isMinimized ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <ChevronLeft className="w-4 h-4" />
-            )}
+            <PanelLeftClose className={cn("w-4 h-4", isMinimized && "rotate-180")} />
           </button>
         </div>
         
         {/* Navigation Items */}
-        <div className="flex-1">
-          <ul className="space-y-1">
+        <div className={cn("flex-1", isMinimized && "flex flex-col items-center")}>
+          <ul className={cn("space-y-1", isMinimized && "w-full flex flex-col items-center")}>
             {/* Use currentBaseHref from context for top-level items */}
             {currentSectionItems.reduce((acc, item) => {
               const result = renderNavItem(item, currentBaseHref, acc.lastGroupTitle);
