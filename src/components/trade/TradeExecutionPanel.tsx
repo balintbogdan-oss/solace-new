@@ -2348,7 +2348,7 @@ export function TradeExecutionPanel({
           {notes && renderFormRow('Notes', <span className="font-medium whitespace-pre-wrap text-right">{notes}</span>)}
        </div>
       <div className="space-y-2">
-         <Button variant="secondary" className="w-full" onClick={handleNewOrder}>
+         <Button variant="outline" className="w-full" onClick={handleNewOrder}>
            Place New Order
          </Button>
          <Button variant="outline" className="w-full" onClick={() => {

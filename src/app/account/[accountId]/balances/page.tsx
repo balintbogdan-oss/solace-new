@@ -141,11 +141,11 @@ function BalancesPageContent() {
             <PageHeading className="text-slate-900 dark:text-slate-100">Balances</PageHeading>
           </div>
           <div className="flex gap-2">
-            <Button variant="secondary">
+            <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button variant="secondary">
+            <Button variant="outline">
               <History className="w-4 h-4 mr-2" />
               View History
             </Button>
@@ -398,11 +398,11 @@ function BalancesPageContent() {
             {/* Income Overview */}
             <div>
               <h3 className="text-lg font-medium mb-4">Income overview</h3>
-              <Card className="text-sm shadow-none p-0">
+              <Card className="text-sm shadow-none p-0 overflow-hidden">
                 <div>
                   <Link 
                     href={`/account/${accountId}/balances/projected-income`}
-                    className="flex items-center justify-between py-6 border-l-4 border-l-blue-600 px-4 border-b hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between py-6 border-l-4 border-l-primary px-4 border-b hover:bg-muted/50 transition-colors rounded-tl-2xl"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
@@ -420,7 +420,7 @@ function BalancesPageContent() {
                   </Link>
                   <Link 
                     href={`/account/${accountId}/balances/pending-income`}
-                    className="flex items-center justify-between py-6 border-l-4 border-l-blue-600 px-4 hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between py-6 border-l-4 border-l-primary px-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">

@@ -534,7 +534,7 @@ function ActivityPageContent() {
               <SelectItem value="Last year">Last year</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="secondary">
+          <Button variant="outline">
             <Download className="h-5 w-5 mr-2" />
             Export
           </Button>

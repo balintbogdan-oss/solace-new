@@ -27,6 +27,14 @@ import {
   TooltipTrigger 
 } from '@/components/ui/tooltip';
 import { PageHeading } from '@/components/layout/PageHeading';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
 // Import kept solely for type reference in comments; avoid unused var error
 // import type { UnrealizedPosition } from '@/types/account';
 
@@ -191,7 +199,7 @@ export default function UnrealizedGLPage() {
                 <SelectItem value="2023">2023</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="secondary" className="h-9">
+            <Button variant="outline" className="h-9">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
@@ -203,30 +211,30 @@ export default function UnrealizedGLPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-sm font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Portfolio market value</div>
-              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.portfolioMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-sm font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.portfolioMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Unrealized long term G/L</div>
-              <h3 className={`text-xl font-medium ${summaryData.unrealizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-sm font-medium ${summaryData.unrealizedLongTerm >= 0 ? 'text-positive' : 'text-negative'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.unrealizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.unrealizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Unrealized short term G/L</div>
-              <h3 className="text-xl font-medium text-red-500" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-sm font-medium ${summaryData.unrealizedShortTerm >= 0 ? 'text-positive' : 'text-negative'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.unrealizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.unrealizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total unrealized G/L</div>
-              <h3 className={`text-xl font-medium ${summaryData.totalUnrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-sm font-medium ${summaryData.totalUnrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.totalUnrealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalUnrealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
-              <div className={`text-sm ${summaryData.totalUnrealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+              <div className={`text-sm ${summaryData.totalUnrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`}>
                 {summaryData.totalUnrealizedGL >= 0 ? '+' : ''}{summaryData.totalUnrealizedGLPercent.toFixed(2)}%
               </div>
             </div>
@@ -252,101 +260,131 @@ export default function UnrealizedGLPage() {
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[1600px]">
-              <thead>
-                <tr className="border-b">
-                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'lastUpdated' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('lastUpdated')}>
+            <Table className="w-full text-sm min-w-[1600px]">
+              <TableHeader>
+                <TableRow className="border-b">
+                  <TableHead 
+                    className="text-left px-6 py-3 whitespace-nowrap border-r w-40 cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('lastUpdated')}
+                  >
+                    <div className="flex items-center gap-1">
                       <span className="text-sm">Date</span>
                       {sortColumn === 'lastUpdated' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('quantity')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('quantity')}
+                  >
+                    <div className="flex items-center justify-end gap-1">
                       <span className="text-sm">Quantity</span>
                       {sortColumn === 'quantity' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/50 border-r max-w-[200px] bg-muted ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('symbol')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 border-r max-w-[200px] cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('symbol')}
+                  >
+                    <div className="flex items-center gap-1">
                       <span className="text-sm">Symbol/CUSIP</span>
                       {sortColumn === 'symbol' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/50 border-r max-w-[200px] bg-muted ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('description')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 border-r max-w-[200px] cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('description')}
+                  >
+                    <div className="flex items-center gap-1">
                       <span className="text-sm">Description</span>
                       {sortColumn === 'description' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-center px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'longShort' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-center gap-1 w-full" onClick={() => handleSort('longShort')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-center px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('longShort')}
+                  >
+                    <div className="flex items-center justify-center gap-1">
                       <span className="text-sm">L/S</span>
                       {sortColumn === 'longShort' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'unrealizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('unrealizedGL')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('unrealizedGL')}
+                  >
+                    <div className="flex items-center justify-end gap-1">
                       <span className="text-sm">Total Unrealized G/L</span>
                       {sortColumn === 'unrealizedGL' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'unrealizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('unrealizedGLPercent')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('unrealizedGLPercent')}
+                  >
+                    <div className="flex items-center justify-end gap-1">
                       <span className="text-sm">Total Unrealized G/L %</span>
                       {sortColumn === 'unrealizedGLPercent' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'avgPrice' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('avgPrice')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('avgPrice')}
+                  >
+                    <div className="flex items-center justify-end gap-1">
                       <span className="text-sm">Buy Price</span>
                       {sortColumn === 'avgPrice' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'investedValue' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('investedValue')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('investedValue')}
+                  >
+                    <div className="flex items-center justify-end gap-1">
                       <span className="text-sm">Invested Value</span>
                       {sortColumn === 'investedValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r bg-muted ${sortColumn === 'currentPrice' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('currentPrice')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('currentPrice')}
+                  >
+                    <div className="flex items-center justify-end gap-1">
                       <span className="text-sm">LTP</span>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -357,14 +395,17 @@ export default function UnrealizedGLPage() {
                         </TooltipContent>
                       </Tooltip>
                       {sortColumn === 'currentPrice' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 bg-muted ${sortColumn === 'marketValue' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('marketValue')}>
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-right px-6 py-3 whitespace-nowrap cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('marketValue')}
+                  >
+                    <div className="flex items-center justify-end gap-1">
                       <span className="text-sm">Market Value</span>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -375,59 +416,59 @@ export default function UnrealizedGLPage() {
                         </TooltipContent>
                       </Tooltip>
                       {sortColumn === 'marketValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
                       )}
-                    </button>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                    </div>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredPositions.length === 0 ? (
-                  <tr>
-                    <td colSpan={11} className="text-center py-8 text-muted-foreground">
+                  <TableRow>
+                    <TableCell colSpan={11} className="py-8 text-muted-foreground">
                       No unrealized positions found
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filteredPositions.map((position, index) => (
-                    <tr key={position.id} className={`border-b ${index % 2 === 1 ? 'bg-card' : 'bg-card'}`}>
-                      <td className="px-6 py-3 text-foreground bg-card">{new Date(position.lastUpdated).toISOString().split('T')[0]}</td>
-                      <td className="px-6 py-3 text-right text-foreground bg-card">{position.quantity.toLocaleString()}</td>
-                      <td className="px-6 py-3 bg-card">
+                    <TableRow key={position.id} className={`border-b ${index % 2 === 1 ? 'bg-card' : 'bg-card'}`}>
+                      <TableCell className="px-6 py-3 text-foreground bg-card w-40">{new Date(position.lastUpdated).toISOString().split('T')[0]}</TableCell>
+                      <TableCell className="px-6 py-3 text-foreground bg-card">{position.quantity.toLocaleString()}</TableCell>
+                      <TableCell className="px-6 py-3 bg-card">
                         <div>
                           <div className="font-medium text-foreground">{position.symbol}</div>
                           <div className="text-xs text-muted-foreground">{position.cusip}</div>
                         </div>
-                      </td>
-                      <td className="px-6 py-3 text-foreground max-w-[200px] truncate bg-card">{position.description}</td>
-                      <td className="px-6 py-3 text-center text-foreground bg-card">
+                      </TableCell>
+                      <TableCell className="px-6 py-3 text-foreground max-w-[200px] truncate bg-card">{position.description}</TableCell>
+                      <TableCell className="px-6 py-3 text-foreground bg-card">
                         {position.longShort}
-                      </td>
-                      <td className={`px-6 py-3 text-right font-medium bg-card ${position.unrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`}>
+                      </TableCell>
+                      <TableCell className={`px-6 py-3 font-medium bg-card ${position.unrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`}>
                         {position.unrealizedGL >= 0 ? '+' : '-'}${Math.abs(position.unrealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className={`px-6 py-3 text-right font-medium bg-card ${position.unrealizedGLPercent >= 0 ? 'text-positive' : 'text-negative'}`}>
+                      </TableCell>
+                      <TableCell className={`px-6 py-3 font-medium bg-card ${position.unrealizedGLPercent >= 0 ? 'text-positive' : 'text-negative'}`}>
                         {position.unrealizedGLPercent >= 0 ? '+' : '-'}{Math.abs(position.unrealizedGLPercent).toFixed(2)}%
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground bg-card">
+                      </TableCell>
+                      <TableCell className="px-6 py-3 text-foreground bg-card">
                         ${position.avgPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground bg-card">
+                      </TableCell>
+                      <TableCell className="px-6 py-3 text-foreground bg-card">
                         ${position.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground bg-card">
+                      </TableCell>
+                      <TableCell className="px-6 py-3 text-foreground bg-card">
                         ${position.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground bg-card">
+                      </TableCell>
+                      <TableCell className="px-6 py-3 text-foreground bg-card">
                         ${position.marketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </Card>
         </div>

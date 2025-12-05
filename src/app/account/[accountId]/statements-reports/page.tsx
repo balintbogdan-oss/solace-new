@@ -201,9 +201,8 @@ export default function StatementsReportsPage() {
       })
     }
     
-    return rows.map(({ dateObj, ...rest }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      void dateObj; // Used for sorting, but not needed in return
+    return rows.map(({ dateObj: _dateObj, ...rest }) => {
+      void _dateObj; // Used for sorting, but not needed in return
       return rest;
     })
   }
@@ -255,9 +254,8 @@ export default function StatementsReportsPage() {
       })
     }
     
-    return rows.map(({ dateObj, ...rest }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      void dateObj; // Used for sorting, but not needed in return
+    return rows.map(({ dateObj: _dateObj, ...rest }) => {
+      void _dateObj; // Used for sorting, but not needed in return
       return rest;
     })
   }

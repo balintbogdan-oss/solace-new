@@ -1,30 +1,39 @@
 'use client';
 
-import { Suspense } from 'react';
+import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LastUpdated } from '@/components/ui/last-updated';
 import { PageHeading } from '@/components/layout/PageHeading';
-import { Download, ChevronRight, Home } from 'lucide-react';
-import Link from 'next/link';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
+import { Download, ArrowUp, ArrowDown, ChevronsUpDown } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { useAccountData } from '@/contexts/AccountDataContext';
+import { AccountBreadcrumb } from '@/components/layout/AccountBreadcrumb';
 
-// Mock pending income data
+// Mock pending income data matching the screenshot
 const pendingIncomeData = [
-  { payDate: '03/15/2025', symbol: 'AAPL', description: 'Apple Inc. Dividend', type: 'Dividend', quantity: 100, rate: 0.24, amount: 24.00 },
-  { payDate: '03/18/2025', symbol: 'MSFT', description: 'Microsoft Corp. Dividend', type: 'Dividend', quantity: 50, rate: 0.75, amount: 37.50 },
-  { payDate: '03/20/2025', symbol: 'VTI', description: 'Vanguard Total Stock Market ETF', type: 'Dividend', quantity: 200, rate: 0.89, amount: 178.00 },
-  { payDate: '03/22/2025', symbol: 'BND', description: 'Vanguard Total Bond Market ETF', type: 'Interest', quantity: 150, rate: 0.28, amount: 42.00 },
-  { payDate: '03/25/2025', symbol: 'JNJ', description: 'Johnson & Johnson Dividend', type: 'Dividend', quantity: 75, rate: 1.24, amount: 93.00 },
-  { payDate: '03/28/2025', symbol: 'PG', description: 'Procter & Gamble Dividend', type: 'Dividend', quantity: 60, rate: 1.01, amount: 60.60 },
-  { payDate: '03/30/2025', symbol: 'T-BILL', description: 'Treasury Bill Interest', type: 'Interest', quantity: 1, rate: 1637.32, amount: 1637.32 },
+  { payDate: '3/12/2025', recordDate: '3/12/2025', exDividendDate: '3/12/2025', symbol: 'AAPL', cusip: '037833100', description: 'Apple Inc. - Technology company...', quantity: 250000, frequency: 'Quarterly', incomeType: 'D' },
+  { payDate: '3/10/2025', recordDate: '3/10/2025', exDividendDate: '3/10/2025', symbol: 'AAPL', cusip: '037833100', description: 'Apple Inc. - Technology company...', quantity: 300, frequency: 'Quarterly', incomeType: 'D' },
+  { payDate: '3/8/2025', recordDate: '3/8/2025', exDividendDate: '3/8/2025', symbol: 'AAPL', cusip: '037833100', description: 'Apple Inc. - Technology company...', quantity: 300, frequency: 'Monthly', incomeType: 'In' },
 ];
 
-const totalPending = pendingIncomeData.reduce((sum, item) => sum + item.amount, 0);
+const totalPending = 2072.42;
 
 function PendingIncomeContent() {
   const params = useParams();
   const accountId = params?.accountId as string;
+  const { refreshData } = useAccountData();
+  
+  const [sortColumn, setSortColumn] = useState<string | null>('payDate');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const getCurrentTimestamp = () => {
     return new Date().toLocaleString('en-US', {
@@ -42,27 +51,48 @@ function PendingIncomeContent() {
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   };
 
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedData = useMemo(() => {
+    if (!sortColumn) return pendingIncomeData;
+    return [...pendingIncomeData].sort((a, b) => {
+      const aValue = a[sortColumn as keyof typeof a];
+      const bValue = b[sortColumn as keyof typeof b];
+      let comparison = 0;
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        comparison = aValue.localeCompare(bValue);
+      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+        comparison = aValue - bValue;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [sortColumn, sortDirection]);
+
   return (
     <div className="w-full">
       <div className="flex flex-col gap-4">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href={`/account/${accountId}/balances`} className="flex items-center gap-1 hover:text-foreground transition-colors">
-            <Home className="h-4 w-4" />
-            Balances
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground">Pending income</span>
-        </nav>
+        <AccountBreadcrumb 
+          items={[
+            { label: 'Balances', href: `/account/${accountId}/balances` },
+            { label: 'Pending income' }
+          ]}
+        />
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="w-full md:w-auto">
             <PageHeading className="text-slate-900 dark:text-slate-100">Pending income</PageHeading>
-            <p className="text-sm text-muted-foreground mt-1">Month of March 2025</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="secondary">
+            <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
@@ -71,70 +101,158 @@ function PendingIncomeContent() {
 
         {/* Summary Card */}
         <Card className="p-6 bg-card">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-normal">Total pending income</span>
-          </div>
-          <h3 className="text-2xl mb-4" style={{ fontFamily: 'var(--font-display)' }}>{formatAmount(totalPending)}</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <div className="text-muted-foreground">Pending dividends</div>
-              <div className="font-medium">{formatAmount(pendingIncomeData.filter(i => i.type === 'Dividend').reduce((sum, item) => sum + item.amount, 0))}</div>
-            </div>
-            <div>
-              <div className="text-muted-foreground">Pending interest</div>
-              <div className="font-medium">{formatAmount(pendingIncomeData.filter(i => i.type === 'Interest').reduce((sum, item) => sum + item.amount, 0))}</div>
-            </div>
-          </div>
+          <div className="text-sm font-medium text-muted-foreground mb-1">Total pending income</div>
+          <h3 className="text-sm font-medium mb-4" style={{ fontFamily: 'var(--font-display)' }}>{formatAmount(totalPending)}</h3>
           <LastUpdated 
             timestamp={`Updated ${getCurrentTimestamp()}`} 
+            onRefresh={refreshData}
             className="mt-4"
           />
         </Card>
 
         {/* Pending Income Details */}
         <Card className="p-6">
-          <h3 className="text-lg font-medium mb-4">Pending payments</h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-normal">Details</h3>
+          </div>
+          <LastUpdated 
+            timestamp={`Updated ${getCurrentTimestamp()}`} 
+            onRefresh={refreshData}
+            className="mb-4"
+          />
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 text-sm font-medium text-muted-foreground">Pay date</th>
-                  <th className="text-left py-2 text-sm font-medium text-muted-foreground">Symbol</th>
-                  <th className="text-left py-2 text-sm font-medium text-muted-foreground">Description</th>
-                  <th className="text-left py-2 text-sm font-medium text-muted-foreground">Type</th>
-                  <th className="text-right py-2 text-sm font-medium text-muted-foreground">Quantity</th>
-                  <th className="text-right py-2 text-sm font-medium text-muted-foreground">Rate</th>
-                  <th className="text-right py-2 text-sm font-medium text-muted-foreground">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingIncomeData.map((item, index) => (
-                  <tr key={`${item.symbol}-${item.payDate}`} className={index < pendingIncomeData.length - 1 ? 'border-b' : ''}>
-                    <td className="py-2">{item.payDate}</td>
-                    <td className="py-2 font-medium">{item.symbol}</td>
-                    <td className="py-2 text-muted-foreground">{item.description}</td>
-                    <td className="py-2">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        item.type === 'Dividend' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                      }`}>
-                        {item.type}
-                      </span>
-                    </td>
-                    <td className="text-right py-2">{item.quantity.toLocaleString()}</td>
-                    <td className="text-right py-2">{formatAmount(item.rate)}</td>
-                    <td className="text-right py-2 font-medium text-green-600">{formatAmount(item.amount)}</td>
-                  </tr>
+            <Table className="w-full text-sm">
+              <TableHeader>
+                <TableRow className="border-b">
+                  <TableHead 
+                    className="text-left px-6 py-3 whitespace-nowrap cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('payDate')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">Pay date</span>
+                      {sortColumn === 'payDate' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 whitespace-nowrap cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('recordDate')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">Record date</span>
+                      {sortColumn === 'recordDate' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 whitespace-nowrap cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('exDividendDate')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">Ex-dividend date</span>
+                      {sortColumn === 'exDividendDate' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('symbol')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">Symbol/CUSIP</span>
+                      {sortColumn === 'symbol' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('description')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">Description</span>
+                      {sortColumn === 'description' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 whitespace-nowrap cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('quantity')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">Quantity</span>
+                      {sortColumn === 'quantity' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 whitespace-nowrap cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('frequency')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">Frequency</span>
+                      {sortColumn === 'frequency' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-left px-6 py-3 whitespace-nowrap cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSort('incomeType')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">In</span>
+                      {sortColumn === 'incomeType' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                      )}
+                    </div>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedData.map((item, index) => (
+                  <TableRow key={`${item.symbol}-${item.payDate}`} className={`border-b ${index % 2 === 1 ? 'bg-card' : ''}`}>
+                    <TableCell className="px-6 py-3 text-foreground bg-card">{item.payDate}</TableCell>
+                    <TableCell className="px-6 py-3 text-foreground bg-card">{item.recordDate}</TableCell>
+                    <TableCell className="px-6 py-3 text-foreground bg-card">{item.exDividendDate}</TableCell>
+                    <TableCell className="px-6 py-3 bg-card">
+                      <div>
+                        <div className="font-medium text-foreground">{item.symbol}</div>
+                        <div className="text-xs text-muted-foreground">{item.cusip}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-foreground bg-card">{item.description}</TableCell>
+                    <TableCell className="px-6 py-3 text-foreground bg-card">{item.quantity.toLocaleString()}</TableCell>
+                    <TableCell className="px-6 py-3 text-foreground bg-card">{item.frequency}</TableCell>
+                    <TableCell className="px-6 py-3 text-foreground bg-card">{item.incomeType}</TableCell>
+                  </TableRow>
                 ))}
-                <tr className="font-semibold border-t">
-                  <td colSpan={6} className="py-2">Total</td>
-                  <td className="text-right py-2 font-medium text-green-600">{formatAmount(totalPending)}</td>
-                </tr>
-              </tbody>
-            </table>
-            <LastUpdated 
-              timestamp={`Updated ${getCurrentTimestamp()}`} 
-              className="mt-4"
-            />
+                <TableRow className="font-semibold border-t">
+                  <TableCell colSpan={7} className="px-6 py-3 text-foreground">Total</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         </Card>
       </div>
@@ -143,10 +261,6 @@ function PendingIncomeContent() {
 }
 
 export default function PendingIncomePage() {
-  return (
-    <Suspense fallback={<div className="animate-pulse">Loading...</div>}>
-      <PendingIncomeContent />
-    </Suspense>
-  );
+  return <PendingIncomeContent />;
 }
 

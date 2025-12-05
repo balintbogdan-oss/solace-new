@@ -316,11 +316,11 @@ export function AccountContent({ accountId }: AccountContentProps) {
               <PageHeading as="h2" className="text-xl sm:text-2xl">Holdings</PageHeading>
             </div>
             <div className="flex items-center space-x-2 w-full sm:w-auto">
-              <Button variant="secondary">
+              <Button variant="outline">
                 <FileText className="mr-2 h-4 w-4" />
                 Export
               </Button>
-              <Button variant="secondary">
+              <Button variant="outline">
                 <History className="mr-2 h-4 w-4" />
                 View History
               </Button>

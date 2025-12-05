@@ -147,7 +147,7 @@ export default function BuyingPowerPage() {
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button variant="secondary" onClick={handleExport}>
+          <Button variant="outline" onClick={handleExport}>
             Export
           </Button>
         </div>

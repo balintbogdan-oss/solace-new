@@ -299,32 +299,32 @@ export default function RealizedGLPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total realized G/L</div>
-              <h3 className={`text-xl font-medium ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-sm font-medium ${summaryData.totalRealizedGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.totalRealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalRealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
-              <div className={`text-sm ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+              <div className={`text-sm ${summaryData.totalRealizedGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
                 {summaryData.totalRealizedGL >= 0 ? '+' : ''}{summaryData.totalGLPercent.toFixed(2)}%
               </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized long term G/L</div>
-              <h3 className={`text-xl font-medium ${summaryData.realizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-sm font-medium ${summaryData.realizedLongTerm >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.realizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized short term G/L</div>
-              <h3 className={`text-xl font-medium ${summaryData.realizedShortTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className={`text-sm font-medium ${summaryData.realizedShortTerm >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.realizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-sm font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total sell value</div>
-              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-sm font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
           </div>
           <LastUpdated 
@@ -520,10 +520,10 @@ export default function RealizedGLPage() {
                       <td className="px-6 py-3 text-foreground max-w-[200px] truncate">{trade.description}</td>
                       <td className="px-6 py-3 text-foreground">{trade.openDate}</td>
                       <td className="px-6 py-3 text-foreground">{trade.closeDate}</td>
-                      <td className={`px-6 py-3 text-right font-medium ${trade.realizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+                      <td className={`px-6 py-3 text-right font-medium ${trade.realizedGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
                         {trade.realizedGL >= 0 ? '+' : '-'}${Math.abs(trade.realizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </td>
-                      <td className={`px-6 py-3 text-right font-medium ${trade.realizedGLPercent >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+                      <td className={`px-6 py-3 text-right font-medium ${trade.realizedGLPercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
                         {trade.realizedGLPercent >= 0 ? '+' : '-'}{Math.abs(trade.realizedGLPercent).toFixed(2)}%
                       </td>
                       <td className="px-6 py-3 text-right text-foreground">
