@@ -12,7 +12,7 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Account } from "@/lib/mock-data";
-import { cn, formatAccountType } from "@/lib/utils"; // Import cn for conditional classes and formatAccountType
+import { cn, formatAccountType, formatCurrency } from "@/lib/utils"; // Import cn for conditional classes and formatAccountType
 import { useUserRole } from '@/contexts/UserRoleContext';
 import React from 'react'; // Ensure React is imported for Fragment
 import { AccountDetailsDrawer } from './AccountDetailsDrawer';
@@ -53,25 +53,11 @@ export function AccountSwitcher({
     return [clientItem];
   }, [clientName]);
 
-  // For client view: group by household, for advisor: show all accounts
+  // Group accounts by household - same logic for both advisors and clients
   const rightPanelSections = useMemo(() => {
     if (!clientAccounts || clientAccounts.length === 0) return [];
     
-      if (role === 'advisor') {
-        // Advisor view: show all accounts in a single section
-        return [{
-          title: 'ACCOUNTS',
-          accounts: clientAccounts,
-          icon: Landmark,
-        isHousehold: false,
-          summary: {
-            title: clientName ? `All ${clientName}'s accounts` : 'All accounts',
-            count: clientAccounts.length,
-          },
-        }];
-    }
-    
-    // Client view: group accounts by household from clientAccounts prop
+    // Group accounts by household from clientAccounts prop
     const householdsMap = new Map<string, { household: { id: string; name: string }; accounts: Account[] }>();
     const nonHousehold: Account[] = [];
     
@@ -91,47 +77,66 @@ export function AccountSwitcher({
       }
     });
     
-      const sections: Array<{
-        title: string;
-        accounts: Account[];
-        icon: typeof Landmark;
+    const sections: Array<{
+      title: string;
+      accounts: Account[];
+      icon: typeof Landmark;
       isHousehold: boolean;
-        householdName?: string;
-        summary?: {
-          title: string;
-          count: number;
-        };
-      }> = [];
+      householdName?: string;
+    }> = [];
 
-      // Add household sections
+    // Add household sections
     householdsMap.forEach(group => {
-        sections.push({
-          title: group.household.name.toUpperCase(),
-          accounts: group.accounts,
-          icon: Home,
-          isHousehold: true,
-          householdName: group.household.name,
-        });
+      sections.push({
+        title: group.household.name.toUpperCase(),
+        accounts: group.accounts,
+        icon: Home,
+        isHousehold: true,
+        householdName: group.household.name,
       });
+    });
 
     // Add non-household section
     if (nonHousehold.length > 0) {
-        sections.push({
+      sections.push({
         title: 'NON-HOUSEHOLD',
         accounts: nonHousehold,
         icon: Building2,
         isHousehold: false,
-        });
-      }
+      });
+    }
 
-      return sections;
-  }, [clientAccounts, clientName, role]);
+    return sections;
+  }, [clientAccounts]);
 
   // Show dropdown if we have accounts (for both advisors and clients)
   const showDropdown = clientAccounts.length > 0;
   
+  // Helper to get account balance
+  const getAccountBalance = (account: Account): string | null => {
+    // Check if account has marketValue (string format from mock-data)
+    if ('marketValue' in account && account.marketValue) {
+      // If it's already formatted as currency string, return as is
+      if (typeof account.marketValue === 'string' && account.marketValue.startsWith('$')) {
+        return account.marketValue;
+      }
+      // If it's a number string, parse and format
+      const numValue = parseFloat(account.marketValue.toString().replace(/[^0-9.-]/g, ''));
+      if (!isNaN(numValue)) {
+        return formatCurrency(numValue);
+      }
+    }
+    // Check if account has balances.totalValue (number format from AccountData)
+    const accountWithBalances = account as Account & { balances?: { totalValue?: number } };
+    if (accountWithBalances.balances?.totalValue !== undefined) {
+      return formatCurrency(accountWithBalances.balances.totalValue);
+    }
+    return null;
+  };
+  
   // Dropdown content component - different for client vs advisor
   const DropdownContent = () => {
+    const currentRole = role; // Capture role before type narrowing
     if (role === 'client') {
       // Client view: single column, no left panel
       return (
@@ -155,10 +160,14 @@ export function AccountSwitcher({
                       }}
                       className={cn(
                         "cursor-pointer flex flex-col items-start rounded-md p-2",
-                        accountId === account.id && "bg-blue-50 dark:bg-blue-900/20"
+                        accountId === account.id && (
+                          role === 'client' 
+                            ? "bg-blue-50 dark:bg-blue-900/20"
+                            : "bg-amber-50 dark:bg-amber-900/20"
+                        )
                       )}
                     >
-                      <div className="flex w-full justify-between items-center">
+                      <div className="flex w-full justify-between items-center gap-2">
                         <div className="flex flex-col min-w-0 flex-1">
                           <div className="text-sm text-foreground flex items-center gap-1.5 font-semibold min-w-0">
                             <span className="flex-shrink-0">{account.id}</span>
@@ -167,11 +176,28 @@ export function AccountSwitcher({
                           </div>
                           <span className="font-normal text-sm text-muted-foreground truncate">{account.name}</span>
                         </div>
-                        {accountId === account.id && (
-                          <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 ml-2">
-                            <Check className="h-4 w-4 text-white" />
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {getAccountBalance(account) && (
+                            <span className="text-sm font-semibold text-foreground text-right whitespace-nowrap">
+                              {getAccountBalance(account)}
+                            </span>
+                          )}
+                          {accountId === account.id && (
+                            <div className={cn(
+                              "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0",
+                              role === 'client'
+                                ? "bg-blue-500"
+                                : "bg-amber-600 dark:bg-amber-700"
+                            )}>
+                              <Check className={cn(
+                                "h-4 w-4",
+                                role === 'client'
+                                  ? "text-white"
+                                  : "text-white dark:text-amber-100"
+                              )} />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </DropdownMenuItem>
                   ))}
@@ -187,7 +213,7 @@ export function AccountSwitcher({
         <DropdownMenuContent align="start" sideOffset={8} className="w-[650px] flex p-0" style={{ zIndex: 9999 }}>
           <div className="flex w-full">
             {/* Left Panel */}
-            <div className="w-[250px] bg-card p-2 space-y-1 border-r border-border">
+            <div className="w-[250px] bg-card p-2 space-y-1 border-r border">
               <div className="px-2 py-2 text-xs text-muted-foreground flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span>CLIENT & HOUSEHOLD</span>
@@ -209,21 +235,15 @@ export function AccountSwitcher({
               ))}
             </div>
             {/* Right Panel */}
-            <div className="flex-1 space-y-2 overflow-y-auto pr-2 pl-1 py-2">
+            <div className="flex-1 space-y-2 overflow-y-auto p-4">
               {rightPanelSections.map((section, idx) => (
                 <div key={idx}>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground mb-2 px-2 pt-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground mb-2 pt-2">
                     <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
                       <section.icon className="h-4 w-4" />
                     </div>
                     <span className="font-semibold tracking-wider">{section.title}</span>
                   </div>
-                  {'summary' in section && section.summary && (
-                    <div className="px-3 pb-2">
-                      <h4 className="font-semibold text-foreground">{section.summary.title}</h4>
-                      <p className="text-sm text-muted-foreground">{section.summary.count} accounts</p>
-                    </div>
-                  )}
                   <div className="flex flex-col gap-1">
                     {section.accounts.map(account => (
                       <DropdownMenuItem
@@ -232,9 +252,16 @@ export function AccountSwitcher({
                           router.push(`/account/${account.id}`);
                           setIsDropdownOpen?.(false);
                         }}
-                        className={cn("cursor-pointer flex flex-col items-start rounded-md p-2", accountId === account.id && "bg-muted")}
+                        className={cn(
+                          "cursor-pointer flex flex-col items-start rounded-md p-2",
+                          accountId === account.id && (
+                            currentRole === 'client' 
+                              ? "bg-blue-50 dark:bg-blue-900/20"
+                              : "bg-amber-50 dark:bg-amber-900/20"
+                          )
+                        )}
                       >
-                        <div className="flex w-full justify-between items-center">
+                        <div className="flex w-full justify-between items-center gap-2">
                           <div className="flex flex-col min-w-0 flex-1">
                             <div className="text-sm text-foreground flex items-center gap-1.5 font-semibold min-w-0">
                               <span className="flex-shrink-0">{account.id}</span>
@@ -243,11 +270,28 @@ export function AccountSwitcher({
                             </div>
                             <span className="font-normal text-sm text-muted-foreground truncate">{account.name}</span>
                           </div>
-                          {accountId === account.id && (
-                            <div className="w-6 h-6 rounded-full bg-amber-200 dark:bg-blue-500 flex items-center justify-center flex-shrink-0 ml-2">
-                              <Check className="h-4 w-4 text-amber-800 dark:text-white" />
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {getAccountBalance(account) && (
+                              <span className="text-sm font-semibold text-foreground text-right whitespace-nowrap">
+                                {getAccountBalance(account)}
+                              </span>
+                            )}
+                            {accountId === account.id && (
+                              <div className={cn(
+                                "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0",
+                                currentRole === 'client'
+                                  ? "bg-blue-500"
+                                  : "bg-amber-600 dark:bg-amber-700"
+                              )}>
+                                <Check className={cn(
+                                  "h-4 w-4",
+                                  currentRole === 'client'
+                                    ? "text-white"
+                                    : "text-white dark:text-amber-100"
+                                )} />
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </DropdownMenuItem>
                     ))}

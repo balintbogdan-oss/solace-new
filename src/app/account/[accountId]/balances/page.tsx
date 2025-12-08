@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { PageLoading } from '@/components/ui/page-loading';
 import { PageHeading } from '@/components/layout/PageHeading';
+import { TableCell, TableHead } from '@/components/ui/table';
 
 function BalancesPageContent() {
   const params = useParams();
@@ -204,37 +205,38 @@ function BalancesPageContent() {
           {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-6">
             {/* Balance & Market Value */}
-            <Card className="p-6">
+            <div>
               <h3 className="text-lg font-medium mb-4">Balance & market value</h3>
-              <div className="overflow-x-auto">
+              <Card className="p-6">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2 text-sm font-medium text-muted-foreground">Type</th>
-                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Balance</th>
-                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Market value</th>
+                    <tr>
+                      <TableHead className="text-left py-2">Type</TableHead>
+                      <TableHead className="text-right py-2">Balance</TableHead>
+                      <TableHead className="text-right py-2">Market value</TableHead>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b">
-                      <td className="py-2">Cash</td>
-                      <td className="text-right font-medium">$15,000.00</td>
-                      <td className="text-right font-medium">$45,000.00</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Cash</TableCell>
+                      <TableCell className="text-right font-medium border-b">$15,000.00</TableCell>
+                      <TableCell className="text-right font-medium border-b">$45,000.00</TableCell>
                     </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Long Margin</td>
-                      <td className="text-right font-medium">$30,000.00</td>
-                      <td className="text-right font-medium">$75,000.00</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Long Margin</TableCell>
+                      <TableCell className="text-right font-medium border-b">$30,000.00</TableCell>
+                      <TableCell className="text-right font-medium border-b">$75,000.00</TableCell>
                     </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Short Margin</td>
-                      <td className="text-right">-</td>
-                      <td className="text-right font-medium">-$15,000.00</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Short Margin</TableCell>
+                      <TableCell className="text-right border-b">-</TableCell>
+                      <TableCell className="text-right font-medium border-b">-$15,000.00</TableCell>
                     </tr>
                     <tr className="font-semibold">
-                      <td className="py-2">Net Total</td>
-                      <td className="text-right font-medium">$40,000.00</td>
-                      <td className="text-right font-medium">$105,000.00</td>
+                      <TableCell className="py-2">Net Total</TableCell>
+                      <TableCell className="text-right font-medium">$40,000.00</TableCell>
+                      <TableCell className="text-right font-medium">$105,000.00</TableCell>
                     </tr>
                   </tbody>
                 </table>
@@ -242,51 +244,53 @@ function BalancesPageContent() {
                   timestamp={`Updated ${getCurrentTimestamp()}`} onRefresh={refreshData} 
                   className="mt-4"
                 />
-              </div>
-            </Card>
+                </div>
+              </Card>
+            </div>
 
             {/* Cashflow Summary */}
-            <Card className="p-6">
+            <div>
               <h3 className="text-lg font-medium mb-4">Cashflow summary</h3>
-              <div className="overflow-x-auto">
+              <Card className="p-6">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2 text-sm font-medium text-muted-foreground">Type</th>
-                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Year to Date</th>
-                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Rolling 12 Months</th>
+                    <tr>
+                      <TableHead className="text-left py-2">Type</TableHead>
+                      <TableHead className="text-right py-2">Year to Date</TableHead>
+                      <TableHead className="text-right py-2">Rolling 12 Months</TableHead>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b">
-                      <td className="py-2">Deposits</td>
-                      <td className="text-right font-medium">$50,000.00</td>
-                      <td className="text-right font-medium">$75,000.00</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Deposits</TableCell>
+                      <TableCell className="text-right font-medium border-b">$50,000.00</TableCell>
+                      <TableCell className="text-right font-medium border-b">$75,000.00</TableCell>
                     </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Withdrawals</td>
-                      <td className="text-right font-medium">-$15,000.00</td>
-                      <td className="text-right">-$25,000.00</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Withdrawals</TableCell>
+                      <TableCell className="text-right font-medium border-b">-$15,000.00</TableCell>
+                      <TableCell className="text-right border-b">-$25,000.00</TableCell>
                     </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Interest</td>
-                      <td className="text-right">$1,200.00</td>
-                      <td className="text-right">$2,400.00</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Interest</TableCell>
+                      <TableCell className="text-right border-b">$1,200.00</TableCell>
+                      <TableCell className="text-right border-b">$2,400.00</TableCell>
                     </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Dividends</td>
-                      <td className="text-right">$3,500.00</td>
-                      <td className="text-right">$7,000.00</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Dividends</TableCell>
+                      <TableCell className="text-right border-b">$3,500.00</TableCell>
+                      <TableCell className="text-right border-b">$7,000.00</TableCell>
                     </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Other Income/Expense</td>
-                      <td className="text-right">$500.00</td>
-                      <td className="text-right">$800.00</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Other Income/Expense</TableCell>
+                      <TableCell className="text-right border-b">$500.00</TableCell>
+                      <TableCell className="text-right border-b">$800.00</TableCell>
                     </tr>
                     <tr className="font-semibold">
-                      <td className="py-2">Net Total</td>
-                      <td className="text-right">$39,200.00</td>
-                      <td className="text-right">$58,600.00</td>
+                      <TableCell className="py-2">Net Total</TableCell>
+                      <TableCell className="text-right">$39,200.00</TableCell>
+                      <TableCell className="text-right">$58,600.00</TableCell>
                     </tr>
                   </tbody>
                 </table>
@@ -294,47 +298,49 @@ function BalancesPageContent() {
                   timestamp={`Updated ${getCurrentTimestamp()}`} onRefresh={refreshData} 
                   className="mt-4"
                 />
-              </div>
-            </Card>
+                </div>
+              </Card>
+            </div>
 
 
             {/* Total Account Value History */}
-            <Card className="p-6">
+            <div>
               <h3 className="text-lg font-medium mb-4">Total account value history</h3>
-              <div className="overflow-x-auto">
+              <Card className="p-6">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2 text-sm font-medium text-muted-foreground">Quarter</th>
-                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Total account value</th>
-                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">QoQ</th>
+                    <tr>
+                      <TableHead className="text-left py-2">Quarter</TableHead>
+                      <TableHead className="text-right py-2">Total account value</TableHead>
+                      <TableHead className="text-right py-2">QoQ</TableHead>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b">
-                      <td className="py-2">Q1 2025 (3/31/2025)</td>
-                      <td className="text-right">$158,000</td>
-                      <td className="text-right text-green-600">+5.3%</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Q4 2024 (12/31/2024)</td>
-                      <td className="text-right">$150,000</td>
-                      <td className="text-right text-green-600">+3.4%</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Q3 2024 (9/30/2024)</td>
-                      <td className="text-right">$145,000</td>
-                      <td className="text-right text-green-600">+3.6%</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Q2 2024 (6/30/2024)</td>
-                      <td className="text-right">$140,000</td>
-                      <td className="text-right text-green-600">+3.7%</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Q1 2025 (3/31/2025)</TableCell>
+                      <TableCell className="text-right border-b">$158,000</TableCell>
+                      <TableCell className="text-right text-green-600 border-b">+5.3%</TableCell>
                     </tr>
                     <tr>
-                      <td className="py-2">Q1 2024 (3/31/2024)</td>
-                      <td className="text-right">$135,000</td>
-                      <td className="text-right text-green-600">+3.7%</td>
+                      <TableCell className="py-2 border-b">Q4 2024 (12/31/2024)</TableCell>
+                      <TableCell className="text-right border-b">$150,000</TableCell>
+                      <TableCell className="text-right text-green-600 border-b">+3.4%</TableCell>
+                    </tr>
+                    <tr>
+                      <TableCell className="py-2 border-b">Q3 2024 (9/30/2024)</TableCell>
+                      <TableCell className="text-right border-b">$145,000</TableCell>
+                      <TableCell className="text-right text-green-600 border-b">+3.6%</TableCell>
+                    </tr>
+                    <tr>
+                      <TableCell className="py-2 border-b">Q2 2024 (6/30/2024)</TableCell>
+                      <TableCell className="text-right border-b">$140,000</TableCell>
+                      <TableCell className="text-right text-green-600 border-b">+3.7%</TableCell>
+                    </tr>
+                    <tr>
+                      <TableCell className="py-2">Q1 2024 (3/31/2024)</TableCell>
+                      <TableCell className="text-right">$135,000</TableCell>
+                      <TableCell className="text-right text-green-600">+3.7%</TableCell>
                     </tr>
                   </tbody>
                 </table>
@@ -342,46 +348,48 @@ function BalancesPageContent() {
                   timestamp={`Updated ${getCurrentTimestamp()}`} onRefresh={refreshData} 
                   className="mt-4"
                 />
-              </div>
-            </Card>
+                </div>
+              </Card>
+            </div>
 
             {/* Interest */}
-            <Card className="p-6">
+            <div>
               <h3 className="text-lg font-medium mb-4">Interest</h3>
-              <div className="overflow-x-auto">
+              <Card className="p-6">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2 text-sm font-medium text-muted-foreground">Type</th>
-                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Credit interest</th>
-                      <th className="text-right py-2 text-sm font-medium text-muted-foreground">Debit interest</th>
+                    <tr>
+                      <TableHead className="text-left py-2">Type</TableHead>
+                      <TableHead className="text-right py-2">Credit interest</TableHead>
+                      <TableHead className="text-right py-2">Debit interest</TableHead>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b">
-                      <td className="py-2">Rate Schedule</td>
-                      <td className="text-right">FRM</td>
-                      <td className="text-right">FRG</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Rate</td>
-                      <td className="text-right">3%</td>
-                      <td className="text-right">9%</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Daily Balance</td>
-                      <td className="text-right">$4,728,401.13</td>
-                      <td className="text-right">$5,190,704.00</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-2">Daily Interest</td>
-                      <td className="text-right">$388.64</td>
-                      <td className="text-right">$1,279.90</td>
+                    <tr>
+                      <TableCell className="py-2 border-b">Rate Schedule</TableCell>
+                      <TableCell className="text-right border-b">FRM</TableCell>
+                      <TableCell className="text-right border-b">FRG</TableCell>
                     </tr>
                     <tr>
-                      <td className="py-2">MTD Interest</td>
-                      <td className="text-right">$2,046.75</td>
-                      <td className="text-right">$2,781.96</td>
+                      <TableCell className="py-2 border-b">Rate</TableCell>
+                      <TableCell className="text-right border-b">3%</TableCell>
+                      <TableCell className="text-right border-b">9%</TableCell>
+                    </tr>
+                    <tr>
+                      <TableCell className="py-2 border-b">Daily Balance</TableCell>
+                      <TableCell className="text-right border-b">$4,728,401.13</TableCell>
+                      <TableCell className="text-right border-b">$5,190,704.00</TableCell>
+                    </tr>
+                    <tr>
+                      <TableCell className="py-2 border-b">Daily Interest</TableCell>
+                      <TableCell className="text-right border-b">$388.64</TableCell>
+                      <TableCell className="text-right border-b">$1,279.90</TableCell>
+                    </tr>
+                    <tr>
+                      <TableCell className="py-2">MTD Interest</TableCell>
+                      <TableCell className="text-right">$2,046.75</TableCell>
+                      <TableCell className="text-right">$2,781.96</TableCell>
                     </tr>
                   </tbody>
                 </table>
@@ -389,8 +397,9 @@ function BalancesPageContent() {
                   timestamp={`Updated ${getCurrentTimestamp()}`} onRefresh={refreshData} 
                   className="mt-4"
                 />
-              </div>
-            </Card>
+                </div>
+              </Card>
+            </div>
           </div>
 
           {/* Right Column - 1/3 width */}

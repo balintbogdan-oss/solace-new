@@ -560,7 +560,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                 // Render header cell based on column type
                 if (columnId === 'actions') {
                   return (
-                    <th key={columnId} className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-30 bg-muted px-4 text-left font-medium w-16">
+                    <th key={columnId} className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-50 bg-muted px-4 text-left font-medium w-16 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                       Actions
                     </th>
                   );
@@ -570,7 +570,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   return (
                     <th
                       key={columnId}
-                      className="px-4 py-2 dark:text-white border-b border-r cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap sticky z-30 bg-muted text-left font-medium"
+                      className="px-4 py-2 dark:text-white border-b border-r cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap sticky z-50 bg-muted text-left font-medium shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]"
                       style={{ left: '64px' }}
                     >
                       <button className="flex items-center gap-1 bg-transparent w-full font-medium" onClick={() => handleSort('symbol')}>
@@ -618,9 +618,9 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
             </tr>
           </thead>
           <tbody>
-            {processedHoldings.map((row) => (
+            {processedHoldings.map((row, index) => (
               <tr
-                key={row.security.cusip}
+                key={`${row.symbol}-${row.security.cusip}-${index}`}
                 className={'hover:bg-muted dark:hover:bg-accent border-b border cursor-pointer relative group bg-card'}
               >
                 {visibleColumns.map((columnId) => {
@@ -630,7 +630,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   // Render cell based on column type
                   if (columnId === 'actions') {
                     return (
-                      <TableCell key={columnId} className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-30 border-b px-4 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 w-16">
+                      <TableCell key={columnId} className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-50 border-b px-4 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 w-16 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="icon" aria-label="Actions">
@@ -660,7 +660,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                     return (
                       <TableCell
                         key={columnId}
-                        className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-30 border-b border-r bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30"
+                        className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-50 border-b border-r bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]"
                         style={{ left: '64px' }}
                         onClick={() => onStockClick?.(row.symbol)}
                       >
@@ -741,7 +741,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   return (
                     <TableCell
                       key={columnId}
-                      className={`px-4 py-2 dark:text-white border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 ${columnId === 'description' ? 'max-w-[280px] overflow-hidden' : 'whitespace-nowrap'}`}
+                      className={`px-4 py-2 dark:text-white border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 relative z-0 ${columnId === 'description' ? 'max-w-[280px] overflow-hidden' : 'whitespace-nowrap'}`}
                     >
                       {cellContent}
                     </TableCell>

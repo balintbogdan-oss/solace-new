@@ -21,13 +21,12 @@ import {
   ArrowDown,
   Search,
   ChevronsUpDown,
-  ChevronUp,
-  ChevronDown,
   SquarePercent,
   BarChart3,
   CalendarDays
 } from 'lucide-react';
 import { Activity } from '@/types/account';
+import { TableCell } from '@/components/ui/table';
 
 const activityTypes = [
   'All',
@@ -498,19 +497,16 @@ function ActivityPageContent() {
     const isActive = sortField === field;
     return (
       <th 
-        className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[80px] cursor-pointer hover:bg-muted/50 transition-colors"
-        onClick={() => handleSort(field)}
+        className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left"
       >
-        <div className="flex items-center gap-1">
-          {label}
-          {isActive && sortDirection === 'asc' ? (
-            <ChevronUp className="h-4 w-4 text-foreground" />
-          ) : isActive && sortDirection === 'desc' ? (
-            <ChevronDown className="h-4 w-4 text-foreground" />
+        <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort(field)}>
+          <span>{label}</span>
+          {isActive ? (
+            sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
           ) : (
-            <ChevronsUpDown className="h-4 w-4 opacity-50" />
+            <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
           )}
-        </div>
+        </button>
       </th>
     );
   };
@@ -774,9 +770,9 @@ function ActivityPageContent() {
           {/* Activity Table */}
           <div className="rounded-lg min-h-[400px]">
             <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
+            <table className="w-full text-sm text-left border-separate border-spacing-0 rounded-md">
+              <thead className="sticky top-0 border-t bg-muted text-muted-foreground z-10">
+                <tr>
                   {renderSortHeader('date', 'Date')}
                   {renderSortHeader('type', 'Activity type')}
                   {renderSortHeader('action', 'Action')}
@@ -794,67 +790,67 @@ function ActivityPageContent() {
               <tbody>
                 {processedActivities.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={12} className="text-center py-8 text-muted-foreground">
                       No activities found
-                    </td>
+                    </TableCell>
                   </tr>
                 ) : (
                   processedActivities.map((activity: Activity) => (
-                    <tr key={activity.id} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4 text-sm text-foreground">
+                    <tr key={activity.id} className="hover:bg-muted dark:hover:bg-accent cursor-pointer relative group bg-card">
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {formatDate(activity.date)}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {formatActivityType(activity.type)}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {activity.action || '-'}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         <div>
-                          <div className="font-medium">{activity.symbol || '-'}</div>
+                          <div className="font-medium text-foreground">{activity.symbol || '-'}</div>
                           <div className="text-xs text-muted-foreground">{activity.cusip || '-'}</div>
                         </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground max-w-[200px] truncate">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white max-w-[200px] truncate border-b">
                         {activity.description}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {activity.quantity ? activity.quantity.toLocaleString() : '-'}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {activity.buyPrice ? formatAmount(activity.buyPrice) : '-'}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {formatAmount(activity.amount)}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {activity.settleDate ? formatDate(activity.settleDate) : '-'}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {activity.transactionType || '-'}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {activity.accountType || '-'}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         {activity.tradeNumber || '-'}
-                      </td>
+                      </TableCell>
                     </tr>
                   ))
                 )}
               </tbody>
               <tfoot>
                 <tr className="border-t font-medium">
-                  <td colSpan={8} className="py-3 px-4 text-sm text-foreground">
+                  <TableCell colSpan={8} className="py-3 px-4 text-sm text-foreground">
                     Net All Activity
-                  </td>
-                  <td className="py-3 px-4 text-sm text-foreground">
+                  </TableCell>
+                  <TableCell className="py-3 px-4 text-sm text-foreground">
                     {formatAmount(netTotal)}
-                  </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  </TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
                 </tr>
               </tfoot>
             </table>

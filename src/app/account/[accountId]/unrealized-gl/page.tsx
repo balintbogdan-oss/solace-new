@@ -27,14 +27,7 @@ import {
   TooltipTrigger 
 } from '@/components/ui/tooltip';
 import { PageHeading } from '@/components/layout/PageHeading';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table';
+import { TableCell } from '@/components/ui/table';
 // Import kept solely for type reference in comments; avoid unused var error
 // import type { UnrealizedPosition } from '@/types/account';
 
@@ -211,32 +204,29 @@ export default function UnrealizedGLPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <h3 className="text-sm font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Portfolio market value</div>
-              <h3 className="text-sm font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.portfolioMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3>${summaryData.portfolioMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Unrealized long term G/L</div>
-              <h3 className={`text-sm font-medium ${summaryData.unrealizedLongTerm >= 0 ? 'text-positive' : 'text-negative'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3>
                 {summaryData.unrealizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.unrealizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Unrealized short term G/L</div>
-              <h3 className={`text-sm font-medium ${summaryData.unrealizedShortTerm >= 0 ? 'text-positive' : 'text-negative'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3>
                 {summaryData.unrealizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.unrealizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total unrealized G/L</div>
-              <h3 className={`text-sm font-medium ${summaryData.totalUnrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`} style={{ fontFamily: 'var(--font-display)' }}>
-                {summaryData.totalUnrealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalUnrealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              <h3>
+                {summaryData.totalUnrealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalUnrealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })} ({summaryData.totalUnrealizedGL >= 0 ? '+' : ''}{summaryData.totalUnrealizedGLPercent.toFixed(2)}%)
               </h3>
-              <div className={`text-sm ${summaryData.totalUnrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`}>
-                {summaryData.totalUnrealizedGL >= 0 ? '+' : ''}{summaryData.totalUnrealizedGLPercent.toFixed(2)}%
-              </div>
             </div>
           </div>
           <LastUpdated 
@@ -259,216 +249,187 @@ export default function UnrealizedGLPage() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
-            <Table className="w-full text-sm min-w-[1600px]">
-              <TableHeader>
-                <TableRow className="border-b">
-                  <TableHead 
-                    className="text-left px-6 py-3 whitespace-nowrap border-r w-40 cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('lastUpdated')}
-                  >
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm">Date</span>
+          <div className="overflow-x-auto bg-card rounded-md shadow-sm">
+            <table className="w-full text-sm text-left border-separate border-spacing-0 rounded-md min-w-[1600px]">
+              <thead className="sticky top-0 border-t border-b bg-muted text-muted-foreground z-10">
+                <tr>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left w-40">
+                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('lastUpdated')}>
+                      <span>Date</span>
                       {sortColumn === 'lastUpdated' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('quantity')}
-                  >
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-sm">Quantity</span>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('quantity')}>
+                      <span>Quantity</span>
                       {sortColumn === 'quantity' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-left px-6 py-3 border-r max-w-[200px] cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('symbol')}
-                  >
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm">Symbol/CUSIP</span>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left max-w-[200px]">
+                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('symbol')}>
+                      <span className="truncate">Symbol/CUSIP</span>
                       {sortColumn === 'symbol' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-left px-6 py-3 border-r max-w-[200px] cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('description')}
-                  >
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm">Description</span>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left max-w-[200px]">
+                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('description')}>
+                      <span className="truncate">Description</span>
                       {sortColumn === 'description' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-center px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('longShort')}
-                  >
-                    <div className="flex items-center justify-center gap-1">
-                      <span className="text-sm">L/S</span>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-center">
+                    <button className="flex items-center justify-center gap-1 w-full font-medium" onClick={() => handleSort('longShort')}>
+                      <span>L/S</span>
                       {sortColumn === 'longShort' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('unrealizedGL')}
-                  >
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-sm">Total Unrealized G/L</span>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('unrealizedGL')}>
+                      <span>Total Unrealized G/L</span>
                       {sortColumn === 'unrealizedGL' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('unrealizedGLPercent')}
-                  >
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-sm">Total Unrealized G/L %</span>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('unrealizedGLPercent')}>
+                      <span>Total Unrealized G/L %</span>
                       {sortColumn === 'unrealizedGLPercent' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('avgPrice')}
-                  >
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-sm">Buy Price</span>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('avgPrice')}>
+                      <span>Buy Price</span>
                       {sortColumn === 'avgPrice' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('investedValue')}
-                  >
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-sm">Invested Value</span>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('investedValue')}>
+                      <span>Invested Value</span>
                       {sortColumn === 'investedValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-right px-6 py-3 whitespace-nowrap border-r cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('currentPrice')}
-                  >
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-sm">LTP</span>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="w-3 h-3 flex-shrink-0" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Values as of the end of the prior business day.</p>
-                        </TooltipContent>
-                      </Tooltip>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('currentPrice')}>
+                      <span>LTP</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="ml-1 h-3 w-3 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Values as of the end of the prior business day.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       {sortColumn === 'currentPrice' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="text-right px-6 py-3 whitespace-nowrap cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('marketValue')}
-                  >
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-sm">Market Value</span>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="w-3 h-3 flex-shrink-0" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Values as of the end of the prior business day.</p>
-                        </TooltipContent>
-                      </Tooltip>
+                    </button>
+                  </th>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('marketValue')}>
+                      <span>Market Value</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="ml-1 h-3 w-3 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Values as of the end of the prior business day.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       {sortColumn === 'marketValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
-                    </div>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredPositions.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={11} className="py-8 text-muted-foreground">
+                  <tr>
+                    <TableCell colSpan={11} className="py-8 text-muted-foreground text-center">
                       No unrealized positions found
                     </TableCell>
-                  </TableRow>
+                  </tr>
                 ) : (
-                  filteredPositions.map((position, index) => (
-                    <TableRow key={position.id} className={`border-b ${index % 2 === 1 ? 'bg-card' : 'bg-card'}`}>
-                      <TableCell className="px-6 py-3 text-foreground bg-card w-40">{new Date(position.lastUpdated).toISOString().split('T')[0]}</TableCell>
-                      <TableCell className="px-6 py-3 text-foreground bg-card">{position.quantity.toLocaleString()}</TableCell>
-                      <TableCell className="px-6 py-3 bg-card">
+                  filteredPositions.map((position) => (
+                    <tr key={position.id} className="hover:bg-muted dark:hover:bg-accent cursor-pointer relative group bg-card">
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap w-40 border-b">{new Date(position.lastUpdated).toISOString().split('T')[0]}</TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">{position.quantity.toLocaleString()}</TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         <div>
                           <div className="font-medium text-foreground">{position.symbol}</div>
                           <div className="text-xs text-muted-foreground">{position.cusip}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="px-6 py-3 text-foreground max-w-[200px] truncate bg-card">{position.description}</TableCell>
-                      <TableCell className="px-6 py-3 text-foreground bg-card">
+                      <TableCell className="px-4 py-2 dark:text-white max-w-[200px] truncate border-b">{position.description}</TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-center border-b">
                         {position.longShort}
                       </TableCell>
-                      <TableCell className={`px-6 py-3 font-medium bg-card ${position.unrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`}>
+                      <TableCell className={`px-4 py-2 dark:text-white whitespace-nowrap text-right font-medium border-b ${position.unrealizedGL >= 0 ? 'text-positive' : 'text-negative'}`}>
                         {position.unrealizedGL >= 0 ? '+' : '-'}${Math.abs(position.unrealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </TableCell>
-                      <TableCell className={`px-6 py-3 font-medium bg-card ${position.unrealizedGLPercent >= 0 ? 'text-positive' : 'text-negative'}`}>
+                      <TableCell className={`px-4 py-2 dark:text-white whitespace-nowrap text-right font-medium border-b ${position.unrealizedGLPercent >= 0 ? 'text-positive' : 'text-negative'}`}>
                         {position.unrealizedGLPercent >= 0 ? '+' : '-'}{Math.abs(position.unrealizedGLPercent).toFixed(2)}%
                       </TableCell>
-                      <TableCell className="px-6 py-3 text-foreground bg-card">
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         ${position.avgPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </TableCell>
-                      <TableCell className="px-6 py-3 text-foreground bg-card">
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         ${position.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </TableCell>
-                      <TableCell className="px-6 py-3 text-foreground bg-card">
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         ${position.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </TableCell>
-                      <TableCell className="px-6 py-3 text-foreground bg-card">
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         ${position.marketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </TableCell>
-                    </TableRow>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </Card>
         </div>

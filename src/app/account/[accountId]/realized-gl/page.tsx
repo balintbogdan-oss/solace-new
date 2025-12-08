@@ -28,6 +28,7 @@ import { LastUpdated } from '@/components/ui/last-updated';
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { RealizedTrade } from '@/types/account';
 import { PageHeading } from '@/components/layout/PageHeading';
+import { TableCell } from '@/components/ui/table';
 
 // Local extension type to support additional display-only fields used by this page
 type RealizedTradeExt = RealizedTrade & { adjInvestedValue: number };
@@ -299,32 +300,29 @@ export default function RealizedGLPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total realized G/L</div>
-              <h3 className={`text-sm font-medium ${summaryData.totalRealizedGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`} style={{ fontFamily: 'var(--font-display)' }}>
-                {summaryData.totalRealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalRealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              <h3>
+                {summaryData.totalRealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalRealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })} ({summaryData.totalRealizedGL >= 0 ? '+' : ''}{summaryData.totalGLPercent.toFixed(2)}%)
               </h3>
-              <div className={`text-sm ${summaryData.totalRealizedGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
-                {summaryData.totalRealizedGL >= 0 ? '+' : ''}{summaryData.totalGLPercent.toFixed(2)}%
-              </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized long term G/L</div>
-              <h3 className={`text-sm font-medium ${summaryData.realizedLongTerm >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3>
                 {summaryData.realizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized short term G/L</div>
-              <h3 className={`text-sm font-medium ${summaryData.realizedShortTerm >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`} style={{ fontFamily: 'var(--font-display)' }}>
+              <h3>
                 {summaryData.realizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <h3 className="text-sm font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total sell value</div>
-              <h3 className="text-sm font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
           </div>
           <LastUpdated 
@@ -369,133 +367,137 @@ export default function RealizedGLPage() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[1500px]">
-              <thead>
-                <tr className="border-b">
-                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('symbol')}>
-                      <span className="text-xs">Symbol/CUSIP</span>
+          <div className="overflow-x-auto bg-card rounded-md shadow-sm">
+            <table className="w-full text-sm text-left border-separate border-spacing-0 rounded-md min-w-[1500px]">
+              <thead className="sticky top-0 border-t border-b bg-muted text-muted-foreground z-10">
+                <tr>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left">
+                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('symbol')}>
+                      <span>Symbol/CUSIP</span>
                       {sortColumn === 'symbol' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/50 border-r max-w-[200px] ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('description')}>
-                      <span className="text-xs">Description</span>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left max-w-[200px]">
+                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('description')}>
+                      <span className="truncate">Description</span>
                       {sortColumn === 'description' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'openDate' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('openDate')}>
-                      <span className="text-xs">Open date</span>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="w-3 h-3 flex-shrink-0" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>If you have multiple tax lots, Open date represents the first purchased date.</p>
-                        </TooltipContent>
-                      </Tooltip>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left">
+                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('openDate')}>
+                      <span>Open date</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="ml-1 h-3 w-3 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>If you have multiple tax lots, Open date represents the first purchased date.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       {sortColumn === 'openDate' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'closeDate' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('closeDate')}>
-                      <span className="text-xs">Close date</span>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="w-3 h-3 flex-shrink-0" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>If you have multiple tax lots, Close date represents the last closed date.</p>
-                        </TooltipContent>
-                      </Tooltip>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left">
+                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('closeDate')}>
+                      <span>Close date</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="ml-1 h-3 w-3 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>If you have multiple tax lots, Close date represents the last closed date.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       {sortColumn === 'closeDate' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'realizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('realizedGL')}>
-                      <span className="text-xs">Total realized G/L</span>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('realizedGL')}>
+                      <span>Total realized G/L</span>
                       {sortColumn === 'realizedGL' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'realizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('realizedGLPercent')}>
-                      <span className="text-xs">Total realized G/L %</span>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('realizedGLPercent')}>
+                      <span>Total realized G/L %</span>
                       {sortColumn === 'realizedGLPercent' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'avgBuyPrice' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('avgBuyPrice')}>
-                      <span className="text-xs">Avg Buy Price</span>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('avgBuyPrice')}>
+                      <span>Avg Buy Price</span>
                       {sortColumn === 'avgBuyPrice' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'adjInvestedValue' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('adjInvestedValue')}>
-                      <span className="text-xs">Adj. Invested Value</span>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('adjInvestedValue')}>
+                      <span>Adj. Invested Value</span>
                       {sortColumn === 'adjInvestedValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('quantity')}>
-                      <span className="text-xs">Quantity</span>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('quantity')}>
+                      <span>Quantity</span>
                       {sortColumn === 'quantity' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'investedValue' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('investedValue')}>
-                      <span className="text-xs">Invested value</span>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('investedValue')}>
+                      <span>Invested value</span>
                       {sortColumn === 'investedValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
-                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 ${sortColumn === 'totalSellValue' ? 'border-b-2 border-b-primary' : ''}`}>
-                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('totalSellValue')}>
-                      <span className="text-xs">Total sell value</span>
+                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
+                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('totalSellValue')}>
+                      <span>Total sell value</span>
                       {sortColumn === 'totalSellValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
                       ) : (
-                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   </th>
@@ -504,43 +506,43 @@ export default function RealizedGLPage() {
               <tbody>
                 {filteredTrades.length === 0 ? (
                   <tr>
-                    <td colSpan={11} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                       No realized trades found
-                    </td>
+                    </TableCell>
                   </tr>
                 ) : (
-                  filteredTrades.map((trade, index) => (
-                    <tr key={trade.id} className={`border-b ${index % 2 === 1 ? 'bg-card' : ''}`}>
-                      <td className="px-6 py-3">
+                  filteredTrades.map((trade) => (
+                    <tr key={trade.id} className="hover:bg-muted dark:hover:bg-accent cursor-pointer relative group bg-card">
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
                         <div>
                           <div className="font-medium text-foreground">{trade.symbol}</div>
                           <div className="text-xs text-muted-foreground">{trade.cusip}</div>
                         </div>
-                      </td>
-                      <td className="px-6 py-3 text-foreground max-w-[200px] truncate">{trade.description}</td>
-                      <td className="px-6 py-3 text-foreground">{trade.openDate}</td>
-                      <td className="px-6 py-3 text-foreground">{trade.closeDate}</td>
-                      <td className={`px-6 py-3 text-right font-medium ${trade.realizedGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white max-w-[200px] truncate border-b">{trade.description}</TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">{trade.openDate}</TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">{trade.closeDate}</TableCell>
+                      <TableCell className={`px-4 py-2 dark:text-white whitespace-nowrap text-right font-medium border-b ${trade.realizedGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
                         {trade.realizedGL >= 0 ? '+' : '-'}${Math.abs(trade.realizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className={`px-6 py-3 text-right font-medium ${trade.realizedGLPercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                      </TableCell>
+                      <TableCell className={`px-4 py-2 dark:text-white whitespace-nowrap text-right font-medium border-b ${trade.realizedGLPercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
                         {trade.realizedGLPercent >= 0 ? '+' : '-'}{Math.abs(trade.realizedGLPercent).toFixed(2)}%
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         ${trade.avgBuyPrice.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         ${trade.adjInvestedValue.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         {trade.quantity}
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         ${trade.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-6 py-3 text-right text-foreground">
+                      </TableCell>
+                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
                         ${trade.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
+                      </TableCell>
                     </tr>
                   ))
                 )}
