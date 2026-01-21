@@ -25,3 +25,4 @@ ADMIN_PASSWORD=your_admin_password
 - `npm run build` - Build for production
 - `npm run lint` - Run linting
 - `npm start` - Start production server
+# Solace-Cursor
