@@ -58,6 +58,6 @@
     "typescript": "^5"
   },
   "overrides": {
-    "react-beautiful-dnd": "npm:noop-package@1.0.0"
+    "react-beautiful-dnd": "npm:@dnd-kit/core@6.3.1"
   }
 }
