@@ -5,10 +5,10 @@ import { PageHeader } from '@/components/layout/PageHeader'
 // import { PageTitle } from '@/components/layout/PageTitle'
 import { NavigationProvider } from '@/contexts/NavigationContext'
 import { AccountDataProvider } from '@/contexts/AccountDataContext'
-import { ReactNode } from 'react'
+import { ReactNode, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
-export default function TradeLayout({
+function TradeLayoutContent({
   children,
 }: {
   children: ReactNode;
@@ -33,5 +33,23 @@ export default function TradeLayout({
         </div>
       </AccountDataProvider>
     </NavigationProvider>
+  )
+}
+
+export default function TradeLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-1 min-h-screen pt-0 bg-white dark:bg-black">
+        <main className="flex-1 min-w-0 px-6 py-4">
+          {children}
+        </main>
+      </div>
+    }>
+      <TradeLayoutContent>{children}</TradeLayoutContent>
+    </Suspense>
   )
 } 
