@@ -1,0 +1,1325 @@
+{
+  "accounts": [
+    {
+      "accountId": "1PB28473",
+      "accountName": "MICHAEL JOHNSON WEDBUSH SEC CTO",
+      "accountType": "joint_jtwros",
+      "clientId": "client-1",
+      "householdId": "household-1",
+      "isPrimary": true,
+      "balances": {
+        "cash": 52347.18,
+        "margin": 0,
+        "buyingPower": 52347.18,
+        "totalValue": 4237892.45,
+        "investedValue": 4185545.27,
+        "realizedGL": 52347.18,
+        "lastUpdated": "2025-01-08T08:05:00Z"
+      },
+      "holdings": [
+        {
+          "symbol": "AAPL",
+          "quantity": 200,
+          "avgPrice": 150,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "quantity": 150,
+          "avgPrice": 380,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "quantity": 100,
+          "avgPrice": 140,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "quantity": 80,
+          "avgPrice": 150,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "quantity": 200,
+          "avgPrice": 250,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "quantity": 120,
+          "avgPrice": 320,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "quantity": 50,
+          "avgPrice": 500,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "quantity": 300,
+          "avgPrice": 150,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "quantity": 200,
+          "avgPrice": 250,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "quantity": 150,
+          "avgPrice": 160,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "quantity": 250,
+          "avgPrice": 160,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "quantity": 180,
+          "avgPrice": 150,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MA",
+          "quantity": 100,
+          "avgPrice": 400,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "DIS",
+          "quantity": 200,
+          "avgPrice": 100,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NFLX",
+          "quantity": 150,
+          "avgPrice": 450,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "securities": [
+        {
+          "symbol": "AAPL",
+          "cusip": "037833100",
+          "description": "Apple Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "cusip": "594918104",
+          "description": "Microsoft Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "cusip": "02079K305",
+          "description": "Alphabet Inc. Class A",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "cusip": "023135106",
+          "description": "Amazon.com Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "cusip": "88160R101",
+          "description": "Tesla Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "cusip": "30303M102",
+          "description": "Meta Platforms Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "cusip": "67066G104",
+          "description": "NVIDIA Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "cusip": "46625H100",
+          "description": "JPMorgan Chase & Co.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "cusip": "92826C839",
+          "description": "Visa Inc.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "cusip": "478160104",
+          "description": "Johnson & Johnson",
+          "sector": "Healthcare",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "cusip": "931142103",
+          "description": "Walmart Inc.",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "cusip": "742718109",
+          "description": "The Procter & Gamble Company",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MA",
+          "cusip": "57636Q104",
+          "description": "Mastercard Incorporated",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "DIS",
+          "cusip": "254687106",
+          "description": "The Walt Disney Company",
+          "sector": "Communication Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NFLX",
+          "cusip": "64110L106",
+          "description": "Netflix Inc.",
+          "sector": "Communication Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "trades": [],
+      "activities": [],
+      "realizedGL": [],
+      "commissions": [],
+      "lastUpdated": "2025-01-08T08:05:00Z"
+    },
+    {
+      "accountId": "1PB29147",
+      "accountName": "Michael Johnson & Alexa Johnson JTWROS",
+      "accountType": "joint_jtwros",
+      "clientId": "client-1",
+      "householdId": "household-1",
+      "isPrimary": false,
+      "balances": {
+        "cash": 27391.42,
+        "margin": 0,
+        "buyingPower": 27391.42,
+        "totalValue": 2145237.89,
+        "investedValue": 2117846.47,
+        "realizedGL": 27391.42,
+        "lastUpdated": "2025-01-08T08:05:00Z"
+      },
+      "holdings": [
+        {
+          "symbol": "AAPL",
+          "quantity": 120,
+          "avgPrice": 170,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "quantity": 80,
+          "avgPrice": 385,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "quantity": 60,
+          "avgPrice": 142,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "quantity": 50,
+          "avgPrice": 152,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "quantity": 100,
+          "avgPrice": 255,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "quantity": 70,
+          "avgPrice": 325,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "quantity": 30,
+          "avgPrice": 510,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "quantity": 150,
+          "avgPrice": 152,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "quantity": 120,
+          "avgPrice": 252,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "quantity": 100,
+          "avgPrice": 162,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "quantity": 140,
+          "avgPrice": 162,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "quantity": 110,
+          "avgPrice": 152,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "securities": [
+        {
+          "symbol": "AAPL",
+          "cusip": "037833100",
+          "description": "Apple Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "cusip": "594918104",
+          "description": "Microsoft Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "cusip": "02079K305",
+          "description": "Alphabet Inc. Class A",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "cusip": "023135106",
+          "description": "Amazon.com Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "cusip": "88160R101",
+          "description": "Tesla Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "cusip": "30303M102",
+          "description": "Meta Platforms Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "cusip": "67066G104",
+          "description": "NVIDIA Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "cusip": "46625H100",
+          "description": "JPMorgan Chase & Co.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "cusip": "92826C839",
+          "description": "Visa Inc.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "cusip": "478160104",
+          "description": "Johnson & Johnson",
+          "sector": "Healthcare",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "cusip": "931142103",
+          "description": "Walmart Inc.",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "cusip": "742718109",
+          "description": "The Procter & Gamble Company",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "trades": [],
+      "activities": [],
+      "realizedGL": [],
+      "commissions": [],
+      "lastUpdated": "2025-01-08T08:05:00Z"
+    },
+    {
+      "accountId": "1PB30682",
+      "accountName": "Alexa WEDBUSH SEC CTDN",
+      "accountType": "trust",
+      "clientId": "client-1",
+      "householdId": "household-1",
+      "isPrimary": false,
+      "balances": {
+        "cash": 102847.56,
+        "margin": 0,
+        "buyingPower": 102847.56,
+        "totalValue": 8567892.13,
+        "investedValue": 8465044.57,
+        "realizedGL": 102847.56,
+        "lastUpdated": "2025-01-08T08:05:00Z"
+      },
+      "holdings": [
+        {
+          "symbol": "AAPL",
+          "quantity": 500,
+          "avgPrice": 175,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "quantity": 400,
+          "avgPrice": 390,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "quantity": 300,
+          "avgPrice": 145,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "quantity": 250,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "quantity": 400,
+          "avgPrice": 260,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "quantity": 350,
+          "avgPrice": 330,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "quantity": 200,
+          "avgPrice": 520,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "quantity": 600,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "quantity": 500,
+          "avgPrice": 255,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "quantity": 450,
+          "avgPrice": 165,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "quantity": 550,
+          "avgPrice": 165,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "quantity": 480,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MA",
+          "quantity": 350,
+          "avgPrice": 410,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "DIS",
+          "quantity": 500,
+          "avgPrice": 105,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NFLX",
+          "quantity": 400,
+          "avgPrice": 460,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "BAC",
+          "quantity": 800,
+          "avgPrice": 35,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "XOM",
+          "quantity": 600,
+          "avgPrice": 110,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CVX",
+          "quantity": 550,
+          "avgPrice": 150,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "HD",
+          "quantity": 300,
+          "avgPrice": 380,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "UNH",
+          "quantity": 200,
+          "avgPrice": 520,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "securities": [
+        {
+          "symbol": "AAPL",
+          "cusip": "037833100",
+          "description": "Apple Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "cusip": "594918104",
+          "description": "Microsoft Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "cusip": "02079K305",
+          "description": "Alphabet Inc. Class A",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "cusip": "023135106",
+          "description": "Amazon.com Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "cusip": "88160R101",
+          "description": "Tesla Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "cusip": "30303M102",
+          "description": "Meta Platforms Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "cusip": "67066G104",
+          "description": "NVIDIA Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "cusip": "46625H100",
+          "description": "JPMorgan Chase & Co.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "cusip": "92826C839",
+          "description": "Visa Inc.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "cusip": "478160104",
+          "description": "Johnson & Johnson",
+          "sector": "Healthcare",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "cusip": "931142103",
+          "description": "Walmart Inc.",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "cusip": "742718109",
+          "description": "The Procter & Gamble Company",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MA",
+          "cusip": "57636Q104",
+          "description": "Mastercard Incorporated",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "DIS",
+          "cusip": "254687106",
+          "description": "The Walt Disney Company",
+          "sector": "Communication Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NFLX",
+          "cusip": "64110L106",
+          "description": "Netflix Inc.",
+          "sector": "Communication Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "BAC",
+          "cusip": "060505104",
+          "description": "Bank of America Corp.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "XOM",
+          "cusip": "30231G102",
+          "description": "Exxon Mobil Corporation",
+          "sector": "Energy",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CVX",
+          "cusip": "166764100",
+          "description": "Chevron Corporation",
+          "sector": "Energy",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "HD",
+          "cusip": "437076102",
+          "description": "The Home Depot, Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "UNH",
+          "cusip": "91324P102",
+          "description": "UnitedHealth Group Inc.",
+          "sector": "Healthcare",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "trades": [],
+      "activities": [],
+      "realizedGL": [],
+      "commissions": [],
+      "lastUpdated": "2025-01-08T08:05:00Z"
+    },
+    {
+      "accountId": "1PB31956",
+      "accountName": "MICHAEL JOHNSON WEDBUSH SEC CT",
+      "accountType": "individual",
+      "clientId": "client-1",
+      "householdId": null,
+      "isPrimary": false,
+      "balances": {
+        "cash": 78923.45,
+        "margin": 0,
+        "buyingPower": 78923.45,
+        "totalValue": 2873456.78,
+        "investedValue": 2794533.33,
+        "realizedGL": 78923.45,
+        "lastUpdated": "2025-01-08T08:05:00Z"
+      },
+      "holdings": [
+        {
+          "symbol": "AAPL",
+          "quantity": 150,
+          "avgPrice": 175,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "quantity": 100,
+          "avgPrice": 390,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "quantity": 75,
+          "avgPrice": 145,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "quantity": 60,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "quantity": 150,
+          "avgPrice": 260,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "quantity": 90,
+          "avgPrice": 330,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "quantity": 40,
+          "avgPrice": 520,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "quantity": 200,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "quantity": 150,
+          "avgPrice": 255,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "quantity": 120,
+          "avgPrice": 165,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "quantity": 180,
+          "avgPrice": 165,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "quantity": 140,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MA",
+          "quantity": 80,
+          "avgPrice": 410,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "DIS",
+          "quantity": 150,
+          "avgPrice": 105,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NFLX",
+          "quantity": 120,
+          "avgPrice": 460,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "BAC",
+          "quantity": 250,
+          "avgPrice": 35,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "XOM",
+          "quantity": 180,
+          "avgPrice": 110,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CVX",
+          "quantity": 160,
+          "avgPrice": 150,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "securities": [
+        {
+          "symbol": "AAPL",
+          "cusip": "037833100",
+          "description": "Apple Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "cusip": "594918104",
+          "description": "Microsoft Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "cusip": "02079K305",
+          "description": "Alphabet Inc. Class A",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "cusip": "023135106",
+          "description": "Amazon.com Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "cusip": "88160R101",
+          "description": "Tesla Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "cusip": "30303M102",
+          "description": "Meta Platforms Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "cusip": "67066G104",
+          "description": "NVIDIA Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "cusip": "46625H100",
+          "description": "JPMorgan Chase & Co.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "cusip": "92826C839",
+          "description": "Visa Inc.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "cusip": "478160104",
+          "description": "Johnson & Johnson",
+          "sector": "Healthcare",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "cusip": "931142103",
+          "description": "Walmart Inc.",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "cusip": "742718109",
+          "description": "The Procter & Gamble Company",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MA",
+          "cusip": "57636Q104",
+          "description": "Mastercard Incorporated",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "DIS",
+          "cusip": "254687106",
+          "description": "The Walt Disney Company",
+          "sector": "Communication Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NFLX",
+          "cusip": "64110L106",
+          "description": "Netflix Inc.",
+          "sector": "Communication Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "BAC",
+          "cusip": "060505104",
+          "description": "Bank of America Corp.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "XOM",
+          "cusip": "30231G102",
+          "description": "Exxon Mobil Corporation",
+          "sector": "Energy",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CVX",
+          "cusip": "166764100",
+          "description": "Chevron Corporation",
+          "sector": "Energy",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "trades": [],
+      "activities": [],
+      "realizedGL": [],
+      "commissions": [],
+      "lastUpdated": "2025-01-08T08:05:00Z"
+    },
+    {
+      "accountId": "1PB32741",
+      "accountName": "Michael Johnson to Layne McHugh Decd IRA",
+      "accountType": "ira",
+      "clientId": "client-1",
+      "householdId": null,
+      "isPrimary": false,
+      "balances": {
+        "cash": 105234.67,
+        "margin": 0,
+        "buyingPower": 105234.67,
+        "totalValue": 7345678.90,
+        "investedValue": 7240444.23,
+        "realizedGL": 105234.67,
+        "lastUpdated": "2025-01-08T08:05:00Z"
+      },
+      "holdings": [
+        {
+          "symbol": "AAPL",
+          "quantity": 350,
+          "avgPrice": 175,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "quantity": 280,
+          "avgPrice": 390,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "quantity": 220,
+          "avgPrice": 145,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "quantity": 180,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "quantity": 300,
+          "avgPrice": 260,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "quantity": 250,
+          "avgPrice": 330,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "quantity": 150,
+          "avgPrice": 520,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "quantity": 450,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "quantity": 380,
+          "avgPrice": 255,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "quantity": 320,
+          "avgPrice": 165,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "quantity": 400,
+          "avgPrice": 165,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "quantity": 350,
+          "avgPrice": 155,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MA",
+          "quantity": 250,
+          "avgPrice": 410,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "DIS",
+          "quantity": 380,
+          "avgPrice": 105,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NFLX",
+          "quantity": 300,
+          "avgPrice": 460,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "BAC",
+          "quantity": 600,
+          "avgPrice": 35,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "XOM",
+          "quantity": 450,
+          "avgPrice": 110,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CVX",
+          "quantity": 420,
+          "avgPrice": 150,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "HD",
+          "quantity": 220,
+          "avgPrice": 380,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "UNH",
+          "quantity": 150,
+          "avgPrice": 520,
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "securities": [
+        {
+          "symbol": "AAPL",
+          "cusip": "037833100",
+          "description": "Apple Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MSFT",
+          "cusip": "594918104",
+          "description": "Microsoft Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "GOOGL",
+          "cusip": "02079K305",
+          "description": "Alphabet Inc. Class A",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "AMZN",
+          "cusip": "023135106",
+          "description": "Amazon.com Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "TSLA",
+          "cusip": "88160R101",
+          "description": "Tesla Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "META",
+          "cusip": "30303M102",
+          "description": "Meta Platforms Inc.",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NVDA",
+          "cusip": "67066G104",
+          "description": "NVIDIA Corporation",
+          "sector": "Technology",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JPM",
+          "cusip": "46625H100",
+          "description": "JPMorgan Chase & Co.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "V",
+          "cusip": "92826C839",
+          "description": "Visa Inc.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "JNJ",
+          "cusip": "478160104",
+          "description": "Johnson & Johnson",
+          "sector": "Healthcare",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "WMT",
+          "cusip": "931142103",
+          "description": "Walmart Inc.",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "PG",
+          "cusip": "742718109",
+          "description": "The Procter & Gamble Company",
+          "sector": "Consumer Staples",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "MA",
+          "cusip": "57636Q104",
+          "description": "Mastercard Incorporated",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "DIS",
+          "cusip": "254687106",
+          "description": "The Walt Disney Company",
+          "sector": "Communication Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "NFLX",
+          "cusip": "64110L106",
+          "description": "Netflix Inc.",
+          "sector": "Communication Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "BAC",
+          "cusip": "060505104",
+          "description": "Bank of America Corp.",
+          "sector": "Financial Services",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "XOM",
+          "cusip": "30231G102",
+          "description": "Exxon Mobil Corporation",
+          "sector": "Energy",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "CVX",
+          "cusip": "166764100",
+          "description": "Chevron Corporation",
+          "sector": "Energy",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "HD",
+          "cusip": "437076102",
+          "description": "The Home Depot, Inc.",
+          "sector": "Consumer Discretionary",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        },
+        {
+          "symbol": "UNH",
+          "cusip": "91324P102",
+          "description": "UnitedHealth Group Inc.",
+          "sector": "Healthcare",
+          "type": "equity",
+          "lastUpdated": "2025-01-08T08:05:00Z"
+        }
+      ],
+      "trades": [],
+      "activities": [],
+      "realizedGL": [],
+      "commissions": [],
+      "lastUpdated": "2025-01-08T08:05:00Z"
+    }
+  ]
+}
+

@@ -1,0 +1,12 @@
+{
+  "households": [
+    {
+      "id": "household-1",
+      "name": "Johnson household",
+      "description": "Michael Johnson & Alexa Johnson",
+      "createdAt": "2023-01-15T00:00:00Z",
+      "lastUpdated": "2024-01-08T00:00:00Z"
+    }
+  ]
+}
+

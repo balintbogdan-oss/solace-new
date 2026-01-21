@@ -1,0 +1,273 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens: base layer with light and dark variables */
+@layer base {
+  :root {
+    /* Reverted to original hex/tailwind values */
+    --background: 245 245 244; /* #F5F5F4 - Default for advisor (Solace) */
+    --foreground: #111827; /* Original: gray-900 */
+
+    --secondary: #f6f6f3; /* Original: gray-100 */
+    --secondary-foreground: #1f2937; /* Original: gray-800 */
+
+    --card: 255 255 255; /* Changed from #ffffff */
+    --card-foreground: #111827; /* Original: gray-900 */
+
+    --border: #e9e7e7; /* Original: gray-200 */
+    --input: #d1d5db; /* Original: gray-300 */
+    --border-input: #d1d5db; /* Original: gray-300 */
+
+    --primary: 142 85 4; /* Default fallback - will be overridden by AppearanceProvider */
+    --primary-foreground: 255 255 255; /* Original: white */
+
+    --muted: 246 245 244; /* Original: gray-100 */
+    --muted-foreground: #64615a; /* Original: gray-500 */
+
+    --accent: 246 246 244; /* Light gray with subtle beige undertone */
+    --accent-foreground: #1f2937; /* Original: gray-800 */
+
+    --destructive: #ef4444; /* Original: red-500 */
+    --destructive-foreground: #ffffff; /* Original: white */
+
+    --ring: #a5b4fc; /* Original: indigo-300 */
+
+    --radius: 0.5rem; /* 8px - Default for most elements */
+
+    --chart-positive: #60a821; /* Original: green-600 */
+    --chart-negative: #f87171; /* Original: red-400 */
+
+    /* Keep gradient variables in RGB format */
+    --gradient-start: 243 237 220; /* rgb(167, 188, 250) */
+    --gradient-end: 249 248 243;   /* rgb(237, 239, 245) */
+
+    /* Blue theme
+      --gradient-start: 225 234 255; 
+      --gradient-end: 237 239 245;   
+      */
+
+    /* Positive/Negative Colors */
+    --positive: 101 23% 48%; /* lime-600 */
+    --negative: 0 84% 60%; /* red-500 */
+    --positive-foreground: 101 23% 48%; /* lime-600 */
+    --negative-foreground: 0 84% 60%; /* red-500 */
+    --chart-primary: 40 64% 60%; /* Bright Golden - Light */
+    --chart-positive: 84 81% 60%; /* One notch brighter warmer green for light mode */
+    --chart-secondary: 50 66% 33%; /* Teal/Cyan - Light */
+    
+    /* Chart colors for Solace theme (advisor) - default - using Wedbush Next colors */
+    --chart-1: #C1EA8B;
+    --chart-2: #5E5CE6;
+    --chart-3: #06B6D4;
+    --chart-4: #237AF6;
+    --chart-5: #831944;
+    --chart-6: #D7A554;
+    
+    /* Sidebar accent color for Solace theme */
+    --sidebar-accent: #E7E5E4;
+  }
+  
+  /* Chart colors for Wedbush Next theme (client) */
+  [data-theme="wedbush-next"] {
+    --chart-1: #C1EA8B;
+    --chart-2: #5E5CE6;
+    --chart-3: #06B6D4;
+    --chart-4: #237AF6;
+    --chart-5: #831944;
+    --chart-6: #D7A554;
+    
+    /* Sidebar accent color for Wedbush Next theme */
+    --sidebar-accent: #E2E8F0;
+    
+    /* Muted color for Wedbush Next theme */
+    --muted: 249 249 250; /* #F9F9FA */
+  }
+
+  .dark {
+    /* Revert to previous dark theme, using neutral-900/50 for card/popover */
+    --background: 4 4 4; /* User change */
+    --foreground: #ffffff; 
+
+    --card: 28 28 28; /* darker for better contrast */
+    --card-foreground: 250 250 250; /* neutral-50 */
+
+    --popover: 28 28 28; /* darker for better contrast */
+    --popover-foreground: 250 250 250; /* neutral-50 */
+
+    --primary: 217 119 6; /* Default fallback for dark mode - will be overridden by AppearanceProvider */
+    --primary-foreground: #000000; /* black text for better readability */ 
+
+    /* Reverting secondary - using previous slate-800/400 equivalent for now */
+    /* If these were different, adjust manually */
+    --secondary: 30 41 59; 
+    --secondary-foreground: 148 163 184;
+
+    --muted: 28 28 28; /* Updated to match card color for consistency */
+    --muted-foreground: #afa79c; /* Reverted */
+
+    --accent: 12 12 12; /* Very dark for dark mode */
+    --accent-foreground: #fee9bf; /* Reverted */
+
+    --destructive: #f87171; /* Reverted */
+    --destructive-foreground: #000000; /* Reverted */
+
+    --border: #404040; /* Dark gray for better visibility */
+    --input: #404040; /* Dark gray for input borders */
+    --border-input: #404040; /* Dark gray for input borders */
+    --ring: #bfdbfe; /* Reverted */
+
+    /* Keeping existing chart/gradient/positive/negative */
+    /* --chart-positive: #bbf7d0; */ 
+    --chart-positive: #84cc16; /* One notch brighter warmer green for dark mode */
+    --chart-negative: #fca5a5; /* Original: red-300 */
+
+    /* Keep gradient variables in RGB format */
+    --gradient-start: 41 39 28; /* rgb(7, 23, 66) */
+    --gradient-end: 13 12 12;   /* rgb(4, 4, 30) */
+
+    /* Positive/Negative Colors (Dark) */
+    --positive: 88 50% 61%; /* lime-300 */
+    --negative: 0 72% 64%; /* red-400 */
+    --positive-foreground: 88 50% 61%; /* lime-300 */
+    --negative-foreground: 0 72% 64%; /* red-400 */
+    --chart-primary: 40 85% 65%; /* Bright Golden - Dark */
+    --chart-positive: 101 51% 48%; /* Bright Golden - Light */
+    --chart-secondary: 10 10% 40%; /* Teal/Cyan - Dark */
+    
+    /* Chart colors for Solace theme (advisor) - dark mode - using Wedbush Next colors */
+    --chart-1: #C1EA8B;
+    --chart-2: #5E5CE6;
+    --chart-3: #06B6D4;
+    --chart-4: #237AF6;
+    --chart-5: #831944;
+    --chart-6: #D7A554;
+    
+    /* Sidebar accent color for Solace theme - dark mode */
+    --sidebar-accent: #E7E5E4;
+  }
+  
+  /* Chart colors for Wedbush Next theme (client) - dark mode */
+  .dark [data-theme="wedbush-next"] {
+    --chart-1: #C1EA8B;
+    --chart-2: #5E5CE6;
+    --chart-3: #06B6D4;
+    --chart-4: #237AF6;
+    --chart-5: #831944;
+    --chart-6: #D7A554;
+    
+    /* Sidebar accent color for Wedbush Next theme - dark mode */
+    --sidebar-accent: #E2E8F0;
+    
+    /* Muted color for Wedbush Next theme - dark mode */
+    --muted: 249 249 250; /* #F9F9FA */
+  }
+  
+
+  body {
+    /* Use reverted hex values directly */
+    @apply bg-background text-foreground;
+    @apply min-h-screen font-medium antialiased;
+    cursor: default;
+    font-family: var(--font-family, 'Inter', sans-serif) !important;
+  }
+
+  /* Header font styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-headers, 'Inter', sans-serif) !important;
+  }
+
+  h1 {
+    @apply text-4xl font-medium tracking-tight lg:text-5xl;
+  }
+
+  /* Responsive heading styles */
+  h2 {
+    @apply text-xl font-medium tracking-tight md:text-xl;
+  }
+
+  h3 {
+    @apply text-base font-medium;
+  }
+
+  *::selection {
+    background-color: rgb(59 130 246 / 0.3);
+    color: inherit;
+  }
+
+  /* Define the gradient effect using CSS variables (still requires rgb() format) */
+  .background-gradient-effect {
+    background: radial-gradient(circle at 20% 20%, rgb(var(--gradient-start)) 0%, rgb(var(--gradient-end)) 20%);
+  }
+}
+
+@layer components {
+  /* Custom component styles */
+  .dark .bg-card-blend-dark {
+    background-color: rgba(38, 36, 36, 0.462);
+  }
+}
+
+/* Force accent color to use the CSS variable */
+.bg-accent {
+  background-color: rgb(var(--accent)) !important;
+}
+
+@layer utilities {
+  /* Force apply the muted-foreground color */
+  .text-muted-foreground {
+    color: var(--muted-foreground) !important;
+  }
+  
+  /* Override Tailwind's primary colors to use dynamic CSS variable */
+  .text-primary {
+    color: rgb(var(--primary)) !important;
+  }
+  
+  .border-primary {
+    border-color: rgb(var(--primary)) !important;
+  }
+  
+  .bg-primary {
+    background-color: rgb(var(--primary)) !important;
+  }
+  
+  /* Force background color to use CSS variable */
+  .bg-background {
+    background-color: rgb(var(--background)) !important;
+  }
+  
+  /* Positive and negative text colors */
+  .text-positive {
+    color: hsl(var(--positive)) !important;
+  }
+  
+  .text-negative {
+    color: hsl(var(--negative)) !important;
+  }
+  
+  /* Positive and negative foreground colors */
+  .text-positive-foreground {
+    color: hsl(var(--positive-foreground)) !important;
+  }
+  
+  .text-negative-foreground {
+    color: hsl(var(--negative-foreground)) !important;
+  }
+  
+  /* Force card background in dark mode */
+  .dark .bg-card {
+    background-color: rgb(28 28 28) !important;
+  }
+  
+  /* Force accent background in dark mode */
+  .dark .bg-accent {
+    background-color: rgb(12 12 12) !important;
+  }
+  
+  /* Info icon styling */
+  .info-icon {
+    @apply cursor-pointer hover:text-foreground transition-colors;
+  }
+  
+}

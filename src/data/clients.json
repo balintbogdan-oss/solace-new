@@ -1,0 +1,16 @@
+{
+  "clients": [
+    {
+      "id": "client-1",
+      "firstName": "Michael",
+      "lastName": "Johnson",
+      "email": "michael.johnson@example.com",
+      "phone": "+1-555-0101",
+      "householdId": "household-1",
+      "accountIds": ["1PB28473", "1PB29147", "1PB30682", "1PB31956", "1PB32741"],
+      "createdAt": "2023-01-15T00:00:00Z",
+      "lastUpdated": "2024-01-08T00:00:00Z"
+    }
+  ]
+}
+
