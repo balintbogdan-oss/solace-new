@@ -87,14 +87,11 @@ export function Sidebar() { // Removed props
                   'flex items-center text-sm transition-colors',
                   isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
                   isActive
-                    ? isMinimized 
-                      ? 'text-foreground dark:text-white' 
-                      : 'text-gray-900 dark:text-gray-100'
+                    ? 'text-foreground dark:text-white'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50',
                   // Keep parent expanded if child is active
                   pathname.startsWith(fullHref) && !isActive && 'text-gray-700 dark:text-gray-300' 
                 )}
-                style={isActive ? { backgroundColor: 'var(--sidebar-accent)' } : undefined}
                 title={isMinimized ? item.label : undefined}
               >
                 <div className={cn("flex items-center", isMinimized ? "gap-0" : "gap-3")}>
@@ -158,12 +155,9 @@ export function Sidebar() { // Removed props
                 'flex items-center text-sm transition-colors',
                 isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
                 isActive
-                  ? isMinimized 
-                    ? 'text-foreground dark:text-white' 
-                    : 'text-gray-900 dark:text-gray-100'
+                  ? 'bg-white dark:bg-white/10 text-amber-800 dark:text-amber-600 shadow-[0px_1px_2px_1px_rgba(0,0,0,0.06)]'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50'
               )}
-              style={isActive ? { backgroundColor: 'var(--sidebar-accent)' } : undefined}
               title={isMinimized ? item.label : undefined}
             >
               <div className={cn("flex items-center", isMinimized ? "gap-0" : "gap-3")}>
