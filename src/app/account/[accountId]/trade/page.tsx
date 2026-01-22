@@ -7,6 +7,9 @@ import { getAllStocks } from '@/services/marketDataService'
 
 type FilterType = 'recents' | 'all' | 'stocks' | 'mutual-funds'
 
+// Recent securities (hardcoded for demo) - defined outside component to avoid useEffect dependency issues
+const recentSymbols = ['AMZN', 'TSLA', 'APPLX', 'GOOGL', 'NFLX', 'FB', 'BA', 'DIS', 'DAL', 'KO']
+
 export default function AccountTradePage() {
   const router = useRouter()
   const params = useParams()
@@ -16,9 +19,6 @@ export default function AccountTradePage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('recents')
   const [allSecurities, setAllSecurities] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [filteredSecurities, setFilteredSecurities] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  // Recent securities (hardcoded for demo)
-  const recentSymbols = ['AMZN', 'TSLA', 'APPLX', 'GOOGL', 'NFLX', 'FB', 'BA', 'DIS', 'DAL', 'KO']
 
   // Load all securities on mount
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function AccountTradePage() {
           <input
             type="text"
             placeholder="Search stocks, options, funds by symbol or name..."
-            className="w-full pl-11 pr-11 py-3 border border-input rounded-lg bg-muted dark:bg-card-blend-dark text-sm"
+            className="w-full pl-11 pr-11 py-3 rounded-lg bg-muted dark:bg-card-blend-dark text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

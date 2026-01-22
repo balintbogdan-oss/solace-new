@@ -9,15 +9,15 @@ import { getAllStocks } from '@/services/marketDataService'
 
 type FilterType = 'recents' | 'all' | 'stocks' | 'mutual-funds'
 
+// Recent securities (hardcoded for demo) - defined outside component to avoid useEffect dependency issues
+const recentSymbols = ['AMZN', 'TSLA', 'APPLX', 'GOOGL', 'NFLX', 'FB', 'BA', 'DIS', 'DAL', 'KO']
+
 export default function GlobalTradePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterType>('recents')
   const [allSecurities, setAllSecurities] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [filteredSecurities, setFilteredSecurities] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  // Recent securities (hardcoded for demo)
-  const recentSymbols = ['AMZN', 'TSLA', 'APPLX', 'GOOGL', 'NFLX', 'FB', 'BA', 'DIS', 'DAL', 'KO']
 
   // Load all securities on mount
   useEffect(() => {

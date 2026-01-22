@@ -68,6 +68,20 @@ export function Sidebar() { // Removed props
     ) : null;
 
     if (hasSub) {
+      // Check if any child route is active (for showing active state when minimized)
+      // Since sub-item URLs may be flat (e.g., /account/[id]/activity instead of /account/[id]/financials/activity),
+      // we need to check each sub-item's actual path using the same logic as fullHref calculation
+      const hasActiveChild = item.subItems!.some(sub => {
+        const subFullHref = sub.href.startsWith('/')
+          ? sub.href
+          : sub.href === ''
+            ? fullHref.replace(/\/[^\/]+$/, '') // Same logic as line 56 - removes last segment
+            : `${currentBaseHref}/${sub.href}`.replace(/\/+$/, '');
+        return pathname === subFullHref || pathname.startsWith(subFullHref + '/');
+      }) || (pathname.startsWith(fullHref) && pathname !== fullHref);
+      // Show active styling when minimized and either this item or any child is active
+      const showActiveState = isMinimized && (isActive || hasActiveChild);
+
       return {
         element: (
           <React.Fragment key={item.href}>
@@ -86,11 +100,13 @@ export function Sidebar() { // Removed props
                 className={cn(
                   'flex items-center text-sm transition-colors',
                   isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
-                  isActive
-                    ? 'text-foreground dark:text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50',
-                  // Keep parent expanded if child is active
-                  pathname.startsWith(fullHref) && !isActive && 'text-gray-700 dark:text-gray-300' 
+                  showActiveState
+                    ? 'bg-white dark:bg-white/10 text-amber-800 dark:text-amber-600 shadow-[0px_1px_2px_1px_rgba(0,0,0,0.06)]'
+                    : isActive
+                      ? 'text-foreground dark:text-white'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50',
+                  // Keep parent expanded if child is active (when not minimized)
+                  !isMinimized && pathname.startsWith(fullHref) && !isActive && 'text-gray-700 dark:text-gray-300' 
                 )}
                 title={isMinimized ? item.label : undefined}
               >
@@ -212,7 +228,7 @@ export function Sidebar() { // Removed props
       "px-4 hidden md:block flex-shrink-0 min-h-[calc(100vh-116px)] rounded-md transition-all duration-300",
       isMinimized ? "w-[60px]" : "w-[260px]"
     )}>
-      <div className="flex flex-col h-full">
+      <div className={cn("flex flex-col h-full", isMinimized && "items-center justify-start")}>
         {/* Sidebar Header */}
         <div className={cn("flex items-center", isMinimized ? "justify-center" : "justify-between", "pt-6 pb-1")}>
           {!isMinimized && currentSectionLabel && (
