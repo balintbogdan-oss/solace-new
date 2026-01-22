@@ -1,12 +1,12 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { usePathname } from 'next/navigation'
 
 interface SidebarContextType {
   isMinimized: boolean
   toggleSidebar: () => void
   setMinimized: (minimized: boolean) => void
+  collapseForTrading: () => void // Collapse sidebar when entering trading mode (from search)
   resetManualSetting: () => void
   isHydrated: boolean
 }
@@ -20,42 +20,26 @@ export function SidebarProvider({
   children: ReactNode
   defaultMinimized?: boolean 
 }) {
-  const pathname = usePathname()
-  
-  // Check if we're on a trade page
-  const isTradePage = pathname?.includes('/trade/')
-  
-  // Initialize minimized state based on trade page or defaultMinimized prop (server-side safe)
-  const [isMinimized, setIsMinimized] = useState(defaultMinimized ?? (isTradePage ?? false))
+  // Initialize minimized state from localStorage or default
+  const [isMinimized, setIsMinimized] = useState(defaultMinimized ?? false)
   const [isHydrated, setIsHydrated] = useState(false)
   
   // Handle hydration and localStorage on client side
   useEffect(() => {
     setIsHydrated(true)
-    const manuallySet = localStorage.getItem('sidebar-manually-set') === 'true'
-    if (manuallySet) {
-      const savedMinimized = localStorage.getItem('sidebar-minimized') === 'true'
-      setIsMinimized(savedMinimized)
+    // Always restore from localStorage if available
+    const savedMinimized = localStorage.getItem('sidebar-minimized')
+    if (savedMinimized !== null) {
+      setIsMinimized(savedMinimized === 'true')
     } else {
-      setIsMinimized(defaultMinimized ?? (isTradePage ?? false))
+      setIsMinimized(defaultMinimized ?? false)
     }
-  }, [isTradePage, defaultMinimized])
-  
-  // Update minimized state when pathname changes, but only if not manually set
-  useEffect(() => {
-    if (!isHydrated) return
-    console.log('SidebarContext: pathname changed to:', pathname, 'isTradePage:', isTradePage)
-    const manuallySet = localStorage.getItem('sidebar-manually-set') === 'true'
-    if (!manuallySet) {
-      setIsMinimized(defaultMinimized ?? (isTradePage ?? false))
-    }
-  }, [isTradePage, pathname, isHydrated, defaultMinimized])
+  }, [defaultMinimized])
 
   const toggleSidebar = () => {
     const newState = !isMinimized
     setIsMinimized(newState)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('sidebar-manually-set', 'true')
       localStorage.setItem('sidebar-minimized', newState.toString())
     }
   }
@@ -63,20 +47,26 @@ export function SidebarProvider({
   const setMinimized = (minimized: boolean) => {
     setIsMinimized(minimized)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('sidebar-manually-set', 'true')
       localStorage.setItem('sidebar-minimized', minimized.toString())
+    }
+  }
+
+  // Collapse sidebar when entering trading mode (e.g., from search selecting a stock)
+  const collapseForTrading = () => {
+    setIsMinimized(true)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebar-minimized', 'true')
     }
   }
 
   const resetManualSetting = () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('sidebar-manually-set')
       localStorage.removeItem('sidebar-minimized')
     }
   }
 
   return (
-    <SidebarContext.Provider value={{ isMinimized, toggleSidebar, setMinimized, resetManualSetting, isHydrated }}>
+    <SidebarContext.Provider value={{ isMinimized, toggleSidebar, setMinimized, collapseForTrading, resetManualSetting, isHydrated }}>
       {children}
     </SidebarContext.Provider>
   )

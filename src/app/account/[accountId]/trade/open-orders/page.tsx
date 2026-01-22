@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dialog';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { LastUpdated } from '@/components/ui/last-updated';
+import { useOrders, Order as ContextOrder } from '@/contexts/OrdersContext';
 
 type OrderType = 'Equity' | 'Option' | 'Mutual Fund';
 type OrderStatusOpen = 'Pending' | 'Partially filled';
@@ -309,14 +310,52 @@ function seedMockOrders(accountId: string): { open: Order[]; history: Order[] } 
 export default function AccountOpenOrdersPage() {
   const params = useParams();
   const accountId = (params?.accountId as string) ?? 'unknown';
+  
+  // Get orders from context (placed orders from trade execution)
+  const { openOrders: contextOpenOrders, historyOrders: contextHistoryOrders, cancelOrder: contextCancelOrder } = useOrders();
 
   const { open: seededOpen, history: seededHistory } = useMemo(
     () => seedMockOrders(accountId),
     [accountId]
   );
 
-  const [openOrders, setOpenOrders] = useState<Order[]>(seededOpen);
-  const [historyOrders, setHistoryOrders] = useState<Order[]>(seededHistory);
+  // Convert context orders to local Order type and filter by account
+  const convertContextOrder = (order: ContextOrder): Order => ({
+    id: order.id,
+    orderId: order.orderId,
+    symbol: order.symbol,
+    description: order.description,
+    cusip: order.cusip,
+    type: order.type,
+    action: order.action,
+    quantity: order.quantity,
+    price: order.price,
+    amount: order.amount,
+    cost: order.cost,
+    created: order.created,
+    expiry: order.expiry,
+    status: order.status,
+    executedPrice: order.executedPrice,
+    filledAt: order.filledAt,
+    filledQuantity: order.filledQuantity,
+    optionDetails: order.optionDetails,
+  });
+
+  // Merge seeded orders with context orders (context orders appear first as they are more recent)
+  const accountContextOpen = contextOpenOrders
+    .filter(o => o.accountId === accountId)
+    .map(convertContextOrder);
+  const accountContextHistory = contextHistoryOrders
+    .filter(o => o.accountId === accountId)
+    .map(convertContextOrder);
+
+  const [localOpenOrders, setLocalOpenOrders] = useState<Order[]>(seededOpen);
+  const [localHistoryOrders, setLocalHistoryOrders] = useState<Order[]>(seededHistory);
+  
+  // Combined orders: context orders first (newest), then seeded orders
+  const openOrders = useMemo(() => [...accountContextOpen, ...localOpenOrders], [accountContextOpen, localOpenOrders]);
+  const historyOrders = useMemo(() => [...accountContextHistory, ...localHistoryOrders], [accountContextHistory, localHistoryOrders]);
+  
   const [activeTab, setActiveTab] = useState<'open' | 'history'>('open');
   const [sortColumn, setSortColumn] = useState<SortColumn>('created');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -376,16 +415,24 @@ export default function AccountOpenOrdersPage() {
   const confirmCancelOrder = () => {
     if (!selectedOrder) return;
 
-    // Remove from open and push into history as Cancelled
-    setOpenOrders(prev => prev.filter(o => o.id !== selectedOrder.id));
-    setHistoryOrders(prev => [
-      {
-        ...selectedOrder,
-        status: 'Cancelled',
-        filledAt: new Date().toISOString(),
-      },
-      ...prev,
-    ]);
+    // Check if this is a context order (from placed trades)
+    const isContextOrder = contextOpenOrders.some(o => o.orderId === selectedOrder.orderId);
+    
+    if (isContextOrder) {
+      // Cancel in context - this will move it to history automatically
+      contextCancelOrder(selectedOrder.orderId);
+    } else {
+      // This is a seeded/local order - handle locally
+      setLocalOpenOrders(prev => prev.filter(o => o.id !== selectedOrder.id));
+      setLocalHistoryOrders(prev => [
+        {
+          ...selectedOrder,
+          status: 'Cancelled',
+          filledAt: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
+    }
 
     setIsCancelDialogOpen(false);
     setIsDrawerOpen(false);

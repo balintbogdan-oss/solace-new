@@ -17,7 +17,7 @@ export function Sidebar() { // Removed props
   const pathname = usePathname() ?? '';
   const router = useRouter();
   const { currentSectionItems, currentBaseHref, currentSectionLabel } = useNavigation(); // Get base href and label from context
-  const { isMinimized, toggleSidebar, setMinimized, resetManualSetting, isHydrated } = useSidebar();
+  const { isMinimized, toggleSidebar, isHydrated } = useSidebar();
   // Initialize expanded state based on current path belonging to a section
   const [expanded, setExpanded] = useState<string[]>(() => {
     if (!currentSectionItems || !currentBaseHref) return [];
@@ -153,19 +153,8 @@ export function Sidebar() { // Removed props
                   // Expand the sidebar when minimized
                   toggleSidebar();
                 } else {
-                  // If clicking Trade, minimize the sidebar AND navigate
-                  if (item.label === 'Trade') {
-                    console.log('Trade clicked: setting minimized to true, navigating to:', fullHref);
-                    setMinimized(true);
-                    router.push(fullHref);
-                  } else {
-                    // Navigate to other pages when sidebar is expanded
-                    // Reset manual setting when leaving trade pages
-                    if (pathname.includes('/trade/') && !fullHref.includes('/trade/')) {
-                      resetManualSetting();
-                    }
-                    router.push(fullHref);
-                  }
+                  // Navigate to the page - sidebar stays in current state
+                  router.push(fullHref);
                 }
               }}
               className={cn(

@@ -47,6 +47,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useSidebar } from '@/contexts/SidebarContext'
 
 import { HoldingWithDetails } from '@/types/account';
 
@@ -180,6 +181,7 @@ function SortableColumnItem({
 
 export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails, accountId }: HoldingsTableProps) {
   const router = useRouter();
+  const { collapseForTrading } = useSidebar();
   
   // Load column preferences from localStorage
   const initialPrefs = loadColumnPreferences();
@@ -266,6 +268,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
     if (onTradeClick) {
       onTradeClick(symbol);
     } else if (accountId) {
+      collapseForTrading();
       router.push(`/account/${accountId}/trade/${symbol}`);
     }
   };
@@ -278,6 +281,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
 
   const handleStockDetails = (symbol: string) => {
     if (accountId) {
+      collapseForTrading();
       router.push(`/account/${accountId}/trade/${symbol}`);
     }
   };

@@ -9,6 +9,7 @@ import { ArrowLeft, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react'
 import { AccountSelectionModal } from './AccountSelectionModal'
 import { cn, formatAccountType } from '@/lib/utils'
 import { useAccountData } from '@/contexts/AccountDataContext'
+import { useOrders, OrderType as ContextOrderType, OrderAction } from '@/contexts/OrdersContext'
 import { MarketDataOverlay } from './MarketDataOverlay'
 import { OptionsMarketDataOverlay } from './OptionsMarketDataOverlay'
 import { MutualFundMarketDataOverlay } from './MutualFundMarketDataOverlay'
@@ -87,11 +88,15 @@ export function TradeExecutionPanel({
   selectedOptionAction: externalSelectedOptionAction,
   onSelectedOptionActionChange
 }: TradeExecutionPanelProps) {
+  const { addOrder } = useOrders()
+  
   // --- Base States ---
   const [orderState, setOrderState] = useState<OrderState>('entry')
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [tradeMode, setTradeMode] = useState<TradeMode>(initialTradeMode)
   const [orderStatus, setOrderStatus] = useState<'filled' | 'pending'>('pending')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [placedOrderId, setPlacedOrderId] = useState<string | null>(null)
   
   const notesTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -835,6 +840,47 @@ export function TradeExecutionPanel({
       const isMarketOrder = orderType === 'market';
       setOrderStatus(isMarketOrder ? 'filled' : 'pending');
       
+      // Determine the order type for the context
+      let contextOrderType: ContextOrderType = 'Equity';
+      if (isOptionTrade) {
+        contextOrderType = 'Option';
+      } else if (isMutualFund) {
+        contextOrderType = 'Mutual Fund';
+      }
+      
+      // Save order to context
+      const priceForOrder = orderType === 'limit' ? currentLimitPrice : marketPrice;
+      const orderAmount = quantity * priceForOrder * (isOptionTrade ? 100 : 1);
+      
+      const placedOrder = addOrder({
+        accountId,
+        symbol: isOptionTrade 
+          ? `${symbol.toUpperCase()} ${strikePrice?.toFixed(0)}${optionType === 'call' ? 'C' : 'P'}` 
+          : symbol.toUpperCase(),
+        description: isOptionTrade 
+          ? `${symbol.toUpperCase()} $${strikePrice?.toFixed(0)} ${optionType === 'call' ? 'Call' : 'Put'}`
+          : `${symbol.toUpperCase()} Stock`,
+        cusip: symbol.toUpperCase(),
+        type: contextOrderType,
+        action: (tradeMode === 'buy' ? 'Buy' : 'Sell') as OrderAction,
+        quantity: quantity,
+        price: priceForOrder,
+        amount: orderAmount,
+        cost: orderAmount + commission,
+        expiry: timeInForce === 'gtc' ? 'GTC' : 'Day',
+        status: isMarketOrder ? 'Filled' : 'Pending',
+        orderType: orderType,
+        executedPrice: isMarketOrder ? priceForOrder : undefined,
+        filledAt: isMarketOrder ? new Date().toISOString() : undefined,
+        optionDetails: isOptionTrade && strikePrice && optionType ? {
+          underlying: symbol.toUpperCase(),
+          strike: strikePrice,
+          optionType: optionType === 'call' ? 'Call' : 'Put',
+          expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+        } : undefined,
+      });
+      
+      setPlacedOrderId(placedOrder.orderId);
       setOrderState('confirmation');
     } catch (error) {
       console.error('Error executing trade:', error);
@@ -2333,7 +2379,7 @@ export function TradeExecutionPanel({
          <Button variant="secondary" className="w-full" onClick={handleNewOrder}>
            Place New Order
          </Button>
-         <Button variant="outline" className="w-full" onClick={() => { /* Navigate to orders */ }}>
+         <Button variant="outline" className="w-full" onClick={() => router.push(`/account/${accountId}/trade/open-orders`)}>
            View Order Status
          </Button>
        </div>

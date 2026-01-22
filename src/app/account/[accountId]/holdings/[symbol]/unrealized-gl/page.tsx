@@ -7,11 +7,13 @@ import { useParams, useRouter } from 'next/navigation'
 import { useAccountData } from '@/contexts/AccountDataContext'
 import { Button } from '@/components/ui/button'
 import { ArrowUpRight, RefreshCcw, Info, SlidersHorizontal, ArrowUp, ArrowDown, ChevronsUpDown } from 'lucide-react'
+import { useSidebar } from '@/contexts/SidebarContext'
 
 export default function SecurityUnrealizedGLPage() {
   const params = useParams()
   const router = useRouter()
   const { loading, error } = useAccountData()
+  const { collapseForTrading } = useSidebar()
   
   const accountId = params?.accountId as string
   const symbol = params?.symbol as string
@@ -189,7 +191,10 @@ export default function SecurityUnrealizedGLPage() {
             <div className="text-sm text-muted-foreground mt-1">Long position</div>
           </div>
           <Button 
-            onClick={() => router.push(`/account/${accountId}/trade/${symbol}`)}
+            onClick={() => {
+              collapseForTrading();
+              router.push(`/account/${accountId}/trade/${symbol}`);
+            }}
             className="bg-amber-500 hover:bg-amber-600 text-white"
           >
             <ArrowUpRight className="mr-2 h-4 w-4" />

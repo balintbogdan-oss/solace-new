@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { HoldingWithDetails } from '@/types/account';
+import { useSidebar } from '@/contexts/SidebarContext';
 
 const getCurrentTimestamp = () => {
     // Use a fixed timestamp to prevent hydration mismatches
@@ -41,6 +42,7 @@ interface HoldingsTableProps {
 
 export function HoldingsTableHardcoded({ onStockClick, onTradeClick, holdingsWithDetails, accountId }: HoldingsTableProps) {
   const router = useRouter();
+  const { collapseForTrading } = useSidebar();
   const timestamp = getCurrentTimestamp();
   
   const [sortColumn, setSortColumn] = useState<SortableColumn | null>(null);
@@ -53,6 +55,7 @@ export function HoldingsTableHardcoded({ onStockClick, onTradeClick, holdingsWit
     if (onTradeClick) {
       onTradeClick(symbol);
     } else if (accountId) {
+      collapseForTrading();
       router.push(`/account/${accountId}/trade/${symbol}`);
     }
   };
@@ -65,6 +68,7 @@ export function HoldingsTableHardcoded({ onStockClick, onTradeClick, holdingsWit
 
   const handleStockDetails = (symbol: string) => {
     if (accountId) {
+      collapseForTrading();
       router.push(`/account/${accountId}/trade/${symbol}`);
     }
   };
