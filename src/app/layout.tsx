@@ -5,6 +5,7 @@ import { GeistMono } from 'geist/font/mono'
 import { NavigationProvider } from '@/contexts/NavigationContext'
 import { SettingsProvider } from '@/contexts/SettingsContext'
 import { OrdersProvider } from '@/contexts/OrdersContext'
+import { SidebarProvider } from '@/contexts/SidebarContext'
 import { AppearanceProvider } from '@/components/AppearanceProvider'
 import { UserRoleProvider } from '@/contexts/UserRoleContext'
 import { 
@@ -173,15 +174,17 @@ export default function RootLayout({
           <UserRoleProvider>
             <SettingsProvider>
               <AppearanceProvider>
-                <OrdersProvider>
-                  <NavigationProvider>
-                    <HeaderWrapper />
-                    <div className="w-full">
-                    {children}
-                    </div>
-                    <Toaster position="top-right" />
-                  </NavigationProvider>
-                </OrdersProvider>
+                <SidebarProvider>
+                  <OrdersProvider>
+                    <NavigationProvider>
+                      <HeaderWrapper />
+                      <div className="w-full">
+                      {children}
+                      </div>
+                      <Toaster position="top-right" />
+                    </NavigationProvider>
+                  </OrdersProvider>
+                </SidebarProvider>
               </AppearanceProvider>
             </SettingsProvider>
           </UserRoleProvider>
