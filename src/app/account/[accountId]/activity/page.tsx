@@ -561,7 +561,7 @@ function ActivityPageContent() {
       {/* Activity Tabs, Filters, and Table */}
       <Card className="p-6">
         {/* Activity Tabs */}
-        <div className="flex justify-between items-end border-b mb-4 pb-2">
+        <div className="flex justify-between items-end mb-4 pb-2">
           <div className="flex space-x-8">
             {tabs.map((tab) => (
               <button

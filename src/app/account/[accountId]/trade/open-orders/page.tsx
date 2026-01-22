@@ -639,7 +639,7 @@ export default function AccountOpenOrdersPage() {
       </div>
 
       <div className="rounded-2xl border bg-card text-card-foreground shadow-sm p-6">
-        <div className="flex justify-between items-end border-b mb-4 pb-2">
+        <div className="flex justify-between items-end mb-4 pb-2">
           <div className="flex space-x-8">
             <button
               onClick={() => resetPaginationOnTabChange('open')}

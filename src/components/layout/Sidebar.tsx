@@ -77,7 +77,8 @@ export function Sidebar() { // Removed props
           : sub.href === ''
             ? fullHref.replace(/\/[^\/]+$/, '') // Same logic as line 56 - removes last segment
             : `${currentBaseHref}/${sub.href}`.replace(/\/+$/, '');
-        return pathname === subFullHref || pathname.startsWith(subFullHref + '/');
+        // For empty href sub-items (like Holdings), only match exact pathname to avoid matching all account pages
+        return pathname === subFullHref || (sub.href !== '' && pathname.startsWith(subFullHref + '/'));
       }) || (pathname.startsWith(fullHref) && pathname !== fullHref);
       // Show active styling when minimized and either this item or any child is active
       const showActiveState = isMinimized && (isActive || hasActiveChild);
