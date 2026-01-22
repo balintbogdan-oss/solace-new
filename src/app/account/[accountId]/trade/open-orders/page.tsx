@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -62,6 +61,8 @@ interface Order {
   // History-only fields
   executedPrice?: number;
   filledAt?: string;
+  // Partial fill tracking
+  filledQuantity?: number;
   // Options-only
   optionDetails?: OptionOrderDetails;
 }
@@ -102,6 +103,33 @@ function formatDatetime(value: string): string {
   });
 }
 
+function formatExpiryDate(createdDate: string, expiryType: string): string {
+  if (expiryType === 'GTC') {
+    return 'Good till cancelled';
+  }
+  
+  const created = new Date(createdDate);
+  let expiryDate: Date;
+  
+  if (expiryType === 'Day') {
+    // End of trading day (market close at 4 PM ET)
+    expiryDate = new Date(created);
+    expiryDate.setHours(16, 0, 0, 0);
+  } else {
+    // Default fallback
+    expiryDate = new Date(created);
+    expiryDate.setDate(expiryDate.getDate() + 30);
+  }
+  
+  return expiryDate.toLocaleString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).replace(',', ',');
+}
+
 // AAPL 150C Jan17 style
 function buildCondensedOptionSymbol(
   details: OptionOrderDetails | undefined
@@ -116,21 +144,22 @@ function buildCondensedOptionSymbol(
   return `${details.underlying} ${strike}${side} ${monthDay}`;
 }
 
-function getStatusVariant(
-  status: OrderStatus
-): 'default' | 'secondary' | 'destructive' | 'outline' {
+function getStatusColor(status: OrderStatus): string {
   switch (status) {
     case 'Pending':
+      return 'text-amber-800 bg-amber-100/70';
     case 'Partially filled':
-      return 'secondary';
+      return 'text-slate-700 bg-slate-200/70';
     case 'Filled':
-      return 'default';
+      return 'text-emerald-800 bg-emerald-100/70';
     case 'Cancelled':
+      return 'text-stone-600 bg-stone-200/60';
     case 'Expired':
+      return 'text-stone-600 bg-stone-200/60';
     case 'Rejected':
-      return 'outline';
+      return 'text-rose-800 bg-rose-100/70';
     default:
-      return 'secondary';
+      return 'text-stone-600 bg-stone-200/60';
   }
 }
 
@@ -169,6 +198,7 @@ function seedMockOrders(accountId: string): { open: Order[]; history: Order[] } 
       created: new Date(now.getTime() - 25 * 60 * 1000).toISOString(),
       expiry: 'Day',
       status: 'Partially filled',
+      filledQuantity: 6,
       optionDetails: {
         underlying: 'AAPL',
         strike: 150,
@@ -504,7 +534,6 @@ export default function AccountOpenOrdersPage() {
                   {renderSortIcon('status')}
                 </div>
               </TableHead>
-              <TableHead className="text-right">View</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -543,23 +572,13 @@ export default function AccountOpenOrdersPage() {
                     {formatCurrency(order.cost)}
                   </TableCell>
                   <TableCell className="group-hover:bg-muted/50 dark:group-hover:bg-accent/30">{formatDatetime(order.created)}</TableCell>
-                  <TableCell className="group-hover:bg-muted/50 dark:group-hover:bg-accent/30">{order.expiry}</TableCell>
                   <TableCell className="group-hover:bg-muted/50 dark:group-hover:bg-accent/30">
-                    <Badge variant={getStatusVariant(order.status)}>
-                      {order.status}
-                    </Badge>
+                    {formatExpiryDate(order.created, order.expiry)}
                   </TableCell>
-                  <TableCell className="text-right group-hover:bg-muted/50 dark:group-hover:bg-accent/30">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewOrder(order);
-                      }}
-                    >
-                      View
-                    </Button>
+                  <TableCell className="group-hover:bg-muted/50 dark:group-hover:bg-accent/30">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </span>
                   </TableCell>
                 </TableRow>
               );
@@ -682,165 +701,165 @@ export default function AccountOpenOrdersPage() {
       </div>
 
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent side="right">
+        <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col bg-white dark:bg-[rgb(28,28,28)]">
           {selectedOrder && (
             <>
-              <SheetHeader>
-                <SheetTitle>
-                  {selectedOrder.symbol}{' '}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    ({selectedOrder.type})
-                  </span>
-                </SheetTitle>
-                <SheetDescription>{selectedOrder.description}</SheetDescription>
-              </SheetHeader>
-              {activeTab === 'open' &&
-                (selectedOrder.status === 'Pending' ||
-                  selectedOrder.status === 'Partially filled') && (
-                  <div className="px-4">
+              {/* Header Section */}
+              <div className="p-6 pb-4">
+                <SheetHeader className="space-y-1 mb-4 sr-only">
+                  <SheetTitle className="sr-only">Order Details</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Details for order {selectedOrder.orderId}
+                  </SheetDescription>
+                </SheetHeader>
+                
+                {/* Symbol & Amount Display */}
+                <div className="flex flex-col justify-center items-start w-full gap-4">
+                  <div className="w-full">
+                    <div className="text-xl font-serif font-medium">{selectedOrder.symbol}</div>
+                    <div className="text-sm text-muted-foreground">{selectedOrder.description}</div>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="text-[28px] font-serif font-normal">
+                      {selectedOrder.action === 'Buy' ? '-' : '+'}{formatCurrency(selectedOrder.amount)}
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Limit {selectedOrder.action} · {new Date(selectedOrder.created).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cancel Order Button */}
+                {activeTab === 'open' &&
+                  (selectedOrder.status === 'Pending' ||
+                    selectedOrder.status === 'Partially filled') && (
                     <Button
-                      className="w-full mb-3"
+                      variant="outline"
+                      className="mt-4 gap-2"
                       onClick={handleCancelOrder}
                     >
+                      <span className="text-sm">×</span>
                       Cancel order
                     </Button>
-                  </div>
-                )}
-              <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 text-sm">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Type</div>
-                    <div className="font-medium">{selectedOrder.type}</div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Action</div>
-                    <div className="font-medium">{selectedOrder.action}</div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Quantity</div>
-                    <div className="font-medium">
-                      {selectedOrder.quantity.toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Price</div>
-                    <div className="font-medium">
-                      {formatCurrency(selectedOrder.price)}{' '}
-                      <span className="text-xs text-muted-foreground">
-                        Limit
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Amount</div>
-                    <div className="font-medium">
-                      {formatCurrency(selectedOrder.amount)}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Cost</div>
-                    <div className="font-medium">
-                      {formatCurrency(selectedOrder.cost)}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Status</div>
-                    <div className="mt-0.5">
-                      <Badge variant={getStatusVariant(selectedOrder.status)}>
-                        {selectedOrder.status}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Created</div>
-                    <div className="font-medium">
-                      {formatDatetime(selectedOrder.created)}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">Expiry</div>
-                    <div className="font-medium">{selectedOrder.expiry}</div>
-                  </div>
-                  <div className="flex items-center justify-between border-b py-2">
-                    <div className="text-xs text-muted-foreground">
-                      Order ID
-                    </div>
-                    <div className="font-mono text-xs">
-                      {selectedOrder.orderId}
-                    </div>
-                  </div>
-                  {selectedOrder.executedPrice && (
-                    <div className="flex items-center justify-between border-b py-2">
-                      <div className="text-xs text-muted-foreground">
-                        Executed price
-                      </div>
-                      <div className="font-medium">
-                        {formatCurrency(selectedOrder.executedPrice)}
-                      </div>
-                    </div>
                   )}
-                  {selectedOrder.filledAt && (
-                    <div className="flex items-center justify-between border-b py-2">
-                      <div className="text-xs text-muted-foreground">
-                        Filled at
-                      </div>
-                      <div className="font-medium">
-                        {formatDatetime(selectedOrder.filledAt)}
-                      </div>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3">
+                {/* Status Card */}
+                <div className="rounded-xl bg-muted/50 py-3 px-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
+                      {selectedOrder.status}
+                    </span>
+                  </div>
+                  {selectedOrder.status === 'Partially filled' && selectedOrder.filledQuantity !== undefined && (
+                    <div className="flex items-center justify-between mt-2 pt-2">
+                      <span className="text-sm text-muted-foreground">Filled</span>
+                      <span className="text-sm">
+                        {selectedOrder.filledQuantity.toLocaleString()} of {selectedOrder.quantity.toLocaleString()}
+                      </span>
                     </div>
                   )}
                 </div>
 
-                {selectedOrder.type === 'Option' &&
-                  selectedOrder.optionDetails && (
-                    <div className="pt-4 border-t space-y-2">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        Option details
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between py-1">
-                          <div className="text-xs text-muted-foreground">
-                            Underlying
-                          </div>
-                          <div className="font-medium">
-                            {selectedOrder.optionDetails.underlying}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between py-1">
-                          <div className="text-xs text-muted-foreground">
-                            Strike
-                          </div>
-                          <div className="font-medium">
-                            {formatCurrency(
-                              selectedOrder.optionDetails.strike
-                            ).replace('.00', '')}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between py-1">
-                          <div className="text-xs text-muted-foreground">
-                            Call / Put
-                          </div>
-                          <div className="font-medium">
-                            {selectedOrder.optionDetails.optionType}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between py-1">
-                          <div className="text-xs text-muted-foreground">
-                            Expiration date
-                          </div>
-                          <div className="font-medium">
-                            {new Date(
-                              selectedOrder.optionDetails.expirationDate
-                            ).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: '2-digit',
-                              year: 'numeric',
-                            })}
-                          </div>
-                        </div>
-                      </div>
+                {/* Order Details Card */}
+                <div className="rounded-xl bg-muted/50 overflow-hidden">
+                  <div className="flex items-center justify-between py-3 px-3">
+                    <span className="text-sm text-muted-foreground">Quantity</span>
+                    <span className="text-sm">
+                      {selectedOrder.quantity.toLocaleString()} {selectedOrder.symbol}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 px-3">
+                    <span className="text-sm text-muted-foreground">Limit price</span>
+                    <span className="text-sm">{formatCurrency(selectedOrder.price)}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 px-3">
+                    <span className="text-sm text-muted-foreground">Estimated value</span>
+                    <span className="text-sm">{formatCurrency(selectedOrder.amount)}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 px-3">
+                    <span className="text-sm text-muted-foreground">Fees</span>
+                    <span className="text-sm">{formatCurrency(0)}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 px-3">
+                    <span className="text-sm text-muted-foreground">Estimated total cost</span>
+                    <span className="text-sm">{formatCurrency(selectedOrder.cost)}</span>
+                  </div>
+                </div>
+
+                {/* Expiry Card */}
+                <div className="rounded-xl bg-muted/50 py-3 px-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Expiry</span>
+                    <span className="text-sm">{formatExpiryDate(selectedOrder.created, selectedOrder.expiry)}</span>
+                  </div>
+                </div>
+
+                {/* Order ID Card */}
+                <div className="rounded-xl bg-muted/50 py-3 px-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Order ID</span>
+                    <span className="text-sm">{selectedOrder.orderId}</span>
+                  </div>
+                </div>
+
+                {/* History-specific fields */}
+                {selectedOrder.executedPrice && (
+                  <div className="rounded-xl bg-muted/50 overflow-hidden">
+                    <div className="flex items-center justify-between py-3 px-3">
+                      <span className="text-sm text-muted-foreground">Executed price</span>
+                      <span className="text-sm">{formatCurrency(selectedOrder.executedPrice)}</span>
                     </div>
-                  )}
+                    {selectedOrder.filledAt && (
+                      <div className="flex items-center justify-between py-3 px-3">
+                        <span className="text-sm text-muted-foreground">Filled at</span>
+                        <span className="text-sm">
+                          {new Date(selectedOrder.filledAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Option Details Card */}
+                {selectedOrder.type === 'Option' && selectedOrder.optionDetails && (
+                  <div className="rounded-xl bg-muted/50 overflow-hidden">
+                    <div className="py-3 px-3">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Option details</span>
+                    </div>
+                    <div className="flex items-center justify-between py-3 px-3">
+                      <span className="text-sm text-muted-foreground">Underlying</span>
+                      <span className="text-sm">{selectedOrder.optionDetails.underlying}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-3 px-3">
+                      <span className="text-sm text-muted-foreground">Strike</span>
+                      <span className="text-sm">
+                        {formatCurrency(selectedOrder.optionDetails.strike).replace('.00', '')}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-3 px-3">
+                      <span className="text-sm text-muted-foreground">Type</span>
+                      <span className="text-sm">{selectedOrder.optionDetails.optionType}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-3 px-3">
+                      <span className="text-sm text-muted-foreground">Expiration</span>
+                      <span className="text-sm">
+                        {new Date(selectedOrder.optionDetails.expirationDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Security Type Card */}
+                <div className="rounded-xl bg-muted/50 py-3 px-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Security type</span>
+                    <span className="text-sm">{selectedOrder.type}</span>
+                  </div>
+                </div>
               </div>
             </>
           )}

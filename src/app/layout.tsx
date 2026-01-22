@@ -31,7 +31,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   // Validate environment variables at startup
-  const envValidation = validateEnvironment();
+  let envValidation;
+  try {
+    envValidation = validateEnvironment();
+  } catch {
+    // If validation fails, continue anyway in development
+    envValidation = {
+      isValid: process.env.NODE_ENV !== 'production',
+      missing: [],
+      invalid: [],
+      warnings: ['Environment validation error occurred']
+    };
+  }
   
   if (!envValidation.isValid) {
     return (
