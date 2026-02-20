@@ -6,7 +6,7 @@
 @layer base {
   :root {
     /* Reverted to original hex/tailwind values */
-    --background: 245 245 244; /* #F5F5F4 - Default for advisor (Solace) */
+    --background: 255 255 255; /* #FFFFFF - Pure white */
     --foreground: #111827; /* Original: gray-900 */
 
     --secondary: #f6f6f3; /* Original: gray-100 */
@@ -28,8 +28,11 @@
     --accent: 246 246 244; /* Light gray with subtle beige undertone */
     --accent-foreground: #1f2937; /* Original: gray-800 */
 
-    --destructive: #ef4444; /* Original: red-500 */
-    --destructive-foreground: #ffffff; /* Original: white */
+    --destructive: 239 68 68; /* red-500 */
+    --destructive-foreground: 255 255 255; /* white */
+
+    --popover: 255 255 255; /* same as card */
+    --popover-foreground: 17 24 39; /* same as card-foreground #111827 */
 
     --ring: #a5b4fc; /* Original: indigo-300 */
 
@@ -66,9 +69,6 @@
     
     /* Sidebar accent color for Solace theme */
     --sidebar-accent: #E7E5E4;
-    
-    /* Button weak color for Solace theme (advisor) */
-    --button-weak: #F1F0EE;
   }
   
   /* Chart colors for Wedbush Next theme (client) */
@@ -85,12 +85,6 @@
     
     /* Muted color for Wedbush Next theme */
     --muted: 249 249 250; /* #F9F9FA */
-    
-    /* Muted foreground color for Wedbush Next theme */
-    --muted-foreground: #334155;
-    
-    /* Button weak color for Wedbush Next theme (client) */
-    --button-weak: #EEEFF1;
   }
 
   .dark {
@@ -118,12 +112,12 @@
     --accent: 12 12 12; /* Very dark for dark mode */
     --accent-foreground: #fee9bf; /* Reverted */
 
-    --destructive: #f87171; /* Reverted */
-    --destructive-foreground: #000000; /* Reverted */
+    --destructive: 248 113 113; /* red-400 */
+    --destructive-foreground: 0 0 0; /* black */
 
-    --border: #3f3f46; /* zinc-700 for better visibility */
-    --input: #3f3f46; /* zinc-700 for input borders */
-    --border-input: #3f3f46; /* zinc-700 for input borders */
+    --border: #404040; /* Dark gray for better visibility */
+    --input: #404040; /* Dark gray for input borders */
+    --border-input: #404040; /* Dark gray for input borders */
     --ring: #bfdbfe; /* Reverted */
 
     /* Keeping existing chart/gradient/positive/negative */
@@ -153,63 +147,23 @@
     --chart-6: #D7A554;
     
     /* Sidebar accent color for Solace theme - dark mode */
-    --sidebar-accent: #262626; /* neutral-800 */
+    --sidebar-accent: #E7E5E4;
   }
   
-  /* Wedbush Next theme (client) - dark mode */
-  .dark [data-theme="wedbush-next"],
-  [data-theme="wedbush-next"].dark {
-    /* Background colors for dark mode - blue-ish slate tones */
-    --background: 15 23 42; /* slate-900 */
-    --foreground: 248 250 252; /* slate-50 */
-    
-    --card: 30 41 59; /* slate-800 */
-    --card-foreground: 248 250 252; /* slate-50 */
-    
-    --popover: 30 41 59; /* slate-800 */
-    --popover-foreground: 248 250 252; /* slate-50 */
-    
-    --muted: 51 65 85; /* slate-700 */
-    --muted-foreground: 148 163 184; /* slate-400 */
-    
-    --accent: 51 65 85; /* slate-700 */
-    --accent-foreground: 248 250 252; /* slate-50 */
-    
-    --border: #334155; /* slate-700 */
-    --input: #475569; /* slate-600 */
-    --border-input: #475569; /* slate-600 */
-    
-    /* Lighter primary blue for dark mode */
-    --primary: 96 165 250; /* blue-400 - lighter for better visibility */
-    
-    /* Sidebar accent color for Wedbush Next theme - dark mode */
-    --sidebar-accent: #334155; /* slate-700 */
-    
-    /* Chart colors */
+  /* Chart colors for Wedbush Next theme (client) - dark mode */
+  .dark [data-theme="wedbush-next"] {
     --chart-1: #C1EA8B;
     --chart-2: #5E5CE6;
     --chart-3: #06B6D4;
     --chart-4: #237AF6;
     --chart-5: #831944;
     --chart-6: #D7A554;
-  }
-  
-  /* Override card background for client dark mode */
-  .dark [data-theme="wedbush-next"] .bg-card,
-  [data-theme="wedbush-next"].dark .bg-card {
-    background-color: rgb(30 41 59) !important; /* slate-800 */
-  }
-  
-  /* Override borders for client dark mode */
-  .dark [data-theme="wedbush-next"] .border,
-  .dark [data-theme="wedbush-next"] .border-b,
-  .dark [data-theme="wedbush-next"] .border-t,
-  .dark [data-theme="wedbush-next"] .border-gray-200,
-  [data-theme="wedbush-next"].dark .border,
-  [data-theme="wedbush-next"].dark .border-b,
-  [data-theme="wedbush-next"].dark .border-t,
-  [data-theme="wedbush-next"].dark .border-gray-200 {
-    border-color: #334155 !important; /* slate-700 */
+    
+    /* Sidebar accent color for Wedbush Next theme - dark mode */
+    --sidebar-accent: #E2E8F0;
+    
+    /* Muted color for Wedbush Next theme - dark mode */
+    --muted: 249 249 250; /* #F9F9FA */
   }
   
 
@@ -236,7 +190,7 @@
   }
 
   h3 {
-    @apply text-lg font-medium;
+    @apply text-base font-medium;
   }
 
   *::selection {
