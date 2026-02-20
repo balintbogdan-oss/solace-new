@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "vercel:link": "vercel link --yes --project solace-vibes --scope pillar-ceb962b5",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "deploy:branch": "sh scripts/deploy-branch.sh",
+    "deploy:branch:prod": "sh scripts/deploy-branch.sh prod"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
