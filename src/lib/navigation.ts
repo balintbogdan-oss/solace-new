@@ -1,4 +1,4 @@
-import { LucideIcon, Home, Users, FileText, TrendingUp, MessageSquare, Briefcase, Bell, PieChart, ChartLine, Activity, FileBarChart, ClipboardList, TrendingUp as LineChart, Link, Coins, UserCheck } from 'lucide-react';
+import { LucideIcon, Home, Users, FileText, TrendingUp, MessageSquare, Briefcase, Bell, PieChart, ChartLine, Activity, FileBarChart, ClipboardList, TrendingUp as LineChart, Link, Coins, UserCheck, ArrowLeftRight } from 'lucide-react';
 import { NavigationSettings } from '@/contexts/SettingsContext';
 
 export interface NavItem {
@@ -7,6 +7,8 @@ export interface NavItem {
   icon?: LucideIcon;
   subItems?: NavItem[];
   groupTitle?: string;
+  /** Optional class for the menu item (e.g. for highlight color) */
+  className?: string;
 }
 
 export interface SidebarSection {
@@ -145,6 +147,12 @@ export const sidebarSections: Record<string, SidebarSection> = {
           // Placeholder route for open orders within this account
           { label: 'Open orders', href: 'trade/open-orders' },
         ],
+      },
+      { 
+        label: 'Move money', 
+        href: 'move-money', 
+        icon: ArrowLeftRight,
+        className: 'text-[#B8860B] dark:text-amber-600',
       },
       { 
         label: 'Documents', 
