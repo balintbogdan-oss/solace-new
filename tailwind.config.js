@@ -17,13 +17,6 @@ module.exports = {
         "2xl": "1400px",
       },
     },
-    screens: {
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1140px',  // Custom breakpoint for better layout at 1148px
-      '2xl': '1536px',
-    },
     extend: {
       backgroundColor: {
         'card-blend': 'rgba(255, 255, 255, 0.5)', // Light mode fallback
@@ -63,13 +56,12 @@ module.exports = {
         },
         popover: { // Needed for popovers/dropdowns
           DEFAULT: "rgb(var(--popover, var(--card)) / <alpha-value>)", // Fallback to card
-          foreground: "rgb(var(--popover-foreground, var(--card-foreground))) / <alpha-value>)", // Fallback to card
+          foreground: "rgb(var(--popover-foreground, var(--card-foreground)) / <alpha-value>)",
         },
         card: {
           DEFAULT: "rgb(var(--card) / <alpha-value>)",
           foreground: "rgb(var(--card-foreground) / <alpha-value>)",
         },
-        "button-weak": "var(--button-weak)",
         positive: "hsl(var(--positive))",
         negative: "hsl(var(--negative))",
         "chart-positive": "hsl(var(--chart-positive))",
