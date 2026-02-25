@@ -152,7 +152,6 @@ export const sidebarSections: Record<string, SidebarSection> = {
         label: 'Move money', 
         href: 'move-money', 
         icon: ArrowLeftRight,
-        className: 'text-[#B8860B] dark:text-amber-600',
       },
       { 
         label: 'Documents', 

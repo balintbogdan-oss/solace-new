@@ -102,7 +102,7 @@ export function Sidebar() { // Removed props
                   'flex items-center text-sm transition-colors',
                   isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
                   showActiveState
-                    ? 'bg-white dark:bg-white/10 text-amber-800 dark:text-amber-600 shadow-[0px_1px_2px_1px_rgba(0,0,0,0.06)]'
+                    ? 'bg-white dark:bg-white/10 text-primary shadow-[0px_1px_2px_1px_rgba(0,0,0,0.06)]'
                     : isActive
                       ? 'text-foreground dark:text-white'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50',
@@ -161,7 +161,7 @@ export function Sidebar() { // Removed props
                 'flex items-center text-sm transition-colors',
                 isMinimized ? 'justify-center items-center w-10 h-10 rounded-lg' : 'justify-between w-full rounded-md px-3 py-3',
                 isActive
-                  ? 'bg-white dark:bg-white/10 text-amber-800 dark:text-amber-600 shadow-[0px_1px_2px_1px_rgba(0,0,0,0.06)]'
+                  ? 'bg-white dark:bg-white/10 text-primary shadow-[0px_1px_2px_1px_rgba(0,0,0,0.06)]'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200/30 dark:hover:bg-muted/50',
                 item.className
               )}

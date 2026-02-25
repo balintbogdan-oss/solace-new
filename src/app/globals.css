@@ -31,6 +31,9 @@
     --destructive: 239 68 68; /* red-500 */
     --destructive-foreground: 255 255 255; /* white */
 
+    --popover: 255 255 255; /* same as card */
+    --popover-foreground: 17 24 39; /* same as card-foreground #111827 */
+
     --ring: #a5b4fc; /* Original: indigo-300 */
 
     --radius: 0.5rem; /* 8px - Default for most elements */
@@ -66,6 +69,9 @@
     
     /* Sidebar accent color for Solace theme */
     --sidebar-accent: #E7E5E4;
+
+    /* Header background - overridden by AppearanceProvider */
+    --header-bg: #000000;
   }
   
   /* Chart colors for Wedbush Next theme (client) */
