@@ -79,12 +79,14 @@ export function HeaderWrapper() {
     return null;
   }
 
-  const isMoneyMovement = pathname?.includes('/move-money');
+  const isMoneyMovementSubFlow =
+    pathname?.includes('/move-money/outbound') ||
+    pathname?.includes('/move-money/inbound') ||
+    pathname?.includes('/move-money/new-ach') ||
+    pathname?.includes('/move-money/new-loa') ||
+    pathname?.includes('/move-money/sign-ach');
 
-  // Both server and client initially render advisor to avoid hydration mismatch
-  // After mount, we update to the correct header
-  // The header components have suppressHydrationWarning to handle any remaining mismatches
-  if (isMoneyMovement) {
+  if (isMoneyMovementSubFlow) {
     return <HeaderMoneyMovement />;
   }
 
