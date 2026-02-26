@@ -31,7 +31,6 @@ import { STOCK_DATA } from '@/components/trade/StockDetailPanel' // Keep STOCK_D
 import { SecurityHeader } from '@/components/trade/SecurityHeader'
 import { useAccountData } from '@/contexts/AccountDataContext'
 import { getChartColorByIndex } from '@/lib/chartColors'
-import { PageHeading } from '@/components/layout/PageHeading'
 
 
 type TradeMode = 'buy' | 'sell' | null
@@ -116,67 +115,22 @@ export function AccountContent({ accountId }: AccountContentProps) {
     // TODO: Implement actual API call
   };
 
-  // Helper function to get asset type colors using chart color system
-  const getAssetTypeColor = (assetType: string) => {
-    // Map asset types to chart color indices (cycling through 1-6)
-    const assetTypeMap: Record<string, number> = {
-      'Equities': 1,
-      'Mutual Funds': 2,
-      'Options': 3,
-      'Fixed Income': 4,
-      'Cash': 5,
-      'Annuities': 6,
-      'Others': 1
+  // Helper function to get sector colors using chart color system
+  const getSectorColor = (sector: string) => {
+    // Map sectors to chart color indices (cycling through 1-6)
+    const sectorMap: Record<string, number> = {
+      'Technology': 1,
+      'Financial Services': 2,
+      'Consumer Discretionary': 3,
+      'Automotive': 4,
+      'Healthcare': 5,
+      'Energy': 6,
+      'Utilities': 1,
+      'Real Estate': 2
     };
     
-    const colorIndex = assetTypeMap[assetType] || 1;
+    const colorIndex = sectorMap[sector] || 1;
     return getChartColorByIndex(colorIndex);
-  };
-
-  // Helper function to determine asset type from holding
-  const getAssetType = (holding: ReturnType<typeof getHoldingsWithDetails>[0]): string => {
-    const symbol = holding.symbol?.toUpperCase() || '';
-    const description = (holding.security?.description || '').toLowerCase();
-    const securityType = (holding.security as { type?: string })?.type?.toLowerCase() || '';
-    const sector = (holding.security?.sector || '').toLowerCase();
-    
-    // First check the security type field if available
-    if (securityType === 'mutual_fund' || sector === 'mutual fund') {
-      return 'Mutual Funds';
-    }
-    if (securityType === 'option' || sector === 'options') {
-      return 'Options';
-    }
-    if (securityType === 'fixed_income' || sector === 'fixed income') {
-      return 'Fixed Income';
-    }
-    
-    // Check for mutual funds - specific fund symbols or explicit fund names
-    if (symbol === 'VTSAX' || symbol === 'VFIAX' || symbol === 'VTSMX' ||
-        symbol === 'FXAIX' || symbol === 'SWTSX' ||
-        description.includes('index fund') || description.includes('mutual fund') ||
-        description.includes('vanguard total') || description.includes('fidelity 500')) {
-      return 'Mutual Funds';
-    }
-    
-    // Check for options - symbol patterns with date and C/P for call/put
-    if (symbol.length > 8 && /\d{6}[CP]\d+/.test(symbol)) {
-      return 'Options';
-    }
-    
-    // Check for fixed income - bonds, treasuries, CDs
-    if (description.includes('bond') || description.includes('treasury') || 
-        description.includes(' note ') || description.includes('certificate of deposit')) {
-      return 'Fixed Income';
-    }
-    
-    // Check for annuities
-    if (description.includes('annuity')) {
-      return 'Annuities';
-    }
-    
-    // Default to Equities for stocks - most common case
-    return 'Equities';
   };
 
   // Calculate dynamic data from accountData
@@ -199,66 +153,50 @@ export function AccountContent({ accountId }: AccountContentProps) {
     // Get holdings with full details first
     const holdingsWithDetails = getHoldingsWithDetails();
     
-    // Use balances.totalValue from account data to match client dashboard
-    // This ensures consistency between dashboard and account page
-    const totalValue = balances.totalValue || 0;
-    const investedValue = balances.investedValue || 0;
+    // Calculate total market value from holdings
+    const totalMarketValue = holdingsWithDetails.reduce((sum, holding) => sum + (holding.marketValue || 0), 0);
+    const totalInvestedValue = holdingsWithDetails.reduce((sum, holding) => sum + (holding.quantity * holding.avgPrice), 0);
     
-    // Calculate unrealized G/L from balances (totalValue - investedValue)
-    // This matches what's stored in the account data and ensures consistency
-    const totalUnrealizedGL = totalValue - investedValue;
-    const totalUnrealizedGLPercent = investedValue > 0 ? (totalUnrealizedGL / investedValue) * 100 : 0;
+    // Use calculated values or fall back to account data
+    const totalValue = totalMarketValue + (balances.cash || 0);
+    const investedValue = totalInvestedValue;
     
-    // Calculate today's unrealized G/L (current price vs previous close)
-    const todaysUnrealizedGL = holdingsWithDetails.reduce((sum, holding) => {
-      const dayChange = holding.marketData?.dayChange || 0;
-      return sum + (holding.quantity * dayChange);
-    }, 0);
-    const todaysUnrealizedGLPercent = totalValue > 0 ? (todaysUnrealizedGL / totalValue) * 100 : 0;
+    // Calculate unrealized G/L from holdings
+    const unrealizedGL = holdingsWithDetails.reduce((sum, holding) => sum + (holding.unrealizedGL || 0), 0);
+    const unrealizedGLPercent = investedValue > 0 ? (unrealizedGL / investedValue) * 100 : 0;
+    
 
-    // Calculate asset allocation from holdings by asset type
+    // Calculate asset allocation from holdings
     const assetAllocation = holdingsWithDetails.reduce((acc, holding) => {
       const marketValue = holding.marketValue || 0;
-      const assetType = getAssetType(holding);
-      const existing = acc.find(item => item.name === assetType);
+      const existing = acc.find(item => item.name === holding.security.sector);
       if (existing) {
         existing.value += marketValue;
       } else {
         acc.push({
-          name: assetType,
+          name: holding.security.sector,
           value: marketValue,
-          color: getAssetTypeColor(assetType)
+          color: getSectorColor(holding.security.sector)
         });
       }
       return acc;
     }, [] as Array<{ name: string; value: number; color: string }>);
 
     // Ensure we have valid numbers
-    const safeTotalUnrealizedGL = isNaN(totalUnrealizedGL) ? 0 : totalUnrealizedGL;
-    const safeTotalUnrealizedGLPercent = isNaN(totalUnrealizedGLPercent) ? 0 : totalUnrealizedGLPercent;
-    const safeTodaysUnrealizedGL = isNaN(todaysUnrealizedGL) ? 0 : todaysUnrealizedGL;
-    const safeTodaysUnrealizedGLPercent = isNaN(todaysUnrealizedGLPercent) ? 0 : todaysUnrealizedGLPercent;
+    const safeUnrealizedGL = isNaN(unrealizedGL) ? 0 : unrealizedGL;
+    const safeUnrealizedGLPercent = isNaN(unrealizedGLPercent) ? 0 : unrealizedGLPercent;
     const safeTotalValue = isNaN(totalValue) ? 0 : totalValue;
     
-
-    // Format amounts: minus before dollar sign if negative, no plus sign if positive
-    const formatGLAmount = (value: number) => {
-      const absValue = Math.abs(value);
-      const formatted = absValue.toLocaleString('en-US', { minimumFractionDigits: 2 });
-      return value < 0 ? `-$${formatted}` : `$${formatted}`;
-    };
 
     return {
       portfolioValue: `$${safeTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       todaysGL: { 
-        amount: formatGLAmount(safeTodaysUnrealizedGL),
-        percentage: `${safeTodaysUnrealizedGLPercent >= 0 ? '' : '-'}${Math.abs(safeTodaysUnrealizedGLPercent).toFixed(2)}%`,
-        isPositive: safeTodaysUnrealizedGL >= 0
+        amount: `${safeUnrealizedGL >= 0 ? '+' : ''}$${safeUnrealizedGL.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, 
+        percentage: `${safeUnrealizedGLPercent.toFixed(2)}%` 
       },
       totalGL: { 
-        amount: formatGLAmount(safeTotalUnrealizedGL),
-        percentage: `${safeTotalUnrealizedGLPercent >= 0 ? '' : '-'}${Math.abs(safeTotalUnrealizedGLPercent).toFixed(2)}%`,
-        isPositive: safeTotalUnrealizedGL >= 0
+        amount: `${safeUnrealizedGL >= 0 ? '+' : ''}$${safeUnrealizedGL.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, 
+        percentage: `${safeUnrealizedGLPercent.toFixed(2)}%` 
       },
       positions: { 
         long: { amount: `$${safeTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}` }, 
@@ -269,20 +207,14 @@ export function AccountContent({ accountId }: AccountContentProps) {
       marginBalance: `$${(balances.margin || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       fundsAvailable: `$${(balances.buyingPower || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       totalAccountValue: `$${safeTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-      assetAllocation: assetAllocation
-        .filter(item => item.value > 0) // Only include segments with actual value
-        .map(item => ({
+      assetAllocation: assetAllocation.map(item => ({
         ...item,
-          // Keep actual market values for the pie chart (not percentages)
-          // This ensures all segments are visible even if small
-          value: item.value
+        value: safeTotalValue > 0 ? Math.round((item.value / safeTotalValue) * 100) : 0
       }))
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountData, getHoldingsWithDetails]);
 
-  // Don't block on loading if we have cached data - show data immediately
-  if (loading && !accountData) {
+  if (loading) {
     return (
       <div className="rounded-md space-y-4 md:space-y-4">
         {/* Holdings Title Skeleton */}
@@ -304,88 +236,84 @@ export function AccountContent({ accountId }: AccountContentProps) {
     );
   }
 
-  if (error && !accountData) {
+  if (error || !accountData) {
     return <div className="min-h-screen flex items-center justify-center text-red-500">Error loading account data</div>;
   }
 
   return (
     <div className="rounded-md space-y-4 md:space-y-4">
          {/* Holdings Title and Action Buttons */}
-         <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="w-full sm:w-auto">
-              <PageHeading as="h2" className="text-xl sm:text-2xl">Holdings</PageHeading>
-            </div>
-            <div className="flex items-center space-x-2 w-full sm:w-auto">
-              <Button variant="outline">
-                <FileText className="mr-2 h-4 w-4" />
+         <div className="w-full flex justify-between items-center">
+            <h2 className="text-2xl font-serif ">Holdings</h2>
+            <div className="flex items-center space-x-2">
+              <Button variant="secondary">
+                <FileText className="mr-2 h-5 w-5" />
                 Export
               </Button>
-              <Button variant="outline">
-                <History className="mr-2 h-4 w-4" />
+              <Button variant="secondary">
+                <History className="mr-2 h-5 w-5" />
                 View History
               </Button>
             </div>
           </div>
-      <div className="w-full flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-4">
-        <Card className="lg:col-span-2 min-w-0 flex flex-col items-start overflow-hidden rounded-2xl p-0">
-          <div className="flex-1 w-full p-4 sm:p-6 flex flex-col justify-between items-start gap-4 sm:gap-6">
-            <div className="w-full flex flex-col gap-4 sm:gap-6">
-              {/* Portfolio market value - full width */}
-              <div className="flex flex-col items-start gap-1 px-px">
-                <div className="text-sm font-medium text-muted-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Portfolio market value</div>
-                {(() => {
-                  const value = portfolioData?.portfolioValue || '$0.00';
-                  const match = value.match(/^\$([\d,]+)\.(\d{2})$/);
-                  if (match) {
-                    return (
-                      <h3 className="flex items-start leading-none">
-                        <span className="text-xl sm:text-2xl lg:text-3xl font-medium text-foreground tracking-[-0.24px] leading-[28px] sm:leading-[36px] lg:leading-[40px]" style={{ fontFamily: 'var(--font-family-headers, "Source Serif 4")' }}>
-                          ${match[1]}.
-                        </span>
-                        <span className="text-base sm:text-lg lg:text-xl font-medium text-foreground leading-6 flex items-end" style={{ fontFamily: 'var(--font-family, "Inter")', transform: 'translateY(10px)', marginBottom: '10px' }}>
-                          {match[2]}
-                        </span>
-                      </h3>
-                    );
-                  }
-                  return <h3 className="text-xl sm:text-2xl lg:text-3xl font-medium text-foreground">{value}</h3>;
-                })()}
-              </div>
-              
-              {/* Metrics grid - 1 column on mobile, 2 columns on larger screens */}
-              <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-2">
-                {/* Left Column */}
-                <div className="flex flex-col gap-2">
-                  {/* Today's unrealized G/L */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
-                    <div className="text-sm font-medium text-muted-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Today&apos;s unrealized G/L</div>
-                    <div className="text-sm font-medium text-positive-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
-                      {portfolioData?.todaysGL.amount} ({portfolioData?.todaysGL.percentage})
-                    </div>
+      <div className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-4">
+     
+        <Card className="md:col-span-2 min-w-0 flex flex-col items-start overflow-hidden rounded-2xl p-0">
+          <div className="flex-1 w-full p-4 sm:p-6 flex flex-col justify-between items-start gap-4">
+            <div className="w-full flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 lg:gap-0">
+              {/* Left side: Portfolio value and G/L */}
+              <div className="flex-1 flex flex-col items-start gap-4 w-full lg:w-auto">
+                <div className="flex flex-col items-start gap-2 w-full">
+                  <div className="flex flex-col items-start gap-1 px-px">
+                    <div className="text-sm font-medium text-card-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Portfolio market value</div>
+                    {(() => {
+                      const value = portfolioData?.portfolioValue || '$0.00';
+                      const match = value.match(/^\$([\d,]+)\.(\d{2})$/);
+                      if (match) {
+                        return (
+                          <h3 className="flex items-start leading-none">
+                            <span className="text-xl sm:text-2xl font-medium text-foreground tracking-[-0.24px] leading-[32px] sm:leading-[40px]" style={{ fontFamily: 'var(--font-family-headers, "Source Serif 4")' }}>
+                              ${match[1]}.
+                            </span>
+                            <span className="text-base sm:text-lg font-medium text-foreground leading-6 h-[28px] sm:h-[35px] flex items-end" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
+                              {match[2]}
+                            </span>
+                          </h3>
+                        );
+                      }
+                      return <h3 className="text-xl sm:text-2xl font-medium text-foreground">{value}</h3>;
+                    })()}
                   </div>
-                  
-                  {/* Total unrealized G/L */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
-                    <div className="text-sm font-medium text-muted-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total unrealized G/L</div>
-                    <div className="text-sm font-medium text-positive-foreground leading-6" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
-                      {portfolioData?.totalGL.amount} ({portfolioData?.totalGL.percentage})
+                  <div className="flex flex-col items-start gap-2 w-full">
+                    <div className="flex items-center gap-1.5 w-full">
+                      <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Today&apos;s unrealized G/L</div>
+                      <div className="flex items-center gap-1">
+                        <div className="text-sm font-medium text-positive-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
+                          {portfolioData?.todaysGL.amount} ({portfolioData?.todaysGL.percentage})
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 w-full">
+                      <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total unrealized G/L</div>
+                      <div className="flex items-center gap-1">
+                        <div className="text-sm font-medium text-positive-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>
+                          {portfolioData?.totalGL.amount} ({portfolioData?.totalGL.percentage})
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                {/* Right Column */}
-                <div className="flex flex-col gap-2">
-                  {/* Long market value */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
-                    <div className="text-sm font-medium text-muted-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Long market value</div>
-                    <div className="text-sm font-medium text-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.long.amount}</div>
-                  </div>
-                  
-                  {/* Short market value */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
-                    <div className="text-sm font-medium text-muted-foreground leading-6 sm:w-[180px] flex-shrink-0" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Short market value</div>
-                    <div className="text-sm font-medium text-negative-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.short.amount}</div>
-                  </div>
+              </div>
+              
+              {/* Right side: Long and Short market values */}
+              <div className="flex flex-col items-start lg:items-end justify-end gap-2 w-full lg:w-auto lg:min-w-[267px]">
+                <div className="w-full lg:w-auto flex items-center justify-between lg:justify-end gap-4">
+                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Long market value</div>
+                  <div className="text-sm font-medium text-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.long.amount}</div>
+                </div>
+                <div className="w-full lg:w-auto flex items-center justify-between lg:justify-end gap-4">
+                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Short market value</div>
+                  <div className="text-sm font-medium text-negative-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.positions.short.amount}</div>
                 </div>
               </div>
             </div>
@@ -396,34 +324,34 @@ export function AccountContent({ accountId }: AccountContentProps) {
             </div>
             
             {/* Bottom row: Available cash, FDIC Sweep, Margin balance, Funds available, Total account value */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-4 xl:gap-0 rounded-lg">
-              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 md:gap-0 rounded-lg">
+              <div className="flex flex-col items-start gap-4 py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
-                  <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Available cash</div>
-                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.availableCash}</div>
+                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Available cash</div>
+                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.availableCash}</div>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
+              <div className="flex flex-col items-start gap-4 py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
-                  <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>FDIC Sweep</div>
-                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.fdicSweep}</div>
+                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>FDIC Sweep</div>
+                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.fdicSweep}</div>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
+              <div className="flex flex-col items-start gap-4 py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
-                  <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Margin balance</div>
-                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.marginBalance}</div>
+                  <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Margin balance</div>
+                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.marginBalance}</div>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
+              <div className="flex flex-col items-start gap-4 py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
                   <div className="flex items-center gap-1">
-                    <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Funds available</div>
+                    <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Funds available</div>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded flex items-center justify-center hover:bg-accent flex-shrink-0">
-                            <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground" />
+                          <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent flex-shrink-0">
+                            <Info className="w-3.5 h-3.5 text-card-foreground" />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -432,18 +360,18 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.fundsAvailable}</div>
+                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.fundsAvailable}</div>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-2 sm:gap-4 py-2 sm:py-3 px-0">
+              <div className="flex flex-col items-start gap-4 py-3 px-0">
                 <div className="flex flex-col items-start gap-1 w-full">
                   <div className="flex items-center gap-1">
-                    <div className="text-sm sm:text-sm font-medium text-muted-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total account value</div>
+                    <div className="text-sm font-medium text-card-foreground leading-6 whitespace-nowrap" style={{ fontFamily: 'var(--font-family, "Inter")' }}>Total account value</div>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded flex items-center justify-center hover:bg-accent flex-shrink-0">
-                            <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground" />
+                          <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent flex-shrink-0">
+                            <Info className="w-3.5 h-3.5 text-card-foreground" />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -452,7 +380,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <div className="text-sm sm:text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.totalAccountValue}</div>
+                  <div className="text-sm font-medium text-foreground leading-6 break-words" style={{ fontFamily: 'var(--font-family, "Inter")' }}>{portfolioData?.totalAccountValue}</div>
                 </div>
               </div>
             </div>
@@ -460,8 +388,8 @@ export function AccountContent({ accountId }: AccountContentProps) {
           
           {/* Footer with updated timestamp */}
           <div className="w-full px-4 sm:px-6 py-2 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-            <div className="flex-1 flex items-center gap-1.5 flex-wrap">
-              <div className="text-xs font-normal text-card-foreground leading-5 tracking-[0.12px] break-words">
+            <div className="flex-1 flex items-center gap-1.5">
+              <div className="text-xs font-normal text-card-foreground leading-5 tracking-[0.12px]">
                 Updated {new Date().toLocaleString('en-US', { 
                   month: '2-digit', 
                   day: '2-digit', 
@@ -478,14 +406,14 @@ export function AccountContent({ accountId }: AccountContentProps) {
           </div>
         </Card>
 
-        <Card className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 flex flex-col items-center gap-4 sm:gap-6">
+        <Card className="px-6 pt-6 pb-3 flex flex-col items-center gap-6">
           <div className="w-full flex justify-between items-center">
-            <span className="text-xs sm:text-sm font-medium text-card-foreground">Asset allocation</span>
-            <button className="text-xs sm:text-sm font-medium text-primary leading-6 tracking-tight hover:underline">Expand view</button>
+            <span className="text-sm font-medium text-card-foreground">Asset allocation</span>
+            <button className="text-sm font-medium text-primary leading-6 tracking-tight hover:underline">Expand view</button>
           </div>
           
           {/* Chart container - centered */}
-          <div className="w-full flex items-center justify-center min-h-[160px] sm:min-h-[192px]">
+          <div className="w-48 h-48 relative flex items-center justify-center">
             <DonutChart 
               data={portfolioData?.assetAllocation || []} 
               portfolioValue={portfolioData ? parseFloat(portfolioData.portfolioValue.replace(/[$,]/g, '')) : 0}
@@ -494,12 +422,17 @@ export function AccountContent({ accountId }: AccountContentProps) {
           
           {/* Legend - centered with flex-wrap */}
           <div className="w-full flex justify-center items-center gap-4 flex-wrap">
-            {(portfolioData?.assetAllocation || []).map((item) => (
+            {(portfolioData?.assetAllocation || []).slice(0, 2).map((item) => (
               <div key={item.name} className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded flex-shrink-0" style={{ backgroundColor: item.color }}></span>
                 <span className="text-xs font-medium text-card-foreground leading-5 tracking-tight">{item.name}</span>
               </div>
             ))}
+            {(portfolioData?.assetAllocation || []).length > 2 && (
+              <div className="text-xs font-medium text-card-foreground leading-5 tracking-tight">
+                +{(portfolioData?.assetAllocation || []).length - 2} more
+              </div>
+            )}
           </div>
         </Card>
       </div>

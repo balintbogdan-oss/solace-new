@@ -153,22 +153,18 @@ export function AccountContent({ accountId }: AccountContentProps) {
     // Get holdings with full details first
     const holdingsWithDetails = getHoldingsWithDetails();
     
-    // Use balances.totalValue from account data to match client dashboard
-    // This ensures consistency between dashboard and account page
-    const totalValue = balances.totalValue || 0;
-    const investedValue = balances.investedValue || 0;
+    // Calculate total market value from holdings
+    const totalMarketValue = holdingsWithDetails.reduce((sum, holding) => sum + (holding.marketValue || 0), 0);
+    const totalInvestedValue = holdingsWithDetails.reduce((sum, holding) => sum + (holding.quantity * holding.avgPrice), 0);
     
-    // Calculate unrealized G/L from balances (totalValue - investedValue)
-    // This matches what's stored in the account data and ensures consistency
-    const totalUnrealizedGL = totalValue - investedValue;
-    const totalUnrealizedGLPercent = investedValue > 0 ? (totalUnrealizedGL / investedValue) * 100 : 0;
+    // Use calculated values or fall back to account data
+    const totalValue = totalMarketValue + (balances.cash || 0);
+    const investedValue = totalInvestedValue;
     
-    // Calculate today's unrealized G/L (current price vs previous close)
-    const todaysUnrealizedGL = holdingsWithDetails.reduce((sum, holding) => {
-      const dayChange = holding.marketData?.dayChange || 0;
-      return sum + (holding.quantity * dayChange);
-    }, 0);
-    const todaysUnrealizedGLPercent = totalValue > 0 ? (todaysUnrealizedGL / totalValue) * 100 : 0;
+    // Calculate unrealized G/L from holdings
+    const unrealizedGL = holdingsWithDetails.reduce((sum, holding) => sum + (holding.unrealizedGL || 0), 0);
+    const unrealizedGLPercent = investedValue > 0 ? (unrealizedGL / investedValue) * 100 : 0;
+    
 
     // Calculate asset allocation from holdings
     const assetAllocation = holdingsWithDetails.reduce((acc, holding) => {
@@ -187,31 +183,20 @@ export function AccountContent({ accountId }: AccountContentProps) {
     }, [] as Array<{ name: string; value: number; color: string }>);
 
     // Ensure we have valid numbers
-    const safeTotalUnrealizedGL = isNaN(totalUnrealizedGL) ? 0 : totalUnrealizedGL;
-    const safeTotalUnrealizedGLPercent = isNaN(totalUnrealizedGLPercent) ? 0 : totalUnrealizedGLPercent;
-    const safeTodaysUnrealizedGL = isNaN(todaysUnrealizedGL) ? 0 : todaysUnrealizedGL;
-    const safeTodaysUnrealizedGLPercent = isNaN(todaysUnrealizedGLPercent) ? 0 : todaysUnrealizedGLPercent;
+    const safeUnrealizedGL = isNaN(unrealizedGL) ? 0 : unrealizedGL;
+    const safeUnrealizedGLPercent = isNaN(unrealizedGLPercent) ? 0 : unrealizedGLPercent;
     const safeTotalValue = isNaN(totalValue) ? 0 : totalValue;
     
-
-    // Format amounts: minus before dollar sign if negative, no plus sign if positive
-    const formatGLAmount = (value: number) => {
-      const absValue = Math.abs(value);
-      const formatted = absValue.toLocaleString('en-US', { minimumFractionDigits: 2 });
-      return value < 0 ? `-$${formatted}` : `$${formatted}`;
-    };
 
     return {
       portfolioValue: `$${safeTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       todaysGL: { 
-        amount: formatGLAmount(safeTodaysUnrealizedGL),
-        percentage: `${safeTodaysUnrealizedGLPercent >= 0 ? '' : '-'}${Math.abs(safeTodaysUnrealizedGLPercent).toFixed(2)}%`,
-        isPositive: safeTodaysUnrealizedGL >= 0
+        amount: `${safeUnrealizedGL >= 0 ? '+' : ''}$${safeUnrealizedGL.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, 
+        percentage: `${safeUnrealizedGLPercent.toFixed(2)}%` 
       },
       totalGL: { 
-        amount: formatGLAmount(safeTotalUnrealizedGL),
-        percentage: `${safeTotalUnrealizedGLPercent >= 0 ? '' : '-'}${Math.abs(safeTotalUnrealizedGLPercent).toFixed(2)}%`,
-        isPositive: safeTotalUnrealizedGL >= 0
+        amount: `${safeUnrealizedGL >= 0 ? '+' : ''}$${safeUnrealizedGL.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, 
+        percentage: `${safeUnrealizedGLPercent.toFixed(2)}%` 
       },
       positions: { 
         long: { amount: `$${safeTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}` }, 
@@ -229,8 +214,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
     };
   }, [accountData, getHoldingsWithDetails]);
 
-  // Don't block on loading if we have cached data - show data immediately
-  if (loading && !accountData) {
+  if (loading) {
     return (
       <div className="rounded-md space-y-4 md:space-y-4">
         {/* Holdings Title Skeleton */}
@@ -252,7 +236,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
     );
   }
 
-  if (error && !accountData) {
+  if (error || !accountData) {
     return <div className="min-h-screen flex items-center justify-center text-red-500">Error loading account data</div>;
   }
 
@@ -262,12 +246,12 @@ export function AccountContent({ accountId }: AccountContentProps) {
          <div className="w-full flex justify-between items-center">
             <h2 className="text-2xl font-serif ">Holdings</h2>
             <div className="flex items-center space-x-2">
-              <Button variant="outline">
-                <FileText className="mr-2 h-4 w-4" />
+              <Button variant="secondary">
+                <FileText className="mr-2 h-5 w-5" />
                 Export
               </Button>
-              <Button variant="outline">
-                <History className="mr-2 h-4 w-4" />
+              <Button variant="secondary">
+                <History className="mr-2 h-5 w-5" />
                 View History
               </Button>
             </div>
@@ -281,7 +265,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
               <div className="flex-1 flex flex-col justify-start items-start gap-4">
                 <div className="flex flex-col justify-start items-start gap-2">
                   <div className="flex flex-col justify-start items-start gap-1">
-                    <div className="text-sm font-medium text-muted-foreground">Portfolio market value</div>
+                    <div className="text-sm font-medium text-card-foreground">Portfolio market value</div>
                     {(() => {
                       const value = portfolioData?.portfolioValue || '$0.00';
                       const match = value.match(/^\$([\d,]+)\.(\d{2})$/);
@@ -300,7 +284,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                     <div className="flex justify-start items-center gap-1.5">
                       <div className="text-sm font-medium text-card-foreground">Today&apos;s unrealized G/L</div>
                       <div className="flex justify-start items-center gap-1">
-                        <div className={`text-sm font-medium ${portfolioData?.todaysGL.isPositive ? 'text-positive' : 'text-negative'}`}>
+                        <div className="text-sm font-medium text-positive">
                           {portfolioData?.todaysGL.amount} ({portfolioData?.todaysGL.percentage})
                         </div>
                       </div>
@@ -308,7 +292,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                     <div className="flex justify-center items-center gap-1.5">
                       <div className="text-sm font-medium text-card-foreground">Total unrealized G/L</div>
                       <div className="flex justify-start items-center gap-1">
-                        <div className={`text-sm font-medium ${portfolioData?.totalGL.isPositive ? 'text-positive' : 'text-negative'}`}>
+                        <div className="text-sm font-medium text-positive">
                           {portfolioData?.totalGL.amount} ({portfolioData?.totalGL.percentage})
                         </div>
                       </div>
@@ -365,7 +349,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent">
-                            <Info className="w-3 h-3 text-muted-foreground" />
+                            <Info className="w-3 h-3 text-card-foreground" />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -385,7 +369,7 @@ export function AccountContent({ accountId }: AccountContentProps) {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button className="w-3.5 h-3.5 rounded flex items-center justify-center hover:bg-accent">
-                            <Info className="w-3 h-3 text-muted-foreground" />
+                            <Info className="w-3 h-3 text-card-foreground" />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>

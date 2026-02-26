@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { AccountData, AccountDataContextType, Holding, Trade, Activity, AccountBalances, MarketData, Security, HoldingWithDetails, UnrealizedPosition, RealizedTrade, CommissionRecord } from '@/types/account';
 import { localDataService } from '@/services/localDataService';
 import { forceReloadMarketData, loadMutualFundsMarketData, loadEquitiesMarketData } from '@/services/marketDataService';
@@ -11,69 +11,28 @@ const AccountDataContext = createContext<AccountDataContextType | undefined>(und
 const accountDataCache = new Map<string, { data: AccountData; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-// Global cache for mock data (shared across all accounts)
-let cachedMockData: { realizedGL: RealizedTrade[]; commissions: CommissionRecord[] } | null = null;
-let mockDataPromise: Promise<{ realizedGL: RealizedTrade[]; commissions: CommissionRecord[] }> | null = null;
-
-// Load mock data (cached globally)
+// Load mock data
 const loadMockData = async (): Promise<{ realizedGL: RealizedTrade[]; commissions: CommissionRecord[] }> => {
-  // Return cached data if available
-  if (cachedMockData) {
-    return cachedMockData;
+  try {
+    const response = await fetch('/data/mock-data.json');
+    const mockData = await response.json();
+    return {
+      realizedGL: mockData.realizedGL || [],
+      commissions: mockData.commissions || []
+    };
+  } catch (error) {
+    console.error('Error loading mock data:', error);
+    return { realizedGL: [], commissions: [] };
   }
-  
-  // Return existing promise if already loading
-  if (mockDataPromise) {
-    return mockDataPromise;
-  }
-  
-  // Start loading
-  mockDataPromise = (async () => {
-    try {
-      const response = await fetch('/data/mock-data.json');
-      const mockData = await response.json();
-      const result = {
-        realizedGL: mockData.realizedGL || [],
-        commissions: mockData.commissions || []
-      };
-      cachedMockData = result;
-      return result;
-    } catch (error) {
-      console.error('Error loading mock data:', error);
-      const result = { realizedGL: [], commissions: [] };
-      cachedMockData = result;
-      return result;
-    } finally {
-      mockDataPromise = null;
-    }
-  })();
-  
-  return mockDataPromise;
 };
 
-// Global cache for market data (shared across all accounts)
-let cachedMarketData: MarketData[] | null = null;
-let marketDataPromise: Promise<MarketData[]> | null = null;
-
-// Load market data from JSON files (cached globally)
+// Load market data from JSON files
 const loadMarketData = async (): Promise<MarketData[]> => {
-  // Return cached data if available
-  if (cachedMarketData) {
-    return cachedMarketData;
-  }
-  
-  // Return existing promise if already loading
-  if (marketDataPromise) {
-    return marketDataPromise;
-  }
-  
-  // Start loading
-  marketDataPromise = (async () => {
-    try {
-      const [equitiesData, mutualFundsData] = await Promise.all([
-        loadEquitiesMarketData(),
-        loadMutualFundsMarketData()
-      ]);
+  try {
+    const [equitiesData, mutualFundsData] = await Promise.all([
+      loadEquitiesMarketData(),
+      loadMutualFundsMarketData()
+    ]);
 
     let allMarketData: MarketData[] = [];
 
@@ -128,19 +87,11 @@ const loadMarketData = async (): Promise<MarketData[]> => {
       })];
     }
 
-      cachedMarketData = allMarketData;
-      return allMarketData;
-    } catch (error) {
-      console.error('Error loading market data:', error);
-      const result: MarketData[] = [];
-      cachedMarketData = result;
-      return result;
-    } finally {
-      marketDataPromise = null;
-    }
-  })();
-  
-  return marketDataPromise;
+    return allMarketData;
+  } catch (error) {
+    console.error('Error loading market data:', error);
+    return [];
+  }
 };
 
 export function AccountDataProvider({ 
@@ -157,107 +108,79 @@ export function AccountDataProvider({
   // Load data with caching
   const loadData = useCallback(async () => {
     try {
+      setLoading(true);
       setError(null);
 
-      // Check cache first - show cached data immediately if available
+      // Check cache first
       const cached = accountDataCache.get(accountId);
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        console.log('Using cached account data for', accountId);
         setData(cached.data);
         setLoading(false);
         return;
       }
 
       console.log('Fetching fresh account data for', accountId);
-      
-      // Load account data first (critical path)
       const accountData = await localDataService.getAccountData(accountId);
       
-      // Load mock data immediately (fast)
-      const mockData = await loadMockData();
+      // Load mock data and market data
+      const [mockData, marketData] = await Promise.all([
+        loadMockData(),
+        loadMarketData()
+      ]);
       
-      // Set data immediately with empty market data, then load market data in background
       if (accountData) {
-        const initialAccountData = {
+        // Merge mock data and market data with account data
+        const enhancedAccountData = {
           ...accountData,
-          marketData: [],
+          marketData: marketData,
           realizedGL: mockData.realizedGL,
           commissions: mockData.commissions
         };
-        setData(initialAccountData);
-        setLoading(false); // Show content immediately
-        
-        // Load market data in background (non-blocking)
-        setTimeout(async () => {
-          try {
-            const marketData = await loadMarketData();
-            const enhancedAccountData = {
-              ...accountData,
-              marketData: marketData,
-              realizedGL: mockData.realizedGL,
-              commissions: mockData.commissions
-            };
-            setData(enhancedAccountData);
-            accountDataCache.set(accountId, { data: enhancedAccountData, timestamp: Date.now() });
-          } catch (err) {
-            console.error('Error loading market data in background:', err);
-          }
-        }, 0);
-        return;
+        setData(enhancedAccountData);
+        // Cache the data
+        accountDataCache.set(accountId, { data: enhancedAccountData, timestamp: Date.now() });
+      } else {
+        // Create empty account data for new accounts with mock data
+        const emptyAccountData: AccountData = {
+          accountId,
+          accountName: 'New Account',
+          accountType: 'individual',
+          clientId: 'unknown',
+          client: {
+            id: 'unknown',
+            firstName: 'Unknown',
+            lastName: 'Client',
+            createdAt: new Date().toISOString(),
+            lastUpdated: new Date().toISOString()
+          },
+          isPrimary: false,
+          securities: [],
+          holdings: [],
+          marketData: marketData,
+          trades: [],
+          activities: [],
+          balances: {
+            cash: 0,
+            margin: 0,
+            buyingPower: 0,
+            totalValue: 0,
+            investedValue: 0,
+            realizedGL: 0,
+            unrealizedGL: 0,
+            lastUpdated: new Date().toISOString()
+          },
+          realizedGL: mockData.realizedGL,
+          unrealizedGL: [],
+          commissions: mockData.commissions,
+          lastUpdated: new Date().toISOString()
+        };
+        setData(emptyAccountData);
+        // Cache the empty data
+        accountDataCache.set(accountId, { data: emptyAccountData, timestamp: Date.now() });
+        // Save empty data (no-op for local data service)
+        await localDataService.saveAccountData();
       }
-      
-      // If no account data, create empty account immediately (non-blocking)
-      const emptyAccountData: AccountData = {
-        accountId,
-        accountName: 'New Account',
-        accountType: 'individual',
-        clientId: 'unknown',
-        client: {
-          id: 'unknown',
-          firstName: 'Unknown',
-          lastName: 'Client',
-          createdAt: new Date().toISOString(),
-          lastUpdated: new Date().toISOString()
-        },
-        isPrimary: false,
-        securities: [],
-        holdings: [],
-        marketData: [], // Start with empty, load in background
-        trades: [],
-        activities: [],
-        balances: {
-          cash: 0,
-          margin: 0,
-          buyingPower: 0,
-          totalValue: 0,
-          investedValue: 0,
-          realizedGL: 0,
-          unrealizedGL: 0,
-          lastUpdated: new Date().toISOString()
-        },
-        realizedGL: mockData.realizedGL,
-        unrealizedGL: [],
-        commissions: mockData.commissions,
-        lastUpdated: new Date().toISOString()
-      };
-      setData(emptyAccountData);
-      setLoading(false); // Show content immediately
-      // Cache the empty data
-      accountDataCache.set(accountId, { data: emptyAccountData, timestamp: Date.now() });
-      
-      // Load market data in background (non-blocking)
-      setTimeout(async () => {
-        try {
-          const marketData = await loadMarketData();
-          const updatedAccountData = {
-            ...emptyAccountData,
-            marketData: marketData
-          };
-          setData(updatedAccountData);
-          accountDataCache.set(accountId, { data: updatedAccountData, timestamp: Date.now() });
-        } catch (err) {
-          console.error('Error loading market data in background:', err);
-        }
-      }, 0);
     } catch (err) {
       console.error('Error loading account data:', err);
       setError('Failed to load account data');
@@ -306,6 +229,8 @@ export function AccountDataProvider({
   // Save data
   const saveData = useCallback(async (newData: AccountData) => {
     try {
+      const aaplHolding = newData.holdings.find(h => h.symbol === 'AAPL');
+      console.log('5. AAPL quantity being saved:', aaplHolding?.quantity);
       await localDataService.saveAccountData();
       setData(newData);
       // Update cache
@@ -392,20 +317,14 @@ export function AccountDataProvider({
 
     return data.holdings.map(holding => {
       const security = data.securities.find(s => s.symbol === holding.symbol);
-      // Match market data case-insensitively
-      const marketData = data.marketData?.find(md => 
-        md.symbol.toUpperCase() === holding.symbol.toUpperCase()
-      );
+      const marketData = data.marketData?.find(md => md.symbol === holding.symbol);
       
       // Always calculate from current market data (not stored values)
-      // If market data not found, use avgPrice as fallback (especially for options)
-      // This ensures holdings show up in asset allocation even without market data
-      const currentPrice = marketData?.currentPrice || holding.avgPrice || 0;
+      const currentPrice = marketData?.currentPrice || 0;
       const marketValue = holding.quantity * currentPrice;
       const investedValue = holding.quantity * holding.avgPrice;
-      // Only calculate unrealized G/L if we have valid market data
-      const unrealizedGL = marketData ? (marketValue - investedValue) : 0;
-      const unrealizedGLPercent = investedValue > 0 && marketData ? (unrealizedGL / investedValue) * 100 : 0;
+      const unrealizedGL = marketValue - investedValue;
+      const unrealizedGLPercent = investedValue > 0 ? (unrealizedGL / investedValue) * 100 : 0;
       
       
       return {
@@ -420,8 +339,8 @@ export function AccountDataProvider({
         },
         marketData: marketData || {
           symbol: holding.symbol,
-          currentPrice: holding.avgPrice || 0, // Use avgPrice as fallback
-          previousClose: holding.avgPrice || 0,
+          currentPrice: 0,
+          previousClose: 0,
           dayChange: 0,
           dayChangePercent: 0,
           volume: 0,
@@ -575,6 +494,8 @@ export function AccountDataProvider({
   const updateHolding = useCallback(async (symbol: string, updates: Partial<Holding>) => {
     if (!data) return;
 
+    console.log('1. updateHolding called for', symbol, 'with quantity:', updates.quantity);
+
     const updatedHoldings = data.holdings.map(holding => {
       if (holding.symbol === symbol) {
         const updated = { ...holding, ...updates };
@@ -592,6 +513,7 @@ export function AccountDataProvider({
         delete updated.marketCap;
         
         updated.lastUpdated = new Date().toISOString();
+        console.log('2. Updated holding:', symbol, 'from', holding.quantity, 'to', updated.quantity);
         return updated;
       }
       return holding;
@@ -622,7 +544,9 @@ export function AccountDataProvider({
       lastUpdated: new Date().toISOString()
     };
 
+    console.log('3. Saving to database...');
     await saveData(updatedData);
+    console.log('4. Database save completed');
   }, [data, saveData, calculateBuyingPower]);
 
   // Add trade
@@ -704,6 +628,8 @@ export function AccountDataProvider({
     balanceUpdates?: Partial<AccountBalances>;
   }) => {
     if (!data) return;
+
+    console.log('🔄 Executing trade with combined save:', tradeData);
 
     let updatedHoldings = [...data.holdings];
     let updatedBalances = { ...data.balances };
@@ -787,7 +713,9 @@ export function AccountDataProvider({
       lastUpdated: new Date().toISOString()
     };
 
+    console.log('💾 Saving trade and holdings together...');
     await saveData(updatedData);
+    console.log('✅ Trade executed successfully');
   }, [data, saveData, calculateBuyingPower]);
 
   // Force refresh market data
@@ -1053,59 +981,19 @@ export function AccountDataProvider({
     return positions;
   }, [data?.activities, data?.marketData, data?.securities]);
 
-  // Generate historical activities after data is loaded (only once per account, not on every update)
-  // Make this non-blocking - run in background
-  const [hasGeneratedHistorical, setHasGeneratedHistorical] = useState<string | null>(null);
-
-  // Load data on mount and when accountId changes
-  // Load data on mount and when accountId changes
+  // Load data on mount and generate historical activities if needed
   useEffect(() => {
-    // Reset loading state immediately when accountId changes to show skeleton
-    setLoading(true);
-    setData(null);
-    setError(null);
-    // Reset historical activities flag when account changes
-    const previousAccountId = hasGeneratedHistorical;
-    if (previousAccountId !== accountId) {
-      setHasGeneratedHistorical(null);
-    }
-    
-    // Check cache first - if we have cached data, show it immediately (don't wait for loadData)
-    const cached = accountDataCache.get(accountId);
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      // Show cached data immediately - this makes navigation instant
-      // Set these synchronously so pages don't block
-      setData(cached.data);
-      setLoading(false);
-      setError(null);
-      // Refresh in background (non-blocking, doesn't affect UI)
-      // Use setTimeout to ensure it doesn't block
-      setTimeout(() => {
-        loadData().catch(() => {
-          // Silently fail - we already have cached data
-        });
-      }, 0);
-      return; // Don't call loadData synchronously
-    }
-    
-    // No cache - load data normally
     loadData();
-  }, [accountId, loadData, hasGeneratedHistorical]);
-  useEffect(() => {
-    // Reset flag when accountId changes
-    if (hasGeneratedHistorical !== accountId && data && !loading) {
-      // Run in background - don't block UI
-      generateHistoricalActivities().then(() => {
-        setHasGeneratedHistorical(accountId);
-      }).catch(() => {
-        // Silently fail - don't block navigation
-        setHasGeneratedHistorical(accountId);
-      });
-    }
-  }, [accountId, data, loading, hasGeneratedHistorical, generateHistoricalActivities]);
+  }, [loadData]);
 
-  // Memoize context value to prevent unnecessary re-renders
-  const value: AccountDataContextType = useMemo(() => ({
+  // Generate historical activities after data is loaded
+  useEffect(() => {
+    if (data && !loading) {
+      generateHistoricalActivities();
+    }
+  }, [data, loading, generateHistoricalActivities]);
+
+  const value: AccountDataContextType = {
     data,
     loading,
     error,
@@ -1135,30 +1023,7 @@ export function AccountDataProvider({
     calculateUnrealizedPositions,
     // Generate historical activities from holdings
     generateHistoricalActivities
-  }), [
-    data,
-    loading,
-    error,
-    updateHolding,
-    addHolding,
-    removeHolding,
-    addSecurity,
-    updateSecurity,
-    getSecurity,
-    updateMarketData,
-    addTrade,
-    addActivity,
-    updateBalances,
-    executeTrade,
-    resetToSeed,
-    refreshData,
-    refreshMarketData,
-    clearCache,
-    preloadAccountData,
-    getHoldingsWithDetails,
-    calculateUnrealizedPositions,
-    generateHistoricalActivities
-  ]);
+  };
 
   return (
     <AccountDataContext.Provider value={value}>

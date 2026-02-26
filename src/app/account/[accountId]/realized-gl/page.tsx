@@ -27,15 +27,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { LastUpdated } from '@/components/ui/last-updated';
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { RealizedTrade } from '@/types/account';
-import { PageHeading } from '@/components/layout/PageHeading';
-import { TableCell } from '@/components/ui/table';
 
 // Local extension type to support additional display-only fields used by this page
 type RealizedTradeExt = RealizedTrade & { adjInvestedValue: number };
 
 export default function RealizedGLPage() {
-  // Don't wait for account data - this page uses hardcoded data
-  const { refreshData } = useAccountData();
+  const { data: accountData, loading, error, refreshData } = useAccountData();
   const [searchTerm, setSearchTerm] = useState('');
   const [yearFilter, setYearFilter] = useState('2025');
   
@@ -66,10 +63,10 @@ export default function RealizedGLPage() {
       {
         id: 'realized-2',
         symbol: 'MSFT',
-        cusip: '594918104',
-        description: 'Microsoft Corp...',
-        openDate: '2024-06-15',
-        closeDate: '2024-11-20',
+        cusip: '037833102',
+        description: 'Amazon.com...',
+        openDate: '2025-01-01',
+        closeDate: '2024-01-15',
         quantity: 75,
         avgBuyPrice: 220.75,
         sellPrice: 260.00,
@@ -83,10 +80,10 @@ export default function RealizedGLPage() {
       {
         id: 'realized-3',
         symbol: 'TSLA',
-        cusip: '88160R101',
-        description: 'Tesla Inc...',
-        openDate: '2024-03-10',
-        closeDate: '2024-08-22',
+        cusip: '037833100',
+        description: 'Vanguard To...',
+        openDate: '2025-01-01',
+        closeDate: '2024-02-01',
         quantity: 50,
         avgBuyPrice: 180.50,
         sellPrice: 225.00,
@@ -95,125 +92,6 @@ export default function RealizedGLPage() {
         totalSellValue: 11250.00,
         realizedGL: 2225.00,
         realizedGLPercent: 24.66,
-        longShort: 'Long'
-      },
-      {
-        id: 'realized-4',
-        symbol: 'GOOGL',
-        cusip: '02079K305',
-        description: 'Alphabet Inc C...',
-        openDate: '2024-02-05',
-        closeDate: '2024-09-15',
-        quantity: 60,
-        avgBuyPrice: 135.80,
-        sellPrice: 172.50,
-        adjInvestedValue: 135.80,
-        investedValue: 8148.00,
-        totalSellValue: 10350.00,
-        realizedGL: 2202.00,
-        realizedGLPercent: 27.02,
-        longShort: 'Long'
-      },
-      {
-        id: 'realized-5',
-        symbol: 'NVDA',
-        cusip: '67066G104',
-        description: 'NVIDIA Corp...',
-        openDate: '2024-01-20',
-        closeDate: '2024-07-30',
-        quantity: 25,
-        avgBuyPrice: 485.20,
-        sellPrice: 620.00,
-        adjInvestedValue: 485.20,
-        investedValue: 12130.00,
-        totalSellValue: 15500.00,
-        realizedGL: 3370.00,
-        realizedGLPercent: 27.78,
-        longShort: 'Long'
-      },
-      {
-        id: 'realized-6',
-        symbol: 'AMZN',
-        cusip: '023135106',
-        description: 'Amazon.com Inc...',
-        openDate: '2024-04-12',
-        closeDate: '2024-10-05',
-        quantity: 40,
-        avgBuyPrice: 178.25,
-        sellPrice: 195.80,
-        adjInvestedValue: 178.25,
-        investedValue: 7130.00,
-        totalSellValue: 7832.00,
-        realizedGL: 702.00,
-        realizedGLPercent: 9.85,
-        longShort: 'Long'
-      },
-      {
-        id: 'realized-7',
-        symbol: 'META',
-        cusip: '30303M102',
-        description: 'Meta Platforms...',
-        openDate: '2024-05-08',
-        closeDate: '2024-12-01',
-        quantity: 30,
-        avgBuyPrice: 425.50,
-        sellPrice: 520.00,
-        adjInvestedValue: 425.50,
-        investedValue: 12765.00,
-        totalSellValue: 15600.00,
-        realizedGL: 2835.00,
-        realizedGLPercent: 22.21,
-        longShort: 'Long'
-      },
-      {
-        id: 'realized-8',
-        symbol: 'JPM',
-        cusip: '46625H100',
-        description: 'JPMorgan Chase...',
-        openDate: '2024-03-25',
-        closeDate: '2024-09-28',
-        quantity: 45,
-        avgBuyPrice: 185.40,
-        sellPrice: 210.25,
-        adjInvestedValue: 185.40,
-        investedValue: 8343.00,
-        totalSellValue: 9461.25,
-        realizedGL: 1118.25,
-        realizedGLPercent: 13.40,
-        longShort: 'Long'
-      },
-      {
-        id: 'realized-9',
-        symbol: 'V',
-        cusip: '92826C839',
-        description: 'Visa Inc Class A...',
-        openDate: '2024-02-18',
-        closeDate: '2024-08-10',
-        quantity: 35,
-        avgBuyPrice: 275.60,
-        sellPrice: 290.15,
-        adjInvestedValue: 275.60,
-        investedValue: 9646.00,
-        totalSellValue: 10155.25,
-        realizedGL: 509.25,
-        realizedGLPercent: 5.28,
-        longShort: 'Long'
-      },
-      {
-        id: 'realized-10',
-        symbol: 'DIS',
-        cusip: '254687106',
-        description: 'Walt Disney Co...',
-        openDate: '2024-01-05',
-        closeDate: '2024-06-20',
-        quantity: 55,
-        avgBuyPrice: 92.30,
-        sellPrice: 78.50,
-        adjInvestedValue: 92.30,
-        investedValue: 5076.50,
-        totalSellValue: 4317.50,
-        realizedGL: -759.00,
-        realizedGLPercent: -14.95,
         longShort: 'Long'
       }
     ];
@@ -266,17 +144,92 @@ export default function RealizedGLPage() {
     };
   }, []);
 
-  // This page uses hardcoded data, so no need to wait for account data
+  if (loading) {
+    return (
+      <div className="w-full">
+        <div className="flex flex-col gap-4">
+          {/* Header Skeleton */}
+          <div className="flex justify-between items-center">
+            <div className="h-8 w-40 bg-muted rounded animate-pulse"></div>
+            <div className="flex gap-2">
+              <div className="h-9 w-20 bg-muted rounded animate-pulse"></div>
+              <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Summary Card Skeleton */}
+          <Card className="p-6 bg-card">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                  <div className="h-7 w-40 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+            <div className="h-4 w-48 bg-muted rounded animate-pulse mt-4"></div>
+          </Card>
+
+          {/* Closed Trades Card Skeleton */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-6 w-32 bg-muted rounded animate-pulse"></div>
+              <div className="h-4 w-40 bg-muted rounded animate-pulse"></div>
+            </div>
+            
+            <div className="flex items-center justify-between mb-6">
+              <div className="h-10 w-64 bg-muted rounded animate-pulse"></div>
+              <div className="flex gap-2">
+                <div className="h-10 w-24 bg-muted rounded animate-pulse"></div>
+                <div className="h-10 w-40 bg-muted rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Table Skeleton */}
+            <div className="overflow-x-auto">
+              <div className="w-full min-w-[1500px]">
+                {/* Table Header Skeleton */}
+                <div className="flex border-b mb-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+                    <div key={i} className="flex-1 px-6 py-3">
+                      <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+                {/* Table Rows Skeleton */}
+                {[1, 2, 3].map((row) => (
+                  <div key={row} className="flex border-b py-3">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((col) => (
+                      <div key={col} className="flex-1 px-6">
+                        <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !accountData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        Error loading realized G/L data: {error || 'No data available'}
+      </div>
+    );
+  }
 
   return (
     <TooltipProvider>
       <div className="w-full">
         <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="w-full md:w-auto">
-            <PageHeading className="text-slate-900 dark:text-slate-100">Realized G/L</PageHeading>
-          </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Realized G/L</h1>
           <div className="flex gap-2">
             <Select value={yearFilter} onValueChange={setYearFilter}>
               <SelectTrigger className="w-20 h-9 bg-white dark:bg-white">
@@ -297,32 +250,35 @@ export default function RealizedGLPage() {
 
         {/* Summary Section */}
         <Card className="p-6 bg-card">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total realized G/L</div>
-              <h3>
-                {summaryData.totalRealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalRealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })} ({summaryData.totalRealizedGL >= 0 ? '+' : ''}{summaryData.totalGLPercent.toFixed(2)}%)
+              <h3 className={`text-xl font-medium ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
+                {summaryData.totalRealizedGL >= 0 ? '+' : '-'}${Math.abs(summaryData.totalRealizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
+              <div className={`text-sm ${summaryData.totalRealizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
+                {summaryData.totalRealizedGL >= 0 ? '+' : ''}{summaryData.totalGLPercent.toFixed(2)}%
+              </div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized long term G/L</div>
-              <h3>
+              <h3 className={`text-xl font-medium ${summaryData.realizedLongTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.realizedLongTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedLongTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Realized short term G/L</div>
-              <h3>
+              <h3 className={`text-xl font-medium ${summaryData.realizedShortTerm >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                 {summaryData.realizedShortTerm >= 0 ? '+' : '-'}${Math.abs(summaryData.realizedShortTerm).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Invested value</div>
-              <h3>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground mb-1">Total sell value</div>
-              <h3>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>${summaryData.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
             </div>
           </div>
           <LastUpdated 
@@ -367,137 +323,133 @@ export default function RealizedGLPage() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto bg-card rounded-md shadow-sm">
-            <table className="w-full text-sm text-left border-separate border-spacing-0 rounded-md min-w-[1500px]">
-              <thead className="sticky top-0 border-t border-b bg-muted text-muted-foreground z-10">
-                <tr>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left">
-                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('symbol')}>
-                      <span>Symbol/CUSIP</span>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[1500px]">
+              <thead>
+                <tr className="border-b">
+                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('symbol')}>
+                      <span className="text-xs">Symbol/CUSIP</span>
                       {sortColumn === 'symbol' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left max-w-[200px]">
-                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('description')}>
-                      <span className="truncate">Description</span>
+                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/50 border-r max-w-[200px] ${sortColumn === 'description' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('description')}>
+                      <span className="text-xs">Description</span>
                       {sortColumn === 'description' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left">
-                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('openDate')}>
-                      <span>Open date</span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="ml-1 h-3 w-3 text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>If you have multiple tax lots, Open date represents the first purchased date.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'openDate' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('openDate')}>
+                      <span className="text-xs">Open date</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3 h-3 flex-shrink-0" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>If you have multiple tax lots, Open date represents the first purchased date.</p>
+                        </TooltipContent>
+                      </Tooltip>
                       {sortColumn === 'openDate' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left">
-                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort('closeDate')}>
-                      <span>Close date</span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="ml-1 h-3 w-3 text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>If you have multiple tax lots, Close date represents the last closed date.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                  <th className={`text-left px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'closeDate' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center gap-1 w-full" onClick={() => handleSort('closeDate')}>
+                      <span className="text-xs">Close date</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3 h-3 flex-shrink-0" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>If you have multiple tax lots, Close date represents the last closed date.</p>
+                        </TooltipContent>
+                      </Tooltip>
                       {sortColumn === 'closeDate' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
-                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('realizedGL')}>
-                      <span>Total realized G/L</span>
+                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'realizedGL' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('realizedGL')}>
+                      <span className="text-xs">Total realized G/L</span>
                       {sortColumn === 'realizedGL' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
-                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('realizedGLPercent')}>
-                      <span>Total realized G/L %</span>
+                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'realizedGLPercent' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('realizedGLPercent')}>
+                      <span className="text-xs">Total realized G/L %</span>
                       {sortColumn === 'realizedGLPercent' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
-                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('avgBuyPrice')}>
-                      <span>Avg Buy Price</span>
+                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'avgBuyPrice' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('avgBuyPrice')}>
+                      <span className="text-xs">Avg Buy Price</span>
                       {sortColumn === 'avgBuyPrice' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
-                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('adjInvestedValue')}>
-                      <span>Adj. Invested Value</span>
+                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'adjInvestedValue' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('adjInvestedValue')}>
+                      <span className="text-xs">Adj. Invested Value</span>
                       {sortColumn === 'adjInvestedValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
-                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('quantity')}>
-                      <span>Quantity</span>
+                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'quantity' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('quantity')}>
+                      <span className="text-xs">Quantity</span>
                       {sortColumn === 'quantity' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
-                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('investedValue')}>
-                      <span>Invested value</span>
+                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 border-r ${sortColumn === 'investedValue' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('investedValue')}>
+                      <span className="text-xs">Invested value</span>
                       {sortColumn === 'investedValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-right">
-                    <button className="flex items-center justify-end gap-1 w-full font-medium" onClick={() => handleSort('totalSellValue')}>
-                      <span>Total sell value</span>
+                  <th className={`text-right px-6 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50 ${sortColumn === 'totalSellValue' ? 'border-b-2 border-b-primary' : ''}`}>
+                    <button className="flex items-center justify-end gap-1 w-full" onClick={() => handleSort('totalSellValue')}>
+                      <span className="text-xs">Total sell value</span>
                       {sortColumn === 'totalSellValue' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
+                        sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
                       ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                       )}
                     </button>
                   </th>
@@ -506,43 +458,43 @@ export default function RealizedGLPage() {
               <tbody>
                 {filteredTrades.length === 0 ? (
                   <tr>
-                    <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                    <td colSpan={11} className="text-center py-8 text-muted-foreground">
                       No realized trades found
-                    </TableCell>
+                    </td>
                   </tr>
                 ) : (
-                  filteredTrades.map((trade) => (
-                    <tr key={trade.id} className="hover:bg-muted dark:hover:bg-accent cursor-pointer relative group bg-card">
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                  filteredTrades.map((trade, index) => (
+                    <tr key={trade.id} className={`border-b ${index % 2 === 1 ? 'bg-card' : ''}`}>
+                      <td className="px-6 py-3">
                         <div>
                           <div className="font-medium text-foreground">{trade.symbol}</div>
                           <div className="text-xs text-muted-foreground">{trade.cusip}</div>
                         </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white max-w-[200px] truncate border-b">{trade.description}</TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">{trade.openDate}</TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">{trade.closeDate}</TableCell>
-                      <TableCell className={`px-4 py-2 dark:text-white whitespace-nowrap text-right font-medium border-b ${trade.realizedGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                      </td>
+                      <td className="px-6 py-3 text-foreground max-w-[200px] truncate">{trade.description}</td>
+                      <td className="px-6 py-3 text-foreground">{trade.openDate}</td>
+                      <td className="px-6 py-3 text-foreground">{trade.closeDate}</td>
+                      <td className={`px-6 py-3 text-right font-medium ${trade.realizedGL >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
                         {trade.realizedGL >= 0 ? '+' : '-'}${Math.abs(trade.realizedGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell className={`px-4 py-2 dark:text-white whitespace-nowrap text-right font-medium border-b ${trade.realizedGLPercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                      </td>
+                      <td className={`px-6 py-3 text-right font-medium ${trade.realizedGLPercent >= 0 ? 'text-[hsl(var(--positive))]' : 'text-[hsl(var(--negative))]'}`}>
                         {trade.realizedGLPercent >= 0 ? '+' : '-'}{Math.abs(trade.realizedGLPercent).toFixed(2)}%
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
+                      </td>
+                      <td className="px-6 py-3 text-right text-foreground">
                         ${trade.avgBuyPrice.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
+                      </td>
+                      <td className="px-6 py-3 text-right text-foreground">
                         ${trade.adjInvestedValue.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
+                      </td>
+                      <td className="px-6 py-3 text-right text-foreground">
                         {trade.quantity}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
+                      </td>
+                      <td className="px-6 py-3 text-right text-foreground">
                         ${trade.investedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap text-right border-b">
+                      </td>
+                      <td className="px-6 py-3 text-right text-foreground">
                         ${trade.totalSellValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </TableCell>
+                      </td>
                     </tr>
                   ))
                 )}

@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AccountData } from '@/types/account';
 import { HouseholdGroup } from './types';
-import { formatCurrency, formatAccountType } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import { DonutChart } from '@/components/charts/DonutChart';
 import { ChevronDown, Check, Building2, Home } from 'lucide-react';
 import {
@@ -40,6 +40,19 @@ export function PortfolioDetailsSection({
   onToggleAccountSelection,
   getDropdownButtonLabel,
 }: PortfolioDetailsSectionProps) {
+  const getAccountTypeLabel = (accountType: string) => {
+    switch (accountType) {
+      case 'joint_jtwros':
+        return 'Joint account';
+      case 'trust':
+        return 'Personal trust';
+      case 'individual':
+      case 'ira':
+        return 'Single account';
+      default:
+        return 'Account';
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -50,9 +63,9 @@ export function PortfolioDetailsSection({
         <DropdownMenu open={isAccountDropdownOpen} onOpenChange={onSetIsAccountDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <Button
-              variant={activeFilter === 'all' ? 'outline' : 'secondary'}
+              variant={activeFilter === 'all' ? 'outline' : 'active'}
               size="sm"
-              className={`flex items-center gap-2 text-sm flex-shrink-0 ${activeFilter === 'all' ? '!bg-card' : ''}`}
+              className={`flex items-center gap-2 text-sm flex-shrink-0 ${activeFilter === 'all' ? '!bg-white' : ''}`}
             >
               <span className="hidden sm:inline">{getDropdownButtonLabel()}</span>
               <span className="sm:hidden">Filter</span>
@@ -125,6 +138,7 @@ export function PortfolioDetailsSection({
                     <div className="flex flex-col gap-2">
                       {group.accounts.map((account) => {
                         const isSelected = selectedAccountIds.has(account.accountId);
+                        const accountType = getAccountTypeLabel(account.accountType);
                         return (
                           <div
                             key={account.accountId}
@@ -134,7 +148,7 @@ export function PortfolioDetailsSection({
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1 mb-1">
                                 <p className="text-sm font-medium text-foreground leading-none">
-                                  {formatAccountType(account.accountType)}
+                                  {accountType}
                                 </p>
                                 {account.isPrimary && (
                                   <div className="h-5 px-1.5 py-0.5 rounded-full bg-[#eaeffc] flex items-center">
@@ -177,6 +191,7 @@ export function PortfolioDetailsSection({
                   <div className="flex flex-col gap-2">
                     {nonHouseholdAccounts.map((account) => {
                       const isSelected = selectedAccountIds.has(account.accountId);
+                      const accountType = getAccountTypeLabel(account.accountType);
                       return (
                         <div
                           key={account.accountId}
@@ -186,7 +201,7 @@ export function PortfolioDetailsSection({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1 mb-1">
                               <p className="text-sm font-medium text-foreground leading-none">
-                                {formatAccountType(account.accountType)}
+                                {accountType}
                               </p>
                             </div>
                             <p className="text-sm text-muted-foreground truncate leading-6">
@@ -246,9 +261,7 @@ export function PortfolioDetailsSection({
 
               <div className="flex-1 w-full sm:w-auto flex flex-col overflow-hidden">
                 {assetAllocationData.map((item, index) => {
-                  // item.value is now the actual market value, not percentage
-                  const dollarValue = item.value;
-                  const percentage = totalPortfolioValue > 0 ? (dollarValue / totalPortfolioValue) * 100 : 0;
+                  const dollarValue = (totalPortfolioValue * item.value) / 100;
                   const formattedValue = dollarValue >= 1000000 
                     ? `$${(dollarValue / 1000000).toFixed(1)}M`
                     : dollarValue >= 1000
@@ -263,7 +276,7 @@ export function PortfolioDetailsSection({
                       }`}
                     >
                       <div className="text-sm font-medium text-foreground leading-6 line-clamp-1 sm:text-right">
-                        {percentage.toFixed(1)}%
+                        {item.value}%
                       </div>
                       <div className="text-sm font-normal text-muted-foreground leading-6 line-clamp-1">
                         {formattedValue}

@@ -28,7 +28,7 @@ module.exports = {
         serif: ["var(--font-source-serif-4)", ...fontFamily.serif], // Add serif family
       },
       colors: {
-        border: "hsl(var(--border))",
+        border: "var(--border)",
         input: "hsl(var(--input))",
         ring: "rgb(var(--ring) / <alpha-value>)",
         background: "rgb(var(--background) / <alpha-value>)",

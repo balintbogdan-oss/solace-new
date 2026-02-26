@@ -10,7 +10,7 @@ import {
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AccountData } from '@/types/account';
-import { formatCurrency, formatAccountType } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 
 interface AdvisorsDrawerProps {
   isOpen: boolean;
@@ -49,6 +49,24 @@ const advisorsInfo: AdvisorInfo[] = [
   },
 ];
 
+// Helper function to get account type label - matches AccountsSection
+const getAccountTypeLabel = (accountType: string): string => {
+  switch (accountType) {
+    case 'joint_jtwros':
+      return 'Joint account';
+    case 'trust':
+    case 'revocable_trust':
+    case 'irrevocable_trust':
+    case 'testamentary_trust':
+      return 'Personal trust';
+    case 'individual':
+    case 'ira':
+    case 'single_account':
+      return 'Single account';
+    default:
+      return 'Account';
+  }
+};
 
 // Map accounts to advisors - you can customize this logic
 // For now, we'll distribute accounts between advisors
@@ -192,7 +210,7 @@ export function AdvisorsDrawer({ isOpen, onOpenChange, accounts = [] }: Advisors
 
                                 {advisorAccounts.map((account, accountIndex) => {
                                   const isLastAccount = accountIndex === advisorAccounts.length - 1;
-                                  const accountTypeLabel = formatAccountType(account.accountType);
+                                  const accountTypeLabel = getAccountTypeLabel(account.accountType);
                                   const accountValue = formatCurrency(account.balances?.totalValue || 0);
                                   return (
                                     <div key={account.accountId} className={!isLastAccount ? 'border-b' : ''}>

@@ -17,10 +17,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
-import { 
-  TableCell,
-} from '@/components/ui/table'
-import { Search, SlidersHorizontal, RefreshCcw, MoreHorizontal, ChevronsUpDown, Info, ArrowUp, ArrowDown, TrendingUp, RotateCcw, BarChart3, GripVertical, Maximize2 } from 'lucide-react'
+import { Search, SlidersHorizontal, RefreshCcw, MoreHorizontal, ChevronsUpDown, Info, ArrowUp, ArrowDown, TrendingUp, RotateCcw, BarChart3, GripVertical } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -50,10 +47,11 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useSidebar } from '@/contexts/SidebarContext'
 
 import { HoldingWithDetails } from '@/types/account';
 
-type SortableColumn = keyof HoldingWithDetails | 'currentPrice' | 'sector' | 'description' | 'assetClass' | 'accountType' | 'longShort' | 'closingPrice' | 'priceChange' | 'investedValue' | 'callPut' | 'maturityDate' | 'yield' | 'todaysGL';
+type SortableColumn = keyof HoldingWithDetails | 'currentPrice' | 'sector' | 'description' | 'assetClass';
 
 interface ColumnDefinition {
   id: string;
@@ -70,26 +68,18 @@ interface HoldingsTableProps {
   accountId?: string;
 }
 
-// Column definitions - default order as specified
+// Column definitions
 const COLUMN_DEFINITIONS: ColumnDefinition[] = [
   { id: 'actions', label: 'Actions', sortKey: null, defaultVisible: true, alwaysVisible: true },
   { id: 'symbol', label: 'Symbol/CUSIP', sortKey: 'symbol', defaultVisible: true, alwaysVisible: true },
-  { id: 'description', label: 'Description', sortKey: 'description', defaultVisible: true },
   { id: 'assetClass', label: 'Asset class', sortKey: 'assetClass', defaultVisible: true },
   { id: 'quantity', label: 'Quantity', sortKey: 'quantity', defaultVisible: true },
-  { id: 'accountType', label: 'Account type', sortKey: 'accountType', defaultVisible: true },
-  { id: 'longShort', label: 'L/S', sortKey: 'longShort', defaultVisible: true },
-  { id: 'currentPrice', label: 'LTP', sortKey: 'currentPrice', defaultVisible: true },
-  { id: 'closingPrice', label: 'Closing price', sortKey: 'closingPrice', defaultVisible: true },
-  { id: 'avgPrice', label: 'Avg buy price', sortKey: 'avgPrice', defaultVisible: true },
-  { id: 'priceChange', label: 'Price change', sortKey: 'priceChange', defaultVisible: true },
   { id: 'marketValue', label: 'Market Value', sortKey: 'marketValue', defaultVisible: true },
-  { id: 'investedValue', label: 'Invested Value', sortKey: 'investedValue', defaultVisible: true },
-  { id: 'callPut', label: 'Call/Put', sortKey: 'callPut', defaultVisible: true },
-  { id: 'maturityDate', label: 'Maturity Date', sortKey: 'maturityDate', defaultVisible: true },
-  { id: 'yield', label: '% Yield', sortKey: 'yield', defaultVisible: true },
-  { id: 'unrealizedGL', label: 'Total Unrealized G/L', sortKey: 'unrealizedGL', defaultVisible: true },
-  { id: 'todaysGL', label: "Today's G/L", sortKey: 'todaysGL', defaultVisible: true },
+  { id: 'description', label: 'Description', sortKey: 'description', defaultVisible: true },
+  { id: 'unrealizedGL', label: 'Unrealized G/L', sortKey: 'unrealizedGL', defaultVisible: true },
+  { id: 'unrealizedGLPercent', label: 'Unrealized G/L %', sortKey: 'unrealizedGLPercent', defaultVisible: true },
+  { id: 'currentPrice', label: 'Current Price', sortKey: 'currentPrice', defaultVisible: true },
+  { id: 'avgPrice', label: 'Avg Price', sortKey: 'avgPrice', defaultVisible: true },
 ];
 
 const STORAGE_KEY = 'holdings-table-columns';
@@ -102,22 +92,19 @@ function loadColumnPreferences(): { order: string[]; visibility: Record<string, 
     };
   }
   
-  // For now, always use default order to ensure consistency
-  // Users can still customize via the UI, but we start with the correct default
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Ignore errors
+  }
+  
   return {
     order: COLUMN_DEFINITIONS.map(col => col.id),
     visibility: Object.fromEntries(COLUMN_DEFINITIONS.map(col => [col.id, col.defaultVisible])),
   };
-  
-  // Commented out localStorage loading to ensure default order is always used
-  // try {
-  //   const stored = localStorage.getItem(STORAGE_KEY);
-  //   if (stored) {
-  //     return JSON.parse(stored);
-  //   }
-  // } catch {
-  //   // Ignore errors
-  // }
 }
 
 function saveColumnPreferences(order: string[], visibility: Record<string, boolean>) {
@@ -194,6 +181,7 @@ function SortableColumnItem({
 
 export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails, accountId }: HoldingsTableProps) {
   const router = useRouter();
+  const { collapseForTrading } = useSidebar();
   
   // Load column preferences from localStorage
   const initialPrefs = loadColumnPreferences();
@@ -280,6 +268,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
     if (onTradeClick) {
       onTradeClick(symbol);
     } else if (accountId) {
+      collapseForTrading();
       router.push(`/account/${accountId}/trade/${symbol}`);
     }
   };
@@ -292,6 +281,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
 
   const handleStockDetails = (symbol: string) => {
     if (accountId) {
+      collapseForTrading();
       router.push(`/account/${accountId}/trade/${symbol}`);
     }
   };
@@ -317,46 +307,34 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
   // Function to determine asset class based on security
   const getAssetClass = (holding: HoldingWithDetails): string => {
     const symbol = holding.symbol?.toUpperCase() || '';
-    const description = (holding.security?.description || '').toLowerCase();
-    const securityType = (holding.security as { type?: string })?.type?.toLowerCase() || '';
-    const sector = (holding.security?.sector || '').toLowerCase();
+    const description = holding.security?.description?.toLowerCase() || '';
     
-    // First check the security type field if available
-    if (securityType === 'mutual_fund' || sector === 'mutual fund') {
-      return 'Mutual Funds';
-    }
-    if (securityType === 'option' || sector === 'options') {
-      return 'Options';
-    }
-    if (securityType === 'fixed_income' || sector === 'fixed income') {
-      return 'Fixed Income';
-    }
-    
-    // Check for mutual funds - specific fund symbols or explicit fund names
-    if (symbol === 'VTSAX' || symbol === 'VFIAX' || symbol === 'VTSMX' ||
-        symbol === 'FXAIX' || symbol === 'SWTSX' ||
-        description.includes('index fund') || description.includes('mutual fund') ||
-        description.includes('vanguard total') || description.includes('fidelity 500')) {
+    // Check for mutual funds
+    if (description.includes('mutual fund') || description.includes('fund') || 
+        symbol.includes('MF') || description.includes('vanguard') || 
+        description.includes('fidelity') || description.includes('t rowe')) {
       return 'Mutual Funds';
     }
     
-    // Check for options - symbol patterns with date and C/P for call/put
-    if (symbol.length > 8 && /\d{6}[CP]\d+/.test(symbol)) {
+    // Check for options
+    if (description.includes('call') || description.includes('put') || 
+        description.includes('option') || symbol.includes('C') || symbol.includes('P')) {
       return 'Options';
     }
     
-    // Check for fixed income - bonds, treasuries, CDs
+    // Check for fixed income
     if (description.includes('bond') || description.includes('treasury') || 
-        description.includes(' note ') || description.includes('certificate of deposit')) {
+        description.includes('note') || description.includes('cd') || 
+        description.includes('fixed income') || symbol.includes('T')) {
       return 'Fixed Income';
     }
     
     // Check for annuities
-    if (description.includes('annuity')) {
+    if (description.includes('annuity') || description.includes('pension')) {
       return 'Annuities';
     }
     
-    // Default to Equities for stocks - most common case
+    // Default to Equities for stocks
     return 'Equities';
   };
 
@@ -394,27 +372,6 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
         } else if (sortColumn === 'assetClass') {
           aValue = getAssetClass(a);
           bValue = getAssetClass(b);
-        } else if (sortColumn === 'closingPrice') {
-          aValue = a.marketData?.previousClose || a.marketData?.currentPrice || 0;
-          bValue = b.marketData?.previousClose || b.marketData?.currentPrice || 0;
-        } else if (sortColumn === 'priceChange') {
-          aValue = a.marketData?.dayChange || 0;
-          bValue = b.marketData?.dayChange || 0;
-        } else if (sortColumn === 'investedValue') {
-          aValue = (a.avgPrice || 0) * a.quantity;
-          bValue = (b.avgPrice || 0) * b.quantity;
-        } else if (sortColumn === 'todaysGL') {
-          aValue = (a.marketData?.dayChange || 0) * a.quantity;
-          bValue = (b.marketData?.dayChange || 0) * b.quantity;
-        } else if (sortColumn === 'accountType') {
-          aValue = 'Cash'; // Default account type
-          bValue = 'Cash';
-        } else if (sortColumn === 'longShort') {
-          aValue = 'Long'; // Default to Long
-          bValue = 'Long';
-        } else if (sortColumn === 'callPut' || sortColumn === 'maturityDate' || sortColumn === 'yield') {
-          aValue = '-';
-          bValue = '-';
         } else {
           aValue = a[sortColumn as keyof HoldingWithDetails] as string | number;
           bValue = b[sortColumn as keyof HoldingWithDetails] as string | number;
@@ -423,7 +380,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
         let comparison = 0;
 
         // Handle different data types
-        if (['marketValue', 'unrealizedGL', 'unrealizedGLPercent', 'quantity', 'currentPrice', 'avgPrice', 'closingPrice', 'priceChange', 'investedValue', 'todaysGL'].includes(sortColumn)) {
+        if (['marketValue', 'unrealizedGL', 'unrealizedGLPercent', 'quantity', 'currentPrice', 'avgPrice'].includes(sortColumn)) {
           comparison = (aValue as number) - (bValue as number);
         } else {
           // Default to string comparison
@@ -505,10 +462,6 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
         </Select>
 
         <div className="ml-auto flex gap-2">
-          <Button variant="outline">
-            <Maximize2 className="w-4 h-4" />
-            Expand
-          </Button>
           <Popover open={isCustomizeDialogOpen} onOpenChange={setIsCustomizeDialogOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline">
@@ -560,7 +513,7 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                 // Render header cell based on column type
                 if (columnId === 'actions') {
                   return (
-                    <th key={columnId} className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-50 bg-muted px-4 text-left font-medium w-16 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
+                    <th key={columnId} className="py-2 dark:text-white border-b whitespace-nowrap sticky left-0 z-40 bg-muted px-4 text-left font-medium">
                       Actions
                     </th>
                   );
@@ -570,8 +523,8 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   return (
                     <th
                       key={columnId}
-                      className="px-4 py-2 dark:text-white border-b border-r cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap sticky z-50 bg-muted text-left font-medium shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]"
-                      style={{ left: '64px' }}
+                      className={`px-4 py-2 dark:text-white border-b border-r cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap sticky z-40 bg-muted text-left font-medium ${sortColumn === 'symbol' ? 'border-b-2 border-b-primary' : ''}`}
+                      style={{ left: '56px' }}
                     >
                       <button className="flex items-center gap-1 bg-transparent w-full font-medium" onClick={() => handleSort('symbol')}>
                         <span>Symbol/CUSIP</span>
@@ -585,42 +538,47 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   );
                 }
 
+                const isSortable = col.sortKey !== null;
                 const isSorted = sortColumn === col.sortKey;
 
                 return (
                   <th
                     key={columnId}
-                    className={`px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left ${col.id === 'description' ? 'max-w-[280px]' : ''}`}
+                    className={`px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium ${isSortable ? 'text-left' : ''} ${isSorted ? 'border-b-2 border-b-primary' : ''}`}
                   >
-                    <button className="flex items-center gap-1 w-full font-medium" onClick={() => col.sortKey && handleSort(col.sortKey)}>
-                      <span className={col.id === 'description' ? 'truncate' : ''}>{col.label}</span>
-                      {col.id === 'currentPrice' || col.id === 'avgPrice' ? (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="ml-1 h-3 w-3 text-muted-foreground" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{col.id === 'currentPrice' ? 'Current Market Price' : 'Average Purchase Price'}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ) : null}
-                      {isSorted ? (
-                        sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
-                      ) : (
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
-                      )}
-                    </button>
+                    {isSortable ? (
+                      <button className="flex items-center gap-1 w-full font-medium" onClick={() => col.sortKey && handleSort(col.sortKey)}>
+                        <span>{col.label}</span>
+                        {col.id === 'currentPrice' || col.id === 'avgPrice' ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="ml-1 h-3 w-3 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{col.id === 'currentPrice' ? 'Current Market Price' : 'Average Purchase Price'}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : null}
+                        {isSorted ? (
+                          sortDirection === 'asc' ? <ArrowUp className="ml-auto h-4 w-4" /> : <ArrowDown className="ml-auto h-4 w-4" />
+                        ) : (
+                          <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                        )}
+                      </button>
+                    ) : (
+                      <span>{col.label}</span>
+                    )}
                   </th>
                 );
               })}
             </tr>
           </thead>
           <tbody>
-            {processedHoldings.map((row, index) => (
+            {processedHoldings.map((row) => (
               <tr
-                key={`${row.symbol}-${row.security.cusip}-${index}`}
+                key={row.security.cusip}
                 className={'hover:bg-muted dark:hover:bg-accent border-b border cursor-pointer relative group bg-card'}
               >
                 {visibleColumns.map((columnId) => {
@@ -630,10 +588,10 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                   // Render cell based on column type
                   if (columnId === 'actions') {
                     return (
-                      <TableCell key={columnId} className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-50 border-b px-4 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 w-16 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
+                      <td key={columnId} className="py-2 dark:text-white whitespace-nowrap sticky left-0 z-40 border-b px-4 bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" aria-label="Actions">
+                            <Button variant="ghost" size="icon" aria-label="Actions">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -652,21 +610,21 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
+                      </td>
                     );
                   }
 
                   if (columnId === 'symbol') {
                     return (
-                      <TableCell
+                      <td
                         key={columnId}
-                        className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-50 border-b border-r bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]"
-                        style={{ left: '64px' }}
+                        className="px-4 py-2 font-semibold cursor-pointer hover:text-primary dark:text-white whitespace-nowrap sticky z-40 border-b border-r bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30"
+                        style={{ left: '56px' }}
                         onClick={() => onStockClick?.(row.symbol)}
                       >
                         {row.symbol}
                         <div className="text-xs text-muted-foreground whitespace-nowrap">{row.security.cusip}</div>
-                      </TableCell>
+                      </td>
                     );
                   }
 
@@ -682,12 +640,19 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                       cellContent = `$${(row.marketValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
                       break;
                     case 'description':
-                      cellContent = <span className="block truncate max-w-full">{row.security.description}</span>;
+                      cellContent = <span className="truncate">{row.security.description}</span>;
                       break;
                     case 'unrealizedGL':
                       cellContent = (
                         <span className={`${(row.unrealizedGL || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
                           {(row.unrealizedGL || 0) >= 0 ? '+' : '-'}${Math.abs(row.unrealizedGL || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      );
+                      break;
+                    case 'unrealizedGLPercent':
+                      cellContent = (
+                        <span className={`${(row.unrealizedGLPercent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                          {(row.unrealizedGLPercent || 0) >= 0 ? '+' : '-'}{Math.abs(row.unrealizedGLPercent || 0).toFixed(2)}%
                         </span>
                       );
                       break;
@@ -697,54 +662,17 @@ export function HoldingsTable({ onStockClick, onTradeClick, holdingsWithDetails,
                     case 'avgPrice':
                       cellContent = `$${(row.avgPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
                       break;
-                    case 'accountType':
-                      cellContent = 'Cash'; // Default account type
-                      break;
-                    case 'longShort':
-                      cellContent = 'Long'; // Default to Long
-                      break;
-                    case 'closingPrice':
-                      cellContent = `$${(row.marketData?.previousClose || row.marketData?.currentPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-                      break;
-                    case 'priceChange':
-                      const change = row.marketData?.dayChange || 0;
-                      cellContent = (
-                        <span className={`${change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
-                          {change >= 0 ? '+' : '-'}${Math.abs(change).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </span>
-                      );
-                      break;
-                    case 'investedValue':
-                      cellContent = `$${((row.avgPrice || 0) * row.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-                      break;
-                    case 'callPut':
-                      cellContent = '-';
-                      break;
-                    case 'maturityDate':
-                      cellContent = '-';
-                      break;
-                    case 'yield':
-                      cellContent = '-';
-                      break;
-                    case 'todaysGL':
-                      const todayGL = (row.marketData?.dayChange || 0) * row.quantity;
-                      cellContent = (
-                        <span className={`${todayGL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
-                          {todayGL >= 0 ? '+' : '-'}${Math.abs(todayGL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </span>
-                      );
-                      break;
                     default:
                       cellContent = null;
                   }
 
                   return (
-                    <TableCell
+                    <td
                       key={columnId}
-                      className={`px-4 py-2 dark:text-white border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30 relative z-0 ${columnId === 'description' ? 'max-w-[280px] overflow-hidden' : 'whitespace-nowrap'}`}
+                      className={`px-4 py-2 dark:text-white whitespace-nowrap border-b bg-card group-hover:bg-muted/50 dark:group-hover:bg-accent/30`}
                     >
                       {cellContent}
-                    </TableCell>
+                    </td>
                   );
                 })}
               </tr>

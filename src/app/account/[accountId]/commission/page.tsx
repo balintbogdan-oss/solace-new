@@ -14,7 +14,6 @@ import { LastUpdated } from '@/components/ui/last-updated';
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useUserRole } from '@/contexts/UserRoleContext';
-import { PageHeading } from '@/components/layout/PageHeading';
 
 // Custom Tooltip Component
 const CustomCommissionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
@@ -200,9 +199,9 @@ export default function CommissionPage() {
     <div className="w-full">
       <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="w-full md:w-auto">
-            <PageHeading className="text-slate-900 dark:text-slate-100">Commission Summary</PageHeading>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-medium text-slate-900 dark:text-slate-100" style={{ fontFamily: 'var(--font-display)' }}>Commission Summary</h1>
             <p className="text-sm text-muted-foreground mt-1">Values as of the end of the prior business day</p>
           </div>
           <div className="flex gap-2">

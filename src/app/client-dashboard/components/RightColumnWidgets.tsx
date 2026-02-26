@@ -35,41 +35,41 @@ export function RightColumnWidgets({ onAdvisorsClick }: RightColumnWidgetsProps)
       </Card>
 
       {/* Take a quick tour widget */}
-      <div className="relative h-[194px] rounded-2xl overflow-hidden p-6 flex flex-col justify-between bg-[#c5deeb] dark:bg-slate-800 dark:border dark:border-slate-700">
+      <div className="relative h-[194px] rounded-2xl overflow-hidden p-6 flex flex-col justify-between" style={{ backgroundColor: '#c5deeb' }}>
         <div className="flex justify-between items-start">
           <div className="flex flex-col gap-[13px] flex-1">
             <h3 className="text-base font-semibold text-foreground leading-none">Take a quick tour</h3>
-            <p className="text-sm font-normal text-muted-foreground dark:text-slate-400 leading-6">
+            <p className="text-sm font-normal text-muted-foreground leading-6">
               Quick tutorials that walk you through the platform and its key features.
             </p>
           </div>
-          <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/20 dark:hover:bg-slate-700 transition-colors flex-shrink-0">
+          <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0">
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
         <div className="flex items-center justify-between">
-          <button className="w-8 h-8 rounded-full border bg-card dark:bg-slate-700 dark:border-slate-600 p-1 flex items-center justify-center hover:bg-muted transition-colors">
+          <button className="w-8 h-8 rounded-full border bg-card p-1 flex items-center justify-center hover:bg-muted transition-colors">
             <ArrowRight className="w-4 h-4 text-primary" />
           </button>
-          <div className="bg-[#75a5bf] dark:bg-cyan-600 rounded-md p-2.5 flex items-center justify-center">
+          <div className="bg-[#75a5bf] rounded-md p-2.5 flex items-center justify-center">
             <Newspaper className="h-[19px] w-[19px] text-white" />
           </div>
         </div>
       </div>
 
       {/* Wedbush Research widget */}
-      <div className="relative h-[194px] rounded-2xl overflow-hidden p-6 flex flex-col justify-between bg-[#c5ceeb] dark:bg-slate-800 dark:border dark:border-slate-700">
+      <div className="relative h-[194px] rounded-2xl overflow-hidden p-6 flex flex-col justify-between" style={{ backgroundColor: '#c5ceeb' }}>
         <div className="flex flex-col gap-[13px] flex-1">
           <h3 className="text-base font-semibold text-foreground leading-none">Wedbush Research</h3>
-          <p className="text-sm font-normal text-muted-foreground dark:text-slate-400 leading-6">
+          <p className="text-sm font-normal text-muted-foreground leading-6">
             Access our resources on investing, tailored to help you thrive.
           </p>
         </div>
         <div className="flex items-center justify-between">
-          <button className="w-8 h-8 rounded-full border bg-card dark:bg-slate-700 dark:border-slate-600 p-1 flex items-center justify-center hover:bg-muted transition-colors">
+          <button className="w-8 h-8 rounded-full border bg-card p-1 flex items-center justify-center hover:bg-muted transition-colors">
             <ArrowRight className="w-4 h-4 text-primary" />
           </button>
-          <div className="bg-[#757bbf] dark:bg-indigo-500 rounded-md p-2.5 flex items-center justify-center">
+          <div className="bg-[#757bbf] rounded-md p-2.5 flex items-center justify-center">
             <BarChart3 className="h-[19px] w-[19px] text-white" />
           </div>
         </div>

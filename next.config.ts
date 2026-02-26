@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  // Ensure Next doesn't incorrectly infer the monorepo/workspace root when multiple lockfiles exist.
+  // This project lives in this directory, so we pin file tracing to it.
   outputFileTracingRoot: process.cwd(),
   poweredByHeader: false,
   generateEtags: false,

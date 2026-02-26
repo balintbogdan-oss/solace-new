@@ -5,6 +5,7 @@ import { Search, X } from 'lucide-react'
 import { useRouter, useParams } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { getAllStocks } from '@/services/marketDataService'
+import { useSidebar } from '@/contexts/SidebarContext'
 
 interface SearchModalProps {
   isOpen: boolean
@@ -15,6 +16,7 @@ interface SearchModalProps {
 export function SearchModal({ isOpen, onOpenChange }: SearchModalProps) {
   const router = useRouter()
   const params = useParams()
+  const { collapseForTrading } = useSidebar()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<'all' | 'stocks' | 'mutual-funds'>('all')
   const [allSecurities, setAllSecurities] = useState<unknown[]>([])
@@ -25,6 +27,8 @@ export function SearchModal({ isOpen, onOpenChange }: SearchModalProps) {
     const accountId = params?.accountId
     const basePath = accountId ? `/account/${accountId}/trade/${symbol}` : `/trade/${symbol}`
     const url = type ? `${basePath}?type=${type}` : basePath
+    // Collapse sidebar when entering trading mode from search
+    collapseForTrading()
     router.push(url)
     onOpenChange(false)
   }

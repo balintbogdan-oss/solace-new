@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Download, Eye, ChevronDown } from 'lucide-react'
-import { PageHeading } from '@/components/layout/PageHeading';
 
 export default function PerformancePage() {
   const [selectedYear, setSelectedYear] = useState('2024')
@@ -31,10 +30,8 @@ export default function PerformancePage() {
     <div className="w-full">
       <div className="flex flex-col gap-4">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="w-full md:w-auto">
-            <PageHeading className="text-slate-900 dark:text-slate-100">Performance</PageHeading>
-          </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-medium font-serif text-slate-900 dark:text-slate-100">Performance</h1>
         </div>
 
         {/* Year selector and download all */}

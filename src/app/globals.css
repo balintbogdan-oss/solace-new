@@ -69,6 +69,9 @@
     
     /* Sidebar accent color for Solace theme */
     --sidebar-accent: #E7E5E4;
+
+    /* Header background - overridden by AppearanceProvider */
+    --header-bg: #000000;
   }
   
   /* Chart colors for Wedbush Next theme (client) */

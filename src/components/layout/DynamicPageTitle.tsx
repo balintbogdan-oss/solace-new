@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAccountData } from '@/contexts/AccountDataContext';
 import { useUserRole } from '@/contexts/UserRoleContext';
 import { localDataService } from '@/services/localDataService';
-import { AccountSwitcher } from './AccountSwitcher';
+import { FullSizePageTitle } from './PageTitle';
 
 interface DynamicPageTitleProps {
   accountId: string;
@@ -27,8 +27,6 @@ export function DynamicPageTitle({
     marketValue: string;
     fdicSweep: string;
     availableMargin: string;
-    householdId?: string;
-    household?: { id: string; name: string };
   }>>([]);
   const [accountsLoading, setAccountsLoading] = useState(true);
 
@@ -51,8 +49,6 @@ export function DynamicPageTitle({
             marketValue: acc.balances?.totalValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
             fdicSweep: "0",
             availableMargin: acc.balances?.buyingPower?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
-            householdId: acc.householdId,
-            household: acc.household,
           }));
           setClientAccounts(accounts);
         }
@@ -82,7 +78,7 @@ export function DynamicPageTitle({
 
   if (loading || accountsLoading) {
     return (
-      <div className="flex px-4 lg:px-6 items-center gap-2 text-sm h-[54px] bg-card border-b border-gray-200 dark:border-gray-700 min-w-0 fixed top-[56px] sm:top-[64px] left-0 right-0 z-20">
+      <div className="flex px-6 items-center gap-2 text-sm h-[54px] bg-card border-b border-gray-200 dark:border-gray-700">
         <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-32 rounded"></div>
       </div>
     );
@@ -110,12 +106,11 @@ export function DynamicPageTitle({
     marketValue: accountData.balances?.totalValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
     fdicSweep: "0",
     availableMargin: accountData.balances?.buyingPower?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || "0",
-    householdId: accountData.householdId,
-    household: accountData.household,
   }];
 
   return (
-    <AccountSwitcher
+    <FullSizePageTitle
+      title={accountData.accountName}
       clientId={clientId}
       clientName={clientName}
       clientAccounts={accountsToShow}

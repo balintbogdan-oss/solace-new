@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { HeaderAdvisor } from './HeaderAdvisor';
 import { HeaderClient } from './HeaderClient';
+import { HeaderMoneyMovement } from './HeaderMoneyMovement';
 import { useUserRole } from '@/contexts/UserRoleContext';
 import { useState, useEffect } from 'react';
 
@@ -78,9 +79,15 @@ export function HeaderWrapper() {
     return null;
   }
 
+  const isMoneyMovement = pathname?.includes('/move-money');
+
   // Both server and client initially render advisor to avoid hydration mismatch
   // After mount, we update to the correct header
   // The header components have suppressHydrationWarning to handle any remaining mismatches
+  if (isMoneyMovement) {
+    return <HeaderMoneyMovement />;
+  }
+
   return (
     <>
       {currentRole === 'client' ? <HeaderClient /> : <HeaderAdvisor />}

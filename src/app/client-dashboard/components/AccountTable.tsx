@@ -1,5 +1,5 @@
 import { AccountData } from '@/types/account';
-import { formatCurrency, formatAccountType } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import { ChevronRight } from 'lucide-react';
 
 interface AccountTableProps {
@@ -8,6 +8,19 @@ interface AccountTableProps {
 }
 
 export function AccountTable({ accounts, onAccountClick }: AccountTableProps) {
+  const getAccountTypeLabel = (accountType: string) => {
+    switch (accountType) {
+      case 'joint_jtwros':
+        return 'Joint account';
+      case 'trust':
+        return 'Personal trust';
+      case 'individual':
+      case 'ira':
+        return 'Single account';
+      default:
+        return 'Account';
+    }
+  };
 
   return (
     <>
@@ -26,7 +39,7 @@ export function AccountTable({ accounts, onAccountClick }: AccountTableProps) {
           >
             <div className="flex-1 flex flex-col gap-0.5 items-start leading-0 min-w-0">
               <p className="text-sm font-medium text-foreground leading-6 truncate w-full">
-                {formatAccountType(account.accountType)}
+                {getAccountTypeLabel(account.accountType)}
               </p>
               <p className="text-sm font-normal text-muted-foreground leading-4 truncate w-full">
                 {account.accountId} • {account.accountName}

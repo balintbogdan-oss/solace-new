@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LastUpdated } from '@/components/ui/last-updated';
 import { Input } from '@/components/ui/input';
-import { PageHeading } from '@/components/layout/PageHeading';
 import { 
   Select,
   SelectContent,
@@ -20,13 +19,9 @@ import {
   ArrowUp,
   ArrowDown,
   Search,
-  ChevronsUpDown,
-  SquarePercent,
-  BarChart3,
-  CalendarDays
+  ChevronsUpDown
 } from 'lucide-react';
 import { Activity } from '@/types/account';
-import { TableCell } from '@/components/ui/table';
 
 const activityTypes = [
   'All',
@@ -246,11 +241,11 @@ const mockSummaryData = {
     total: 30000.00,
     deposits: {
       count: 1132,
-      amount: 1000000.00
+      amount: 1000000000.00
     },
     withdrawals: {
       count: 98,
-      amount: 90000.00
+      amount: 90000000.00
     }
   },
   totalIncome: {
@@ -270,9 +265,6 @@ const mockSummaryData = {
   }
 };
 
-type SortField = 'date' | 'type' | 'action' | 'symbol' | 'description' | 'quantity' | 'buyPrice' | 'amount' | 'settleDate' | 'transactionType' | 'accountType' | 'tradeNumber';
-type SortDirection = 'asc' | 'desc' | null;
-
 function ActivityPageContent() {
   const [activeTab, setActiveTab] = useState<'all' | 'cashflow' | 'ira'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -280,26 +272,6 @@ function ActivityPageContent() {
   const [accountTypeFilter, setAccountTypeFilter] = useState('');
   const [, setLastRefresh] = useState<Date>(new Date());
   const [timeframe, setTimeframe] = useState('Last 30 days');
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-
-  // Handle column sort
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      // Cycle through: asc -> desc -> null
-      if (sortDirection === 'asc') {
-        setSortDirection('desc');
-      } else if (sortDirection === 'desc') {
-        setSortDirection(null);
-        setSortField(null);
-      } else {
-        setSortDirection('asc');
-      }
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
 
   // Handle refresh
   const handleRefresh = useCallback(async () => {
@@ -363,78 +335,13 @@ function ActivityPageContent() {
       filtered = filtered.filter((activity: Activity) => activity.accountType === mappedAccountType);
     }
 
-    // Apply sorting
-    if (sortField && sortDirection) {
-      filtered = [...filtered].sort((a: Activity, b: Activity) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-        
-        switch (sortField) {
-          case 'date':
-            aVal = new Date(a.date).getTime();
-            bVal = new Date(b.date).getTime();
-            break;
-          case 'type':
-            aVal = a.type.toLowerCase();
-            bVal = b.type.toLowerCase();
-            break;
-          case 'action':
-            aVal = (a.action || '').toLowerCase();
-            bVal = (b.action || '').toLowerCase();
-            break;
-          case 'symbol':
-            aVal = (a.symbol || '').toLowerCase();
-            bVal = (b.symbol || '').toLowerCase();
-            break;
-          case 'description':
-            aVal = a.description.toLowerCase();
-            bVal = b.description.toLowerCase();
-            break;
-          case 'quantity':
-            aVal = a.quantity || 0;
-            bVal = b.quantity || 0;
-            break;
-          case 'buyPrice':
-            aVal = a.buyPrice || 0;
-            bVal = b.buyPrice || 0;
-            break;
-          case 'amount':
-            aVal = a.amount;
-            bVal = b.amount;
-            break;
-          case 'settleDate':
-            aVal = a.settleDate ? new Date(a.settleDate).getTime() : 0;
-            bVal = b.settleDate ? new Date(b.settleDate).getTime() : 0;
-            break;
-          case 'transactionType':
-            aVal = (a.transactionType || '').toLowerCase();
-            bVal = (b.transactionType || '').toLowerCase();
-            break;
-          case 'accountType':
-            aVal = (a.accountType || '').toLowerCase();
-            bVal = (b.accountType || '').toLowerCase();
-            break;
-          case 'tradeNumber':
-            aVal = (a.tradeNumber || '').toLowerCase();
-            bVal = (b.tradeNumber || '').toLowerCase();
-            break;
-        }
-        
-        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      });
-    } else {
-      // Default sort by date (most recent first)
-      filtered = filtered.sort((a: Activity, b: Activity) => {
+    return filtered.sort((a: Activity, b: Activity) => {
+      // Use lastUpdated timestamp for proper chronological sorting
       const timeA = new Date(a.lastUpdated || a.date).getTime();
       const timeB = new Date(b.lastUpdated || b.date).getTime();
-        return timeB - timeA;
+      return timeB - timeA; // Most recent first
     });
-    }
-
-    return filtered;
-  }, [activeTab, searchTerm, activityTypeFilter, accountTypeFilter, sortField, sortDirection]);
+  }, [activeTab, searchTerm, activityTypeFilter, accountTypeFilter]);
 
   const formatAmount = (amount: number) => {
     const isNegative = amount < 0;
@@ -492,32 +399,11 @@ function ActivityPageContent() {
   // Calculate net total
   const netTotal = processedActivities.reduce((sum, activity) => sum + activity.amount, 0);
 
-  // Render sortable header
-  const renderSortHeader = (field: SortField, label: string) => {
-    const isActive = sortField === field;
-    return (
-      <th 
-        className="px-4 py-2 dark:text-white border-b cursor-pointer hover:bg-muted/50 dark:hover:bg-accent/30 whitespace-nowrap bg-muted font-medium text-left"
-      >
-        <button className="flex items-center gap-1 w-full font-medium" onClick={() => handleSort(field)}>
-          <span>{label}</span>
-          {isActive ? (
-            sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 flex-shrink-0" /> : <ArrowDown className="h-4 w-4 flex-shrink-0" />
-          ) : (
-            <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
-          )}
-        </button>
-      </th>
-    );
-  };
-
   return (
     <div className="min-h-screen rounded-md space-y-4 md:space-y-4">
       {/* Page Title and Controls */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="w-full md:w-auto">
-          <PageHeading>Activity</PageHeading>
-        </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-serif text-foreground">Activity</h1>
         <div className="flex items-center gap-3">
           <Select value={timeframe} onValueChange={setTimeframe}>
             <SelectTrigger className="w-[140px]">
@@ -530,7 +416,7 @@ function ActivityPageContent() {
               <SelectItem value="Last year">Last year</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="secondary">
             <Download className="h-5 w-5 mr-2" />
             Export
           </Button>
@@ -538,26 +424,21 @@ function ActivityPageContent() {
       </div>
 
       {/* Three Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Net Flow Card */}
         <Card className="p-6 bg-card">
           <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Net flow</p>
-                <h3 className="text-2xl font-medium text-foreground mt-1" style={{ fontFamily: 'var(--font-display)' }}>
-                  {formatAmount(mockSummaryData.netFlow.total)}
-                </h3>
-              </div>
-              <div className="w-10 h-10 bg-blue-500 rounded flex items-center justify-center flex-shrink-0">
-                <SquarePercent className="h-5 w-5 text-white" />
-              </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Net flow</p>
+              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+                {formatAmount(mockSummaryData.netFlow.total)}
+              </h3>
             </div>
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#DBEAFE' }}>
-                  <ArrowDown className="h-3 w-3 text-muted-foreground" />
+                <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                  <ArrowDown className="h-3 w-3 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
@@ -570,8 +451,8 @@ function ActivityPageContent() {
               </div>
               
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#DBEAFE' }}>
-                  <ArrowUp className="h-3 w-3 text-muted-foreground" />
+                <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                  <ArrowUp className="h-3 w-3 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
@@ -595,23 +476,18 @@ function ActivityPageContent() {
         {/* Total Income Card */}
         <Card className="p-6 bg-card">
           <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total income</p>
-                <h3 className="text-2xl font-medium text-foreground mt-1" style={{ fontFamily: 'var(--font-display)' }}>
-                  {formatAmount(mockSummaryData.totalIncome.total)}
-                </h3>
-              </div>
-              <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#8C7023' }}>
-                <BarChart3 className="h-5 w-5 text-white" />
-              </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Total income</p>
+              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+                {formatAmount(mockSummaryData.totalIncome.total)}
+              </h3>
             </div>
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <div className="flex-1 flex items-center justify-between gap-4">
                   <span className="text-sm text-muted-foreground">
-                    Dividend income - {mockSummaryData.totalIncome.dividendIncome.count} transactions
+                    Dividend income · {mockSummaryData.totalIncome.dividendIncome.count} transactions
                   </span>
                   <div className="text-sm font-medium text-green-600 dark:text-green-400">
                     +{formatAmount(mockSummaryData.totalIncome.dividendIncome.amount)}
@@ -642,16 +518,11 @@ function ActivityPageContent() {
         {/* Upcoming Actions Card */}
         <Card className="p-6 bg-card">
           <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Upcoming actions</p>
-                <h3 className="text-2xl font-medium text-foreground mt-1" style={{ fontFamily: 'var(--font-display)' }}>
-                  {mockSummaryData.upcomingActions.total} events
-                </h3>
-              </div>
-              <div className="w-10 h-10 bg-blue-500 rounded flex items-center justify-center flex-shrink-0">
-                <CalendarDays className="h-5 w-5 text-white" />
-              </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Upcoming actions</p>
+              <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+                {mockSummaryData.upcomingActions.total} events
+              </h3>
             </div>
             
             <div className="space-y-2">
@@ -690,7 +561,7 @@ function ActivityPageContent() {
       {/* Activity Tabs, Filters, and Table */}
       <Card className="p-6">
         {/* Activity Tabs */}
-        <div className="flex justify-between items-end border-b mb-4 pb-2">
+        <div className="flex justify-between items-end mb-4 pb-2">
           <div className="flex space-x-8">
             {tabs.map((tab) => (
               <button
@@ -770,87 +641,147 @@ function ActivityPageContent() {
           {/* Activity Table */}
           <div className="rounded-lg min-h-[400px]">
             <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left border-separate border-spacing-0 rounded-md">
-              <thead className="sticky top-0 border-t bg-muted text-muted-foreground z-10">
-                <tr>
-                  {renderSortHeader('date', 'Date')}
-                  {renderSortHeader('type', 'Activity type')}
-                  {renderSortHeader('action', 'Action')}
-                  {renderSortHeader('symbol', 'Symbol/CUSIP')}
-                  {renderSortHeader('description', 'Description')}
-                  {renderSortHeader('quantity', 'Quantity')}
-                  {renderSortHeader('buyPrice', 'Buy price')}
-                  {renderSortHeader('amount', 'Amount')}
-                  {renderSortHeader('settleDate', 'Settle date')}
-                  {renderSortHeader('transactionType', 'Transaction type')}
-                  {renderSortHeader('accountType', 'Account type')}
-                  {renderSortHeader('tradeNumber', 'Trade number')}
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[80px]">
+                    <div className="flex items-center gap-1">
+                      Date
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
+                    <div className="flex items-center gap-1">
+                      Activity type
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[80px]">
+                    <div className="flex items-center gap-1">
+                      Action
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
+                    <div className="flex items-center gap-1">
+                      Symbol/CUSIP
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[200px]">
+                    <div className="flex items-center gap-1">
+                      Description
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[100px]">
+                    <div className="flex items-center gap-1">
+                      Quantity
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[100px]">
+                    <div className="flex items-center gap-1">
+                      Buy price
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
+                    <div className="flex items-center gap-1">
+                      Amount
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[100px]">
+                    <div className="flex items-center gap-1">
+                      Settle date
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[140px]">
+                    <div className="flex items-center gap-1">
+                      Transaction type
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
+                    <div className="flex items-center gap-1">
+                      Account type
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground whitespace-nowrap min-w-[120px]">
+                    <div className="flex items-center gap-1">
+                      Trade number
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {processedActivities.length === 0 ? (
                   <tr>
-                    <TableCell colSpan={12} className="text-center py-8 text-muted-foreground">
+                    <td colSpan={12} className="text-center py-8 text-muted-foreground">
                       No activities found
-                    </TableCell>
+                    </td>
                   </tr>
                 ) : (
                   processedActivities.map((activity: Activity) => (
-                    <tr key={activity.id} className="hover:bg-muted dark:hover:bg-accent cursor-pointer relative group bg-card">
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                    <tr key={activity.id} className="border-b hover:bg-muted/50">
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {formatDate(activity.date)}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {formatActivityType(activity.type)}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {activity.action || '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         <div>
-                          <div className="font-medium text-foreground">{activity.symbol || '-'}</div>
+                          <div className="font-medium">{activity.symbol || '-'}</div>
                           <div className="text-xs text-muted-foreground">{activity.cusip || '-'}</div>
                         </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white max-w-[200px] truncate border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground max-w-[200px] truncate">
                         {activity.description}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {activity.quantity ? activity.quantity.toLocaleString() : '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {activity.buyPrice ? formatAmount(activity.buyPrice) : '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {formatAmount(activity.amount)}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {activity.settleDate ? formatDate(activity.settleDate) : '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {activity.transactionType || '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {activity.accountType || '-'}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 dark:text-white whitespace-nowrap border-b">
+                      </td>
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {activity.tradeNumber || '-'}
-                      </TableCell>
+                      </td>
                     </tr>
                   ))
                 )}
               </tbody>
               <tfoot>
                 <tr className="border-t font-medium">
-                  <TableCell colSpan={8} className="py-3 px-4 text-sm text-foreground">
+                  <td colSpan={8} className="py-3 px-4 text-sm text-foreground">
                     Net All Activity
-                  </TableCell>
-                  <TableCell className="py-3 px-4 text-sm text-foreground">
+                  </td>
+                  <td className="py-3 px-4 text-sm text-foreground">
                     {formatAmount(netTotal)}
-                  </TableCell>
-                  <TableCell></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell></TableCell>
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
                 </tr>
               </tfoot>
             </table>
@@ -875,7 +806,7 @@ function ActivityPageSkeleton() {
       </div>
 
       {/* Three Summary Cards Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="p-6 bg-card">
             <div className="space-y-4">

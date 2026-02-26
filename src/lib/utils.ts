@@ -8,18 +8,18 @@ export function cn(...inputs: ClassValue[]) {
 // Format account type for display
 export function formatAccountType(accountType: string): string {
   const typeMap: Record<string, string> = {
-    'individual': 'Single Account',
+    'individual': 'Individual',
     'joint': 'Joint',
-    'ira': 'Wedbush IRA',
+    'ira': 'IRA',
     'roth_ira': 'Roth IRA',
     '401k': '401(k)',
     '403b': '403(b)',
     'sep_ira': 'SEP IRA',
     'simple_ira': 'SIMPLE IRA',
-    'trust': 'Irrevocable Trust',
-    'corporate': 'Corporate Account (C or S)',
+    'trust': 'Trust',
+    'corporate': 'Corporate',
     'partnership': 'Partnership',
-    'llc': 'LLC/LLP',
+    'llc': 'LLC',
     'custodian_minor': 'Custodian Minor/UTMA/UGMA',
     '529_plan': '529 Plan',
     '529_plan_utma': '529 Plan UTMA',

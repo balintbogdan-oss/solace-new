@@ -88,45 +88,15 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
 
   }, [appearanceSettings.headerFontFamily, appearanceSettings.bodyFontFamily, isHydrated, role, roleHydrated]);
 
-  // Set background color based on role and theme
+  // Set background color based on role
   useEffect(() => {
     if (!isHydrated || !roleHydrated) return;
     
-    const updateBackground = () => {
-      const isDarkMode = document.documentElement.classList.contains('dark');
-      
-      if (role === 'client') {
-        // Client portal colors
-        if (isDarkMode) {
-          // Dark mode: slate-900
-          document.documentElement.style.setProperty('--background', '15 23 42');
-        } else {
-          // Light mode: #F1F5F9 (slate-100)
-          document.documentElement.style.setProperty('--background', '241 245 249');
-        }
-      } else {
-        // Advisor (Solace) colors
-        if (isDarkMode) {
-          // Dark mode: near black
-          document.documentElement.style.setProperty('--background', '4 4 4');
-        } else {
-          // Light mode: #F5F5F4 (stone-100)
-          document.documentElement.style.setProperty('--background', '245 245 244');
-        }
-      }
-    };
-    
-    // Initial update
-    updateBackground();
-    
-    // Watch for theme changes
-    const observer = new MutationObserver(updateBackground);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-    
-    return () => observer.disconnect();
+    // Set background color based on role
+    // Advisor (Solace): #F5F5F4 (245 245 244)
+    // Client: #F1F5F9 (241 245 249)
+    const backgroundRgb = role === 'advisor' ? '245 245 244' : '241 245 249';
+    document.documentElement.style.setProperty('--background', backgroundRgb);
   }, [role, isHydrated, roleHydrated]);
 
   // Separate useEffect for other appearance settings
@@ -357,19 +327,13 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (!roleHydrated) return;
 
-    const updateClientTheme = () => {
-      const isDarkMode = document.documentElement.classList.contains('dark');
-
-      // Update data-role attribute
-      document.documentElement.setAttribute('data-role', role);
-
     // Set data-theme attribute based on role
     if (role === 'client') {
       document.documentElement.setAttribute('data-theme', 'wedbush-next');
       
-        // Webush Next blue theme colors - lighter primary for dark mode
+      // Webush Next blue theme colors
       const webushColors = {
-          primary: isDarkMode ? '96 165 250' : '44 84 201', // blue-400 in dark, blue-600 in light
+        primary: '44 84 201', // #2c54c9 (blue-500)
         headerBg: '4 19 64', // #041340 (wedbush-next-brand/950)
         avatarBg: '30 58 138', // #1e3a8a (wedbush-next-brand/900)
         welcomeBanner: '16 33 83', // #102153
@@ -388,63 +352,11 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
       document.documentElement.style.setProperty('--webush-avatar-bg', webushColors.avatarBg);
       document.documentElement.style.setProperty('--webush-welcome-banner', webushColors.welcomeBanner);
       document.documentElement.style.setProperty('--webush-accent-cyan', webushColors.accentCyan);
-
-        // Set client background color based on mode
-        if (isDarkMode) {
-          document.documentElement.style.setProperty('--background', '15 23 42'); // slate-900
-        } else {
-          document.documentElement.style.setProperty('--background', '241 245 249'); // slate-100
-        }
     } else {
       // Remove data-theme for advisor (Solace theme)
       document.documentElement.removeAttribute('data-theme');
-        
-        // Reset CSS variables to advisor defaults
-        // Reset primary color to use settings (will be set by the primary color useEffect)
-        const primaryColorRgb = (() => {
-          const hex = appearanceSettings.primaryColor;
-          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-          if (result) {
-            const r = parseInt(result[1], 16);
-            const g = parseInt(result[2], 16);
-            const b = parseInt(result[3], 16);
-            return `${r} ${g} ${b}`;
-          }
-          return '142 85 4'; // Default brown color
-        })();
-        document.documentElement.style.setProperty('--primary', primaryColorRgb);
-        
-        // Remove Webush-specific CSS variables
-        document.documentElement.style.removeProperty('--webush-primary');
-        document.documentElement.style.removeProperty('--webush-header-bg');
-        document.documentElement.style.removeProperty('--webush-avatar-bg');
-        document.documentElement.style.removeProperty('--webush-welcome-banner');
-        document.documentElement.style.removeProperty('--webush-accent-cyan');
-        
-        // Reset header background
-        document.documentElement.style.removeProperty('--header-bg');
-        
-        // Set advisor background color based on mode
-        if (isDarkMode) {
-          document.documentElement.style.setProperty('--background', '4 4 4'); // near black
-        } else {
-          document.documentElement.style.setProperty('--background', '245 245 244'); // stone-100
-        }
-      }
-    };
-
-    // Initial update
-    updateClientTheme();
-
-    // Watch for theme changes
-    const observer = new MutationObserver(updateClientTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
-    return () => observer.disconnect();
-  }, [role, roleHydrated, appearanceSettings.primaryColor]);
+    }
+  }, [role, roleHydrated]);
 
   return <>{children}</>;
 }

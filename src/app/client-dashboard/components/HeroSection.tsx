@@ -6,7 +6,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ clientName }: HeroSectionProps) {
   return (
-    <div className="w-full relative h-24 sm:h-32 lg:h-36" style={{ backgroundColor: '#041340' }}>
+    <div className="w-full relative h-32 sm:h-40 lg:h-44" style={{ backgroundColor: '#041340' }}>
       <div className="absolute inset-0">
         <Image 
           src="/images/client-hero.jpg" 

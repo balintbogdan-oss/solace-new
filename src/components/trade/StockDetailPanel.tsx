@@ -656,7 +656,7 @@ export function StockDetailPanel({
 }: StockDetailPanelProps) {
   const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1D');
   const [currentTime, setCurrentTime] = useState(formatCurrentTime());
-  const [mutedColor, setMutedColor] = useState(''); // Will be set based on theme
+  const [mutedColor, setMutedColor] = useState('#9ca3af'); // Default to dark mode muted color
   const [stock, setStock] = useState<StockInfo | null>(null);
   const { theme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
@@ -710,29 +710,21 @@ export function StockDetailPanel({
   useEffect(() => {
     const updateMutedColor = () => {
         if (typeof window !== 'undefined') {
-           // Use theme-aware colors directly
-           const isDark = document.documentElement.classList.contains('dark');
-           setMutedColor(isDark ? '#94a3b8' : '#64748b'); // slate-400 for dark, slate-500 for light
+           const color = getComputedStyle(document.documentElement).getPropertyValue('--muted-foreground').trim();
+           setMutedColor(color || '#9ca3af'); // Fallback if variable not found
         }
     };
 
     updateMutedColor(); // Initial calculation
 
-    // Watch for theme changes
-    const observer = new MutationObserver(updateMutedColor);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
+    // Optional: Re-calculate if theme changes (requires theme provider context or other trigger)
+    // For now, we assume it gets the correct value on initial load based on the applied theme.
 
     // Time update interval
     const intervalId = setInterval(() => {
         setCurrentTime(formatCurrentTime());
     }, 60000); 
-    return () => {
-      clearInterval(intervalId);
-      observer.disconnect();
-    }; 
+    return () => clearInterval(intervalId); 
   }, []); // Empty dependency array, runs once on mount
 
   // --- TEMPORARY: Simulate Price Updates for Animation --- 

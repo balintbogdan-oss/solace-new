@@ -14,7 +14,6 @@ import {
 } from './components';
 import { useClientDashboardData } from './hooks/useClientDashboardData';
 import { calculateAssetAllocation } from './utils/assetAllocation';
-import { formatAccountType } from '@/lib/utils';
 
 export default function ClientDashboardPage() {
   const router = useRouter();
@@ -128,11 +127,21 @@ export default function ClientDashboardPage() {
       }
       if (selectedAccounts.length === 1) {
         const account = selectedAccounts[0];
-        return formatAccountType(account.accountType);
+        const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
+                           account.accountType === 'trust' ? 'Personal trust' :
+                           account.accountType === 'individual' ? 'Single account' :
+                           account.accountType === 'ira' ? 'Single account' :
+                           'Account';
+        return accountType;
       }
       if (selectedAccounts.length === 2) {
         const account = selectedAccounts[0];
-        return `${formatAccountType(account.accountType)} +1 more`;
+        const accountType = account.accountType === 'joint_jtwros' ? 'Joint account' : 
+                           account.accountType === 'trust' ? 'Personal trust' :
+                           account.accountType === 'individual' ? 'Single account' :
+                           account.accountType === 'ira' ? 'Single account' :
+                           'Account';
+        return `${accountType} +1 more`;
       }
       return `${selectedAccounts.length} accounts`;
     }
@@ -202,13 +211,12 @@ export default function ClientDashboardPage() {
   }
 
   // During SSR, return null to match what Next.js expects (Suspense boundary)
-  // After mount, show skeleton only if loading AND we don't have data
+  // After mount, show skeleton if loading
   if (!mounted) {
     return null;
   }
 
-  // Don't block on loading if we have cached data - show data immediately
-  if (loading && householdGroups.length === 0 && nonHouseholdAccounts.length === 0) {
+  if (loading) {
     return <ClientDashboardSkeleton />;
   }
 

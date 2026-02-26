@@ -3,23 +3,16 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { HelpCircle, ChevronDown, User, LogOut, Sun, Moon, ExternalLink } from 'lucide-react';
+import { HelpCircle, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 import { useUserRole } from '@/contexts/UserRoleContext';
-import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 
 export function HeaderClient() {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { switchRole } = useUserRole();
-  const { theme, setTheme } = useTheme();
   const isWealthActive = pathname === '/client-dashboard';
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -100,14 +93,8 @@ export function HeaderClient() {
           </div>
         </div>
 
-        {/* Right Section: Wedbush Research, Support, Profile */}
+        {/* Right Section: Support, Profile */}
         <div className="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
-          {/* Wedbush Research */}
-          <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white gap-1 sm:gap-2 px-2 sm:px-3">
-            <span className="hidden sm:inline text-white">Wedbush Research</span>
-            <ExternalLink className="h-4 w-4 flex-shrink-0 text-white" />
-          </Button>
-
           {/* Support */}
           <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white gap-1 sm:gap-2 px-2 sm:px-3">
             <HelpCircle className="h-4 w-4 flex-shrink-0 text-white" />
@@ -176,29 +163,20 @@ export function HeaderClient() {
                       Profile & Settings
                     </Link>
                   </Button>
-
-                  {/* Theme Toggle */}
-                  {mounted && (
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setTheme(theme === 'dark' ? 'light' : 'dark');
-                      }}
-                      className="w-full justify-start text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 gap-2"
+                  
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="w-full justify-start text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 gap-2"
+                  >
+                    <Link
+                      href="/settings"
+                      onClick={() => setShowDropdown(false)}
                     >
-                      {theme === 'dark' ? (
-                        <>
-                          <Sun className="h-4 w-4" />
-                          Light mode
-                        </>
-                      ) : (
-                        <>
-                          <Moon className="h-4 w-4" />
-                          Dark mode
-                        </>
-                      )}
-                    </Button>
-                  )}
+                      <Settings className="h-4 w-4" />
+                      App Settings
+                    </Link>
+                  </Button>
                   
                   {/* Logout */}
                   <Button

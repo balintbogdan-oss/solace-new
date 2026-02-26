@@ -100,7 +100,7 @@ export default function AccountSymbolTradePage() {
   const searchParams = useSearchParams();
   const accountId = params?.accountId as string;
   const symbol = params?.symbol as string;
-  const { data, loading } = useAccountData();
+  const { data } = useAccountData();
   const marketData = data?.marketData;
   
   // Check if this is a mutual fund
@@ -195,8 +195,7 @@ export default function AccountSymbolTradePage() {
   const [currentOptionTradeDetails, setCurrentOptionTradeDetails] = useState<OptionTradeDetails | null>(null);
   const [selectedOptionAction, setSelectedOptionAction] = useState<OptionAction>('buyToOpen');
 
-  // Show skeleton while loading or if stock data is not available
-  if (loading || !stock) {
+  if (!stock) {
     return <TradeDetailPageSkeleton />; 
   }
 

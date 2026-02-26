@@ -32,7 +32,7 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, title = "Document Viewer" }
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  const objectRef = useRef<HTMLObjectElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   // Reset state when modal opens
   useEffect(() => {
@@ -45,11 +45,11 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, title = "Document Viewer" }
     }
   }, [isOpen])
 
-  // Reload object when zoom or rotation changes
+  // Reload iframe when zoom or rotation changes
   useEffect(() => {
-    if (objectRef.current && isOpen) {
+    if (iframeRef.current && isOpen) {
       const newSrc = `${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&zoom=${zoom}&rotate=${rotation}&page=${currentPage}`
-      objectRef.current.data = newSrc
+      iframeRef.current.src = newSrc
     }
   }, [zoom, rotation, currentPage, pdfUrl, isOpen])
 
@@ -66,13 +66,13 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, title = "Document Viewer" }
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  // Handle object load
+  // Handle iframe load
   const handleIframeLoad = () => {
     setIsLoading(false)
     setError(null)
   }
 
-  // Handle object error
+  // Handle iframe error
   const handleIframeError = () => {
     setIsLoading(false)
     setError('Failed to load PDF. Please try downloading the document instead.')
@@ -246,10 +246,10 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, title = "Document Viewer" }
             </div>
           )}
 
-          <object
+          <iframe
             key={`${zoom}-${rotation}-${currentPage}`}
-            data={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&zoom=${zoom}&rotate=${rotation}&page=${currentPage}`}
-            type="application/pdf"
+            ref={iframeRef}
+            src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&zoom=${zoom}&rotate=${rotation}&page=${currentPage}`}
             className={`absolute inset-0 w-full h-full border-0 ${
               isLoading || error ? 'opacity-0' : 'opacity-100'
             }`}
@@ -267,11 +267,7 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, title = "Document Viewer" }
               right: 0,
               bottom: 0
             }}
-          >
-            <p className="text-sm text-muted-foreground p-4">
-              Unable to display PDF. <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Click here to open in a new tab</a>.
-            </p>
-          </object>
+          />
         </div>
       </DialogContent>
     </Dialog>
