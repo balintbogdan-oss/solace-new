@@ -239,7 +239,7 @@ export default function MoveMoneyPage() {
               <div className="flex w-full gap-0 px-1">
                 <Link
                   href={outboundPath}
-                  className="flex flex-col items-center gap-5 group cursor-pointer w-[264px]"
+                  className="flex flex-col items-center gap-5 group cursor-pointer w-[246px]"
                 >
                   <div className="size-16 rounded-full bg-[#c5ceeb] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
                     <MoveUp className="size-5 text-foreground" />
@@ -252,7 +252,7 @@ export default function MoveMoneyPage() {
 
                 <Link
                   href={inboundPath}
-                  className="flex flex-col items-center gap-5 group cursor-pointer w-full"
+                  className="flex flex-col items-center gap-5 group cursor-pointer w-[145px]"
                 >
                   <div className="size-16 rounded-full bg-[#dae8cd] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
                     <MoveDown className="size-5 text-foreground" />
