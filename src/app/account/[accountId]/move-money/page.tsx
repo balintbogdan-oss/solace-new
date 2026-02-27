@@ -234,12 +234,12 @@ export default function MoveMoneyPage() {
           <div className="space-y-5">
             <h2 className="text-xl font-medium font-serif tracking-tight">Start a transfer</h2>
 
-            <div className="flex w-full justify-start items-center gap-[124px] pb-7">
+            <div className="flex w-full items-start gap-16 pb-7">
               {/* Transfer type buttons */}
-              <div className="flex w-full gap-0 px-1">
+              <div className="flex flex-1 min-w-0">
                 <Link
                   href={outboundPath}
-                  className="flex flex-col items-center gap-5 group cursor-pointer w-[246px]"
+                  className="flex flex-1 flex-col items-center gap-5 group cursor-pointer"
                 >
                   <div className="size-16 rounded-full bg-[#c5ceeb] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
                     <MoveUp className="size-5 text-foreground" />
@@ -252,7 +252,7 @@ export default function MoveMoneyPage() {
 
                 <Link
                   href={inboundPath}
-                  className="flex flex-col items-center gap-5 group cursor-pointer w-[145px]"
+                  className="flex flex-1 flex-col items-center gap-5 group cursor-pointer"
                 >
                   <div className="size-16 rounded-full bg-[#dae8cd] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
                     <MoveDown className="size-5 text-foreground" />
@@ -263,7 +263,7 @@ export default function MoveMoneyPage() {
                   </div>
                 </Link>
 
-                <div className="flex flex-col items-center gap-5 opacity-55 w-[264px]">
+                <div className="flex flex-1 flex-col items-center gap-5 opacity-55">
                   <div className="size-16 rounded-full bg-[#e9e2d4] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center">
                     <ArrowUpDown className="size-5 text-foreground" />
                   </div>
@@ -280,7 +280,7 @@ export default function MoveMoneyPage() {
               </div>
 
               {/* Funds card */}
-              <Card className="w-full px-8 py-6 flex flex-col gap-4">
+              <Card className="flex-1 min-w-0 px-8 py-6 flex flex-col gap-4">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
