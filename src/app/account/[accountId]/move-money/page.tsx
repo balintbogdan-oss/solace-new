@@ -236,10 +236,10 @@ export default function MoveMoneyPage() {
 
             <div className="flex w-full justify-start items-center gap-[124px] pb-7">
               {/* Transfer type buttons */}
-              <div className="flex w-full gap-4 px-1">
+              <div className="flex w-full gap-0 px-1">
                 <Link
                   href={outboundPath}
-                  className="flex flex-col items-center gap-5 group cursor-pointer w-full"
+                  className="flex flex-col items-center gap-5 group cursor-pointer w-[264px]"
                 >
                   <div className="size-16 rounded-full bg-[#c5ceeb] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
                     <MoveUp className="size-5 text-foreground" />
@@ -263,7 +263,7 @@ export default function MoveMoneyPage() {
                   </div>
                 </Link>
 
-                <div className="flex flex-col items-center gap-5 opacity-55">
+                <div className="flex flex-col items-center gap-5 opacity-55 w-[264px]">
                   <div className="size-16 rounded-full bg-[#e9e2d4] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center">
                     <ArrowUpDown className="size-5 text-foreground" />
                   </div>
