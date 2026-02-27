@@ -113,13 +113,6 @@ export default function NewAchAuthorizationPage() {
   const [ownershipPercentage, setOwnershipPercentage] = useState('')
   const [ownershipConfirmed, setOwnershipConfirmed] = useState(false)
 
-  // Progressive disclosure gates
-  const hasFile = uploadedFile !== null
-  const hasBankFields = accountName.trim() !== '' && routingNumber.trim() !== '' && institutionName.trim() !== '' && institutionAccountNumber.trim() !== '' && accountType !== ''
-  const hasTransferDirection = inboundSelected || outboundSelected
-  const hasTransferDetails = asRequested !== '' && recurring !== ''
-  const hasChangeOwnership = changeOwnership !== ''
-
   const handleFileDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
@@ -141,9 +134,9 @@ export default function NewAchAuthorizationPage() {
     <div className="fixed inset-0 z-20 flex flex-col bg-white">
       <HeaderMoneyMovement />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden mx-auto max-w-[1440px] w-full">
         {/* Sidebar */}
-        <aside className="flex w-[260px] shrink-0 flex-col gap-4 overflow-y-auto px-5 py-10">
+        <aside className="flex w-fit shrink-0 flex-col gap-4 overflow-y-auto px-[142px] py-10">
           <div className="flex items-center gap-1.5">
             <div className="flex size-7 items-center justify-center rounded-[18px] bg-[#dbb069]">
               <Landmark className="size-3.5 text-foreground" />
@@ -262,9 +255,7 @@ export default function NewAchAuthorizationPage() {
               )}
             </section>
 
-            {/* Bank account form fields — show after file upload */}
-            {hasFile && (
-              <div className="space-y-5">
+            <div className="space-y-5">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">Name (As it appears on the account)</label>
                   <input
@@ -314,11 +305,8 @@ export default function NewAchAuthorizationPage() {
                   />
                 </div>
               </div>
-            )}
 
-            {/* Type of transfer — show after bank fields are complete */}
-            {hasFile && hasBankFields && (
-              <section className="space-y-4">
+            <section className="space-y-4">
                 <div>
                   <h2 className="font-serif text-[20px] font-medium leading-8 tracking-tight text-foreground">
                     Type of transfer
@@ -392,12 +380,8 @@ export default function NewAchAuthorizationPage() {
                   </button>
                 </div>
               </section>
-            )}
 
-            {/* Transfer details — show after transfer direction is selected */}
-            {hasFile && hasBankFields && hasTransferDirection && (
-              <>
-                <div className="space-y-2">
+            <div className="space-y-2">
                   <p className="text-sm font-medium text-foreground">As requested transfers?</p>
                   <ToggleGroup
                     options={[{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }]}
@@ -446,20 +430,15 @@ export default function NewAchAuthorizationPage() {
                 <div>
                   <ToggleGroup
                     options={[
-                      { id: 'interne-balance', label: 'Interne balance' },
+                      { id: 'interne-balance', label: 'Income balance' },
                       { id: 'free-credit', label: 'Free credit' },
                     ]}
                     value={transferBalanceType}
                     onChange={setTransferBalanceType}
                   />
                 </div>
-              </>
-            )}
 
-            {/* Change of ownership — show after transfer details */}
-            {hasFile && hasBankFields && hasTransferDirection && hasTransferDetails && (
-              <>
-                <hr className="border-border" />
+            <hr className="border-border" />
 
                 <section className="space-y-5">
                   <h2 className="font-serif text-[20px] font-medium leading-8 tracking-tight text-foreground">
@@ -572,8 +551,6 @@ export default function NewAchAuthorizationPage() {
                     </>
                   )}
                 </section>
-              </>
-            )}
           </div>
         </main>
       </div>
@@ -591,7 +568,7 @@ export default function NewAchAuthorizationPage() {
           </Button>
           <Button
             className="h-10 bg-black px-8 text-sm font-medium text-white hover:bg-black/90 disabled:opacity-50"
-            disabled={!hasFile || !hasBankFields || !hasTransferDirection || !hasTransferDetails || !hasChangeOwnership}
+            disabled={false}
             onClick={() => router.push(transferInfoPath)}
           >
             Continue

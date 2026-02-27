@@ -125,7 +125,7 @@ export default function ReviewPage() {
           </section>
 
           <ReviewSection
-            title="Inbound transfer"
+            title="Outbound disbursement"
             rows={TRANSFER_ROWS}
             onEdit={() => router.push(disbursementPath)}
           />
@@ -151,6 +151,16 @@ export default function ReviewPage() {
           <Button
             className="h-10 bg-black px-8 text-sm font-medium text-white hover:bg-black/90"
             onClick={() => {
+              const newTransfer = {
+                id: `outbound-${Date.now()}`,
+                dateCreated: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                moneyMovement: 'Outbound',
+                transferMethod: 'ACH',
+                requestAmount: 250000.0,
+                status: 'awaiting_approval',
+              }
+              const existing = JSON.parse(localStorage.getItem('submittedTransfers') || '[]')
+              localStorage.setItem('submittedTransfers', JSON.stringify([newTransfer, ...existing]))
               router.push(confirmationPath)
             }}
           >

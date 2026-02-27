@@ -489,8 +489,7 @@ export default function OutboundDisbursementPage() {
                 <div className="space-y-1.5">
                   <p className="text-sm font-medium text-foreground">Credit/IRA instructions</p>
                   <textarea
-                    disabled
-                    className="min-h-[60px] w-full rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-foreground shadow-xs opacity-50 placeholder:text-muted-foreground"
+                    className="min-h-[60px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-foreground shadow-xs placeholder:text-muted-foreground"
                   />
                 </div>
 
@@ -594,8 +593,7 @@ export default function OutboundDisbursementPage() {
                 <div className="space-y-1.5">
                   <p className="text-sm font-medium text-foreground">Credit/IRA instructions</p>
                   <textarea
-                    disabled
-                    className="min-h-[60px] w-full rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-foreground shadow-xs opacity-50 placeholder:text-muted-foreground"
+                    className="min-h-[60px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-foreground shadow-xs placeholder:text-muted-foreground"
                   />
                 </div>
 

@@ -36,9 +36,9 @@ export default function NewAchFormSentPage() {
     <div className="fixed inset-0 z-20 flex flex-col bg-white">
       <HeaderMoneyMovement />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden mx-auto max-w-[1440px] w-full">
         {/* Sidebar */}
-        <aside className="flex w-[260px] shrink-0 flex-col gap-4 overflow-y-auto px-5 py-10">
+        <aside className="flex w-fit shrink-0 flex-col gap-4 overflow-y-auto px-[142px] py-10">
           <div className="flex items-center gap-1.5">
             <div className="flex size-7 items-center justify-center rounded-[18px] bg-[#dbb069]">
               <Landmark className="size-3.5 text-foreground" />

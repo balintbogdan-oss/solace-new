@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
@@ -50,7 +50,7 @@ const STATUS_CONFIG: Record<TransferStatus, { label: string; bg: string; text: s
   awaiting_approval: { label: 'Awaiting approval', bg: 'bg-amber-100', text: 'text-amber-700' },
   awaiting_signature: { label: 'Awaiting client signature', bg: 'bg-violet-100', text: 'text-violet-600' },
   submitted_to_credit: { label: 'Submitted to credit', bg: 'bg-sky-100', text: 'text-sky-700' },
-  ready_to_sign: { label: 'Ready to sign', bg: 'bg-emerald-100', text: 'text-emerald-700' },
+  ready_to_sign: { label: 'Ready to sign', bg: 'bg-yellow-100', text: 'text-yellow-700' },
   processed: { label: 'Processed', bg: 'bg-lime-100', text: 'text-lime-700' },
   rejected: { label: 'Rejected', bg: 'bg-red-100', text: 'text-red-600' },
   pending: { label: 'Pending', bg: 'bg-amber-100', text: 'text-amber-700' },
@@ -200,6 +200,16 @@ export default function MoveMoneyPage() {
 
   const router = useRouter()
   const [selectedTransfer, setSelectedTransfer] = useState<TransferRecord | null>(null)
+  const [transfers, setTransfers] = useState<TransferRecord[]>(MOCK_TRANSFERS)
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('submittedTransfers') || '[]') as TransferRecord[]
+      if (stored.length > 0) {
+        setTransfers([...stored, ...MOCK_TRANSFERS])
+      }
+    } catch {}
+  }, [])
 
   const handleRowClick = (transfer: TransferRecord) => {
     if (transfer.status === 'ready_to_sign') {
@@ -224,18 +234,18 @@ export default function MoveMoneyPage() {
           <div className="space-y-5">
             <h2 className="text-xl font-medium font-serif tracking-tight">Start a transfer</h2>
 
-            <div className="flex w-full gap-16 items-center pl-11 pb-7">
+            <div className="flex w-full justify-start items-center gap-[124px] pb-7">
               {/* Transfer type buttons */}
               <div className="flex w-full gap-4 px-1">
                 <Link
                   href={outboundPath}
                   className="flex flex-col items-center gap-5 group cursor-pointer w-full"
                 >
-                  <div className="size-12 rounded-full bg-[#c5ceeb] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <div className="size-16 rounded-full bg-[#c5ceeb] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
                     <MoveUp className="size-5 text-foreground" />
                   </div>
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <span className="text-base font-medium">Outbound</span>
+                    <span className="text-base font-medium group-hover:text-primary transition-colors">Outbound</span>
                     <span className="text-base text-muted-foreground">Money going out</span>
                   </div>
                 </Link>
@@ -244,25 +254,25 @@ export default function MoveMoneyPage() {
                   href={inboundPath}
                   className="flex flex-col items-center gap-5 group cursor-pointer w-full"
                 >
-                  <div className="size-12 rounded-full bg-[#dae8cd] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <div className="size-16 rounded-full bg-[#dae8cd] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center group-hover:scale-105 transition-transform">
                     <MoveDown className="size-5 text-foreground" />
                   </div>
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <span className="text-base font-medium">Inbound</span>
+                    <span className="text-base font-medium group-hover:text-primary transition-colors">Inbound</span>
                     <span className="text-base text-muted-foreground">Money coming in</span>
                   </div>
                 </Link>
 
                 <div className="flex flex-col items-center gap-5 opacity-55">
-                  <div className="size-12 rounded-full bg-[#e9e2d4] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center">
+                  <div className="size-16 rounded-full bg-[#e9e2d4] shadow-[0px_0px_2px_1px_rgba(0,0,0,0.06)] flex items-center justify-center">
                     <ArrowUpDown className="size-5 text-foreground" />
                   </div>
                   <div className="flex flex-col items-center gap-2 text-center">
                     <span className="text-base font-medium">Transfer between</span>
-                    <span className="text-base font-medium opacity-40 text-center w-[135px]">
-                      Wedbush{'\n'}accounts
+                    <span className="text-base font-medium opacity-40 text-center whitespace-nowrap">
+                      Wedbush accounts
                     </span>
-                    <span className="bg-muted-foreground/75 text-white text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    <span className="bg-[var(--card-foreground)] text-white text-xs font-medium px-2.5 py-0.5 rounded-full">
                       Coming soon
                     </span>
                   </div>
@@ -324,7 +334,7 @@ export default function MoveMoneyPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {MOCK_TRANSFERS.map((t) => {
+                  {transfers.map((t) => {
                     const status = STATUS_CONFIG[t.status]
                     const isSelected = selectedTransfer?.id === t.id
                     const isClickable = t.status === 'awaiting_signature' || t.status === 'ready_to_sign' || t.status === 'submitted_to_credit' || t.status === 'awaiting_approval' || t.status === 'processed'

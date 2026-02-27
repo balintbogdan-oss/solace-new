@@ -125,7 +125,7 @@ export default function InboundReviewPage() {
           </section>
 
           <ReviewSection
-            title="Inbound transfer"
+            title="Inbound disbursement"
             rows={TRANSFER_ROWS}
             onEdit={() => router.push(inboundPath)}
           />
