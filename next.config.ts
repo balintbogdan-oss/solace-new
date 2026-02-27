@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   // Ensure Next doesn't incorrectly infer the monorepo/workspace root when multiple lockfiles exist.
   // This project lives in this directory, so we pin file tracing to it.
-  outputFileTracingRoot: __dirname,
+  outputFileTracingRoot: process.cwd(),
   poweredByHeader: false,
   generateEtags: false,
   images: {

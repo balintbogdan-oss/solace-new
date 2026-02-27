@@ -28,7 +28,7 @@ module.exports = {
         serif: ["var(--font-source-serif-4)", ...fontFamily.serif], // Add serif family
       },
       colors: {
-        border: "hsl(var(--border))",
+        border: "var(--border)",
         input: "hsl(var(--input))",
         ring: "rgb(var(--ring) / <alpha-value>)",
         background: "rgb(var(--background) / <alpha-value>)",
@@ -56,7 +56,7 @@ module.exports = {
         },
         popover: { // Needed for popovers/dropdowns
           DEFAULT: "rgb(var(--popover, var(--card)) / <alpha-value>)", // Fallback to card
-          foreground: "rgb(var(--popover-foreground, var(--card-foreground))) / <alpha-value>)", // Fallback to card
+          foreground: "rgb(var(--popover-foreground, var(--card-foreground)) / <alpha-value>)",
         },
         card: {
           DEFAULT: "rgb(var(--card) / <alpha-value>)",
